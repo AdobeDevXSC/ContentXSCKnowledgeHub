@@ -141,7 +141,54 @@ function loadDelayed() {
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
+  loadDefaultContentWrapper(document);
   loadDelayed();
 }
 
 loadPage();
+
+
+function loadDefaultContentWrapper(doc) {
+  const defaultContentWrappers = [...doc.querySelectorAll('main .default-content-wrapper')];
+
+  defaultContentWrappers.forEach((defaultContentWrapper) => {
+    [...defaultContentWrapper.querySelectorAll('h1')].forEach((element) => {
+      element.classList.add('my-4');
+    });
+
+    [...defaultContentWrapper.querySelectorAll('h2')].forEach((element) => {
+      element.classList.add('my-2');
+    });
+
+    [...defaultContentWrapper.querySelectorAll('h3')].forEach((element) => {
+      element.classList.add('my-1');
+    });
+
+    [...defaultContentWrapper.querySelectorAll('p, ul')].forEach((element) => {
+      element.classList.add('mb-0', 'fs-1', 'text-dark-1');
+    });
+    
+    [...defaultContentWrapper.querySelectorAll('img')].forEach((element) => {
+      element.classList.add('img-fluid', 'w-100', 'my-3');
+    });
+
+
+    const section = document.createElement('div');
+    section.classList.add('bg-bg-3');
+
+    const sectionDiv = document.createElement('div');
+    sectionDiv.classList.add('container');
+
+    const rowDiv = document.createElement('div');
+    rowDiv.classList.add('row', 'justify-content-center');
+
+    const columnDiv = document.createElement('div');
+    columnDiv.classList.add('col-xxl-12', 'col-xl-12', 'col-lg-12');
+
+    columnDiv.append(...defaultContentWrapper.children);
+    rowDiv.append(columnDiv);
+    sectionDiv.append(rowDiv);
+    section.append(sectionDiv);
+    defaultContentWrapper.append(section);
+  });
+}
