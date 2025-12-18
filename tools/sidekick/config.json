@@ -1,11 +1,18 @@
 {
-  "project": "WKND",
+  "project": "Knowledge Hub",
   "plugins": [
     {
-      "id": "library",
-      "title": "Library",
+      "id": "Blocks",
+      "title": "Blocks",
       "environments": [ "edit" ],
-      "url": "/tools/sidekick/library.html",
+      "url": "/tools/sidekick/blocks.html",
+      "includePaths": [ "**.docx**" ]
+    },
+    {
+      "id": "Templates",
+      "title": "Templates",
+      "environments": [ "edit" ],
+      "url": "/tools/sidekick/templates.html",
       "includePaths": [ "**.docx**" ]
     }
   ]
