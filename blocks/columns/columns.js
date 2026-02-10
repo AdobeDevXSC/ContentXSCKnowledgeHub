@@ -1,23 +1,18 @@
 export default function decorate(block) {
-  const rows = [...block.children];
+  const cols = [...block.firstElementChild.children];
+  block.classList.add(`columns-${cols.length}-cols`);
 
-  rows.forEach((row) => {
-    row.classList.add('row', 'justify-content-lg-between');
-
-    const columns = [...row.children];
-
-    columns.forEach((column) => {
-      column.classList.add('col-lg');
+  // setup image columns
+  [...block.children].forEach((row) => {
+    [...row.children].forEach((col) => {
+      const pic = col.querySelector('picture');
+      if (pic) {
+        const picWrapper = pic.closest('div');
+        if (picWrapper && picWrapper.children.length === 1) {
+          // picture is only content in column
+          picWrapper.classList.add('columns-img-col');
+        }
+      }
     });
   });
-
-  const section = document.createElement('section');
-  section.classList.add('py-10', 'py-lg-10', 'bg-bg-3');
-
-  const sectionDiv = document.createElement('div');
-  sectionDiv.classList.add('container');
-
-  sectionDiv.append(...block.children);
-  section.append(sectionDiv);
-  block.append(section);
 }
