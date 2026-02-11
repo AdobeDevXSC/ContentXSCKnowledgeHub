@@ -13,6 +13,9 @@ import {
   loadCSS,
 } from './aem.js';
 
+import './uikit.min.js';
+import './uikit-icons.min.js';
+
 /**
  * Builds hero block and prepends to main in a new section.
  * @param {Element} main The container element
