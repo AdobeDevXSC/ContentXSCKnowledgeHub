@@ -17,19 +17,22 @@ import './uikit.min.js';
 import './uikit-icons.min.js';
 
 /**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
+ * load left nav
  */
-// function buildHeroBlock(main) {
-//   const h1 = main.querySelector('h1');
-//   const picture = main.querySelector('picture');
-//   // eslint-disable-next-line no-bitwise
-//   if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-//     const section = document.createElement('div');
-//     section.append(buildBlock('hero', { elems: [picture, h1] }));
-//     main.prepend(section);
-//   }
-// }
+async function loadLeftNav(main) {
+  const aside = document.createElement('aside');
+  aside.className = 'leftnav-container';
+
+  const block = document.createElement('div');
+  block.className = 'block leftnav';
+
+  aside.append(block);
+  main.insertBefore(aside, main.querySelector('.section'));
+
+  const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
+  loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
+  await decorate(block);
+}
 
 /**
  * load fonts.css and set a session storage flag
@@ -99,6 +102,9 @@ async function loadEager(doc) {
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
+
+    loadLeftNav(main);
+
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 

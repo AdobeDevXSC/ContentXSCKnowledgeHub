@@ -227,14 +227,30 @@ main img {
   width: 100%;
 }
 
+/* main */
+main {
+  display: flex !important;
+  flex-direction: column;
+}
+
+@media (width >= 900px) {
+  main {
+    flex-direction: row;
+  }
+}
+
 /* sections */
 main > .section {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
   margin: 40px 0;
 }
 
 main > .section > div {
   max-width: 1200px;
-  margin: auto;
+  /* margin: auto; */
   padding: 0 24px;
 }
 

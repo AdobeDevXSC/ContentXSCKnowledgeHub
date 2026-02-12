@@ -1,0 +1,37 @@
+
+/* leftnav-container */
+.leftnav-container {
+  width: 300px;
+  min-width: 300px;
+  background-color: #111;
+  color: white;
+  padding: 2rem 1rem;
+  padding-right: 40px;
+  height: calc(100vh - var(--nav-height));
+  position: sticky;
+  top: var(--nav-height);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.3s ease; /* for slide toggle */
+}
+
+.leftnav {
+  height: 100%;
+}
+
+
+/* mobile layout < 900px */
+@media (width < 900px) {
+  .leftnav-container {
+    position: fixed; /* slide over content */
+    top: 0;
+    left: 0;
+    width: 80%; /* cover 80% of screen */
+    height: 100vh;
+    transform: translateX(-100%); /* hidden by default */
+    z-index: 9999;
+  }
+  .leftnav-container.open {
+    transform: translateX(0);
+  }
+}
