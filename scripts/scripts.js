@@ -148,27 +148,6 @@ function loadDelayed() {
   // load anything that can be postponed to the latest here
 }
 
-function loadCopiedNav(doc) {
-  console.log(" bap bap bap to the bap bap -- scripts js")
-  // Grab the left nav container
-  const leftNavContainer = doc.querySelector('.leftnav-container .leftnav');
-  console.log("leftNavContainer", leftNavContainer);
-
-  // Grab the target container in header
-  const navSections = document.querySelector('.header > div');
-  console.log("navSections", navSections);
-
-  // if (leftNavContainer && navSections) {
-  //   // Clear any existing content
-  //   navSections.innerHTML = '';
-
-  //   // Clone all children from leftNavContainer into navSections
-  //   leftNavContainer.childNodes.forEach((node) => {
-  //     navSections.appendChild(node.cloneNode(true));
-  //   });
-  // }
-}
-
 async function loadPage() {
   await loadEager(document);
   await loadLazy(document);

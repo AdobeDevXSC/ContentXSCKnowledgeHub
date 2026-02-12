@@ -164,9 +164,6 @@ export default async function decorate(block) {
   const navSectionsEl = nav.querySelector('.nav-sections');
 
   if (leftNavContainer && navSectionsEl) {
-    // Clear any existing content
-    navSectionsEl.innerHTML = '';
-
     const wrapper = document.createElement('div');
     wrapper.className = 'mobile-nav-wrapper';
 
