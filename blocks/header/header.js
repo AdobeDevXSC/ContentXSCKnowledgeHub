@@ -159,6 +159,24 @@ export default async function decorate(block) {
   toggleMenu(nav, navSections, isDesktop.matches);
   isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
 
+  // Grab the left nav container
+  const leftNavContainer = document.querySelector('.leftnav-container .leftnav');
+  const navSectionsEl = nav.querySelector('.nav-sections');
+
+  if (leftNavContainer && navSectionsEl) {
+    // Clear any existing content
+    navSectionsEl.innerHTML = '';
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'mobile-nav-wrapper';
+
+    // Clone all children from leftNavContainer into navSections
+    leftNavContainer.childNodes.forEach((node) => {
+      wrapper.appendChild(node.cloneNode(true));
+    });
+    navSectionsEl.appendChild(wrapper);
+  }
+
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper';
   navWrapper.append(nav);

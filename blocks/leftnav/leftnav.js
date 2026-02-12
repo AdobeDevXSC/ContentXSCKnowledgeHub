@@ -1,4 +1,5 @@
 export default async function decorate(block) {
+  const test = '<div>Left navigation content</div>';
   try {
     // Fetch navigation content from a fragment
     // const resp = await fetch('/leftnav.plain.html');
@@ -6,7 +7,7 @@ export default async function decorate(block) {
 
     // const html = await resp.text();
     // block.innerHTML = html;
-    block.innerHTML = '<div>Left navigation</div>';
+    block.innerHTML = test;
   } catch (e) {
     console.error('Left nav failed to load', e);
   }

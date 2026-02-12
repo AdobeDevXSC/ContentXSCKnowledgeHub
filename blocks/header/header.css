@@ -20,7 +20,7 @@ header nav {
   align-items: center;
   gap: 0 2em;
   margin: auto;
-  max-width: 1400px;
+  max-width: 1860px;
   height: var(--nav-height);
   padding: 0 1rem;
   font-family: var(--body-font-family);
@@ -284,4 +284,16 @@ header nav .nav-sections ul > li > ul > li {
 /* tools */
 header nav .nav-tools {
   grid-area: tools;
+}
+
+
+/** Mobile Left Nav **/
+header nav .nav-sections .mobile-nav-wrapper {
+  display: none;
+}
+
+@media (width < 900px) {
+  header nav .nav-sections .mobile-nav-wrapper {
+    display: block;
+  }
 }
