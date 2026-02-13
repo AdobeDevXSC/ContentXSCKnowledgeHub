@@ -241,11 +241,18 @@ main {
 
 /* sections */
 main > .section {
-  min-height: 80vh;
+  min-height: calc(100vh - var(--nav-height));
   display: flex;
   flex-direction: column;
-  width: 100%;
-  margin: 40px 0;
+  width: -webkit-fill-available;
+  /* margin: 40px 0; */
+  box-sizing: border-box;
+
+  border-radius: 20px;
+  padding: 1rem;
+  margin: 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
+
 }
 
 main > .section > div {
@@ -254,11 +261,20 @@ main > .section > div {
   padding: 0 24px;
 }
 
-main > .section:first-of-type {
-  margin-top: 0;
+main > .section > div.default-content-wrapper {
+  margin: 1rem 0;
 }
 
+/* main > .section:first-of-type {
+  margin-top: 0;
+} */
+
 @media (width >= 900px) {
+  main > .section {
+    border-radius: 40px;
+    padding: 30px;
+  }
+
   main > .section > div {
     padding: 0 32px;
   }

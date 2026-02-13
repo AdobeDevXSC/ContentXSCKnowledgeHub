@@ -78,7 +78,7 @@ header nav .nav-hamburger button {
   border: 0;
   border-radius: 0;
   padding: 0;
-  background-color: var(--background-color);
+  background-color: transparent;
   color: inherit;
   overflow: initial;
   text-overflow: initial;
@@ -286,6 +286,14 @@ header nav .nav-tools {
   grid-area: tools;
 }
 
+header nav .nav-tools img {
+  width: 35px;
+  height: auto;
+  /* border: 1px solid black;
+  border-radius: 50%; */
+  padding: 3px;
+  object-fit:cover;
+}
 
 /** Mobile Left Nav **/
 header nav .nav-sections .mobile-nav-wrapper {

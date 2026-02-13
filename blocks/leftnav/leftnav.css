@@ -3,8 +3,8 @@
 .leftnav-container {
   width: 25vw;
   min-width: 275px;
-  background-color: #111;
-  color: white;
+  background-color: white;
+  color: black;
   padding: 2rem 1rem;
   padding-right: 40px;
   height: calc(100vh - var(--nav-height));
@@ -13,6 +13,9 @@
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.3s ease; /* for slide toggle */
+  border-radius: 40px;
+  margin: 1rem .5rem 1rem 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
 }
 
 .leftnav {
@@ -23,13 +26,14 @@
 /* mobile layout < 900px */
 @media (width < 900px) {
   .leftnav-container {
-    position: fixed; /* slide over content */
+    display: none;
+    /* position: fixed;
     top: var(--nav-height);
     left: 0;
     width: 100%;
     max-height: 100%;
-    transform: translateX(-100%); /* hidden by default */
-    z-index: 9999;
+    transform: translateX(-100%);
+    z-index: 9999; */
   }
   .leftnav-container.open {
     transform: translateX(0);
