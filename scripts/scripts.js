@@ -21,7 +21,7 @@ import './uikit-icons.min.js';
  */
 async function loadLeftNav(main) {
   const aside = document.createElement('aside');
-  aside.className = 'leftnav-container uk-animation-scale-up';
+  aside.className = 'leftnav-container';
   // aside.className = 'leftnav-container';
 
   const block = document.createElement('div');
@@ -113,9 +113,9 @@ export function decorateMain(main) {
   decorateBlocks(main);
 
   // Add UIKit animation to all sections inside <main>
-  main.querySelectorAll('.section').forEach((section) => {
-    section.classList.add('uk-animation-scale-up');
-  });
+  // main.querySelectorAll('.section').forEach((section) => {
+  //   section.classList.add('');
+  // });
 }
 
 /**
