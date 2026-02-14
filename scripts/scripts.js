@@ -126,18 +126,22 @@ async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
+
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
 
-    // Insert left nav
-    loadLeftNav(main);
+    const { pathname } = window.location;
+
+    // Ignore tools pages
+    if (!pathname.startsWith('/tools/')) {
+      loadLeftNav(main);
+    }
 
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 
   try {
-    /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
     if (window.innerWidth >= 1000 || sessionStorage.getItem('fonts-loaded')) {
       loadFonts();
     }
