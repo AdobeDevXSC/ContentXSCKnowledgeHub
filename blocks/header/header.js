@@ -2,7 +2,7 @@ import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 
 // media query match that indicates mobile/tablet width
-const isDesktop = window.matchMedia('(min-width: 900px)');
+const isDesktop = window.matchMedia('(min-width: 1000px)');
 
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
@@ -168,9 +168,8 @@ export default async function decorate(block) {
     wrapper.className = 'mobile-nav-wrapper';
 
     // Clone all children from leftNavContainer into navSections
-    leftNavContainer.childNodes.forEach((node) => {
-      wrapper.appendChild(node.cloneNode(true));
-    });
+    const clonedNav = leftNavContainer.cloneNode(true);
+    wrapper.appendChild(clonedNav);
     navSectionsEl.appendChild(wrapper);
   }
 

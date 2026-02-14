@@ -46,6 +46,27 @@ async function loadFonts() {
   }
 }
 
+export async function fetchPlaceholders() {
+  let placeholderCache;
+  const endpoint = '/placeholder.json';
+
+  try {
+    const resp = await fetch(endpoint);
+
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch placeholders: ${resp.status}`);
+    }
+
+    const json = await resp.json();
+    placeholderCache = json; // store in module cache
+
+    return placeholderCache;
+  } catch (error) {
+    console.error('Error fetching placeholder.json:', error);
+    return null;
+  }
+}
+
 /**
  * Builds all synthetic blocks in a container element.
  * @param {Element} main The container element
@@ -116,7 +137,7 @@ async function loadEager(doc) {
 
   try {
     /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
-    if (window.innerWidth >= 900 || sessionStorage.getItem('fonts-loaded')) {
+    if (window.innerWidth >= 1000 || sessionStorage.getItem('fonts-loaded')) {
       loadFonts();
     }
   } catch (e) {

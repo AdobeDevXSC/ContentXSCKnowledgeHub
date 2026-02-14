@@ -25,8 +25,8 @@
 
   /* body sizes */
   --body-font-size-m: 22px;
-  --body-font-size-s: 19px;
-  --body-font-size-xs: 17px;
+  --body-font-size-s: 18px;
+  --body-font-size-xs: 16px;
 
   /* heading sizes */
   --heading-font-size-xxl: 55px;
@@ -53,7 +53,7 @@
   src: local('Arial');
 }
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   :root {
     /* body sizes */
     --body-font-size-m: 18px;
@@ -76,7 +76,7 @@ body {
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: var(--body-font-family);
-  font-size: var(--body-font-size-m);
+  font-size: var(--body-font-size-s);
   line-height: 1.6;
 }
 
@@ -233,7 +233,7 @@ main {
   flex-direction: column;
 }
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   main {
     flex-direction: row;
   }
@@ -241,7 +241,7 @@ main {
 
 /* sections */
 main > .section {
-  min-height: calc(100vh - var(--nav-height));
+  min-height: calc(100vh - var(--nav-height) - 2rem);
   display: flex;
   flex-direction: column;
   width: -webkit-fill-available;
@@ -269,10 +269,11 @@ main > .section > div.default-content-wrapper {
   margin-top: 0;
 } */
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   main > .section {
     border-radius: 40px;
     padding: 30px;
+    /* width: 75vw; */
   }
 
   main > .section > div {

@@ -1,15 +1,13 @@
 
-/* leftnav-container */
 .leftnav-container {
-  width: 25vw;
-  min-width: 275px;
+  width: 20vw;
+  min-width: 250px;
   background-color: white;
   color: black;
   padding: 2rem 1rem;
-  padding-right: 40px;
-  height: calc(100vh - var(--nav-height));
+  height: calc(100vh - var(--nav-height) - 90px);
   position: sticky;
-  top: var(--nav-height);
+  top: calc(var(--nav-height) + 1rem);
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.3s ease; /* for slide toggle */
@@ -19,12 +17,79 @@
 }
 
 .leftnav {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
   height: 100%;
 }
 
+/* title */
+.leftnav .nav-title > h3 {
+  padding: 0 1rem;
+  text-align: center;
+  margin-bottom: 0;
+}
 
-/* mobile layout < 900px */
-@media (width < 900px) {
+.leftnav .aem-parent {
+  padding: 1rem;
+}
+
+.leftnav .uk-heading-bullet::before {
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: 0;
+  vertical-align: middle;
+  height: 35px;
+  margin-right: calc(5px + .2em);
+  border-left: calc(3px + .1em) solid #ED2224;
+}
+
+/* accordion */
+.leftnav .uk-accordion-title {
+  font-weight: 600;
+  font-size: 0.92em;
+  text-transform: uppercase;
+}
+
+.leftnav .uk-nav-default > li > a {
+  font-size: 0.9rem;
+  padding: 5px 10px;
+}
+
+.leftnav .uk-nav-default > li.uk-active > a {
+  font-weight: 700;
+  background-color: rgba(0, 123, 255, 0.08);
+  color: #000;
+  border-radius: 7px;
+  width: fit-content;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul.uk-accordion {
+  margin-top: 0;
+  padding: 10px 0 10px 10px;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li {
+  padding-left: 10px;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li a {
+  font-size: 0.9rem;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li > .uk-accordion-content ul {
+  margin-left: 20px;;
+}
+
+.leftnav .uk-accordion-default .uk-accordion-content {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* mobile layout < 1000px */
+@media (width < 1000px) {
   .leftnav-container {
     display: none;
     /* position: fixed;
