@@ -164,13 +164,19 @@ export default async function decorate(block) {
   const navSectionsEl = nav.querySelector('.nav-sections');
 
   if (leftNavContainer && navSectionsEl) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'mobile-nav-wrapper';
+    const navSectionsEl = nav.querySelector('.nav-sections');
 
-    // Clone all children from leftNavContainer into navSections
-    const clonedNav = leftNavContainer.cloneNode(true);
-    wrapper.appendChild(clonedNav);
-    navSectionsEl.appendChild(wrapper);
+    if (navSectionsEl) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mobile-nav-wrapper leftnav';
+
+      navSectionsEl.appendChild(wrapper);
+
+      // Import and decorate directly into wrapper
+      import('../../blocks/leftnav/leftnav.js').then((module) => {
+        module.default(wrapper);
+      });
+    }
   }
 
   const navWrapper = document.createElement('div');

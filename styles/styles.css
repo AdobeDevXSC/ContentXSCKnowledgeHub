@@ -273,7 +273,7 @@ main > .section > div.default-content-wrapper {
   main > .section {
     border-radius: 40px;
     padding: 30px;
-    /* width: 75vw; */
+    width: 80vw;
   }
 
   main > .section > div {

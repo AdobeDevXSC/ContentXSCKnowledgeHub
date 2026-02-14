@@ -22,6 +22,7 @@ import './uikit-icons.min.js';
 async function loadLeftNav(main) {
   const aside = document.createElement('aside');
   aside.className = 'leftnav-container uk-animation-scale-up';
+  // aside.className = 'leftnav-container';
 
   const block = document.createElement('div');
   block.className = 'block leftnav';
