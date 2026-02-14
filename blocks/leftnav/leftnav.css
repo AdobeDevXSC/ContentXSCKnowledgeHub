@@ -24,10 +24,21 @@
 }
 
 /* title */
-.leftnav .nav-title > h3 {
-  padding: 0 1rem;
+ .leftnav .nav-title > h3 {
+  padding: 0.75rem 1rem;
   text-align: center;
-  margin-bottom: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.leftnav .nav-title > h3::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 2px;
+  margin: 0.5rem auto 0;
+  background-color: rgba(0, 0, 0, 0.1);
 }
 
 .leftnav .aem-parent {
@@ -53,6 +64,7 @@
 .leftnav-search .uk-input {
   background-color: #f7f7f7;
   border: none;
+  height: 40px !important;
 }
 
 /* accordion */

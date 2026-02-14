@@ -237,7 +237,7 @@ export default async function decorate(block) {
   block.append(await addTitle());
 
   const searchWrapper = document.createElement('div');
-  searchWrapper.className = 'leftnav-search uk-margin';
+  searchWrapper.className = 'leftnav-search';
   searchWrapper.innerHTML = `
     <div class="uk-inline uk-width-1-1">
       <span class="uk-form-icon" uk-icon="icon: search"></span>
