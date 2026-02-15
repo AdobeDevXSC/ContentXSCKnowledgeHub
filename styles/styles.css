@@ -236,6 +236,7 @@ main {
 @media (width >= 1000px) {
   main {
     flex-direction: row;
+    max-width: 1860px;
   }
 }
 

@@ -1,0 +1,69 @@
+/* Base Notebox */
+.notebox {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 2.5rem 1.25rem;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+  width: 100%;
+  max-width: 700px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  font-family: Arial, sans-serif;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Icon */
+.notebox-icon {
+  flex-shrink: 0;
+  color: inherit; /* icon inherits alert color */
+}
+
+/* Title inside notebox */
+.notebox-title {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
+}
+
+/* Content inside notebox */
+.notebox-content {
+  font-size: 0.95rem;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Close button */
+.uk-alert-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+}
+
+/* Optional: Custom colors if UIkit doesn't cover all types */
+.notebox.uk-alert-primary {
+  background-color: #edf2fc;
+  color: #0a3d91;
+}
+
+.notebox.uk-alert-warning {
+  background-color: #fff4e5;
+  color: #b35600;
+}
+
+.notebox.uk-alert-danger {
+  background-color: #ffe5e5;
+  color: #b30000;
+}
+
+.notebox.uk-alert-success {
+  background-color: #e6f8e0;
+  color: #1a5a00;
+}
+
+/* Paragraph spacing */
+.notebox-content p:last-of-type {
+  margin-bottom: 0;
+}
