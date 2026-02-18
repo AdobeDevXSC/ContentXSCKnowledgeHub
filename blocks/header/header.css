@@ -20,7 +20,7 @@ header nav {
   align-items: center;
   gap: 0 2em;
   margin: auto;
-  max-width: 1400px;
+  max-width: 1860px;
   height: var(--nav-height);
   padding: 0 1rem;
   font-family: var(--body-font-family);
@@ -41,7 +41,7 @@ header nav[aria-expanded="true"] {
   }
 }
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   header nav {
     display: flex;
     justify-content: space-between;
@@ -78,7 +78,7 @@ header nav .nav-hamburger button {
   border: 0;
   border-radius: 0;
   padding: 0;
-  background-color: var(--background-color);
+  background-color: transparent;
   color: inherit;
   overflow: initial;
   text-overflow: initial;
@@ -138,7 +138,7 @@ header nav[aria-expanded="true"] .nav-hamburger-icon::after {
   transform: rotate(-45deg);
 }
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   header nav .nav-hamburger {
     display: none;
     visibility: hidden;
@@ -198,7 +198,7 @@ header nav .nav-sections ul > li > ul > li {
   font-weight: 500;
 }
 
-@media (width >= 900px) {
+@media (width >= 1000px) {
   header nav .nav-sections {
     display: block;
     visibility: visible;
@@ -246,6 +246,8 @@ header nav .nav-sections ul > li > ul > li {
     flex: 0 1 auto;
     position: relative;
     font-weight: 500;
+    font-size: 15px;
+
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul {
@@ -284,4 +286,42 @@ header nav .nav-sections ul > li > ul > li {
 /* tools */
 header nav .nav-tools {
   grid-area: tools;
+}
+
+header nav .nav-tools img {
+  width: 35px;
+  height: auto;
+  /* border: 1px solid black;
+  border-radius: 50%; */
+  padding: 3px;
+  object-fit:cover;
+}
+
+/** Mobile Left Nav **/
+header nav .nav-sections .mobile-nav-wrapper {
+  display: none;
+}
+
+@media (width < 1000px) {
+  header nav .nav-sections .mobile-nav-wrapper {
+    display: block;
+  }
+}
+
+/** Injected left mega nav */
+
+
+header nav .mobile-nav-wrapper {
+  box-sizing: border-box;
+  width: 100%;
+  background-color: white;
+  color: black;
+  padding: 2rem 1rem;
+  height: auto;
+  /* height: calc(100vh - var(--nav-height) - 90px); */
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.3s ease; /* for slide toggle */
+  border-radius: 40px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
 }

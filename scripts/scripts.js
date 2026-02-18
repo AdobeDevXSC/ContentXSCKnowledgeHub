@@ -17,19 +17,23 @@ import './uikit.min.js';
 import './uikit-icons.min.js';
 
 /**
- * Builds hero block and prepends to main in a new section.
- * @param {Element} main The container element
+ * load left nav
  */
-// function buildHeroBlock(main) {
-//   const h1 = main.querySelector('h1');
-//   const picture = main.querySelector('picture');
-//   // eslint-disable-next-line no-bitwise
-//   if (h1 && picture && (h1.compareDocumentPosition(picture) & Node.DOCUMENT_POSITION_PRECEDING)) {
-//     const section = document.createElement('div');
-//     section.append(buildBlock('hero', { elems: [picture, h1] }));
-//     main.prepend(section);
-//   }
-// }
+async function loadLeftNav(main) {
+  const aside = document.createElement('aside');
+  aside.className = 'leftnav-container';
+  // aside.className = 'leftnav-container';
+
+  const block = document.createElement('div');
+  block.className = 'block leftnav';
+
+  aside.append(block);
+  main.insertBefore(aside, main.querySelector('.section'));
+
+  const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
+  loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
+  await decorate(block);
+}
 
 /**
  * load fonts.css and set a session storage flag
@@ -40,6 +44,27 @@ async function loadFonts() {
     if (!window.location.hostname.includes('localhost')) sessionStorage.setItem('fonts-loaded', 'true');
   } catch (e) {
     // do nothing
+  }
+}
+
+export async function fetchPlaceholders() {
+  let placeholderCache;
+  const endpoint = '/placeholder.json';
+
+  try {
+    const resp = await fetch(endpoint);
+
+    if (!resp.ok) {
+      throw new Error(`Failed to fetch placeholders: ${resp.status}`);
+    }
+
+    const json = await resp.json();
+    placeholderCache = json; // store in module cache
+
+    return placeholderCache;
+  } catch (error) {
+    console.error('Error fetching placeholder.json:', error);
+    return null;
   }
 }
 
@@ -86,6 +111,11 @@ export function decorateMain(main) {
   buildAutoBlocks(main);
   decorateSections(main);
   decorateBlocks(main);
+
+  // Add UIKit animation to all sections inside <main>
+  // main.querySelectorAll('.section').forEach((section) => {
+  //   section.classList.add('');
+  // });
 }
 
 /**
@@ -95,20 +125,19 @@ export function decorateMain(main) {
 async function loadEager(doc) {
   document.documentElement.lang = 'en';
   decorateTemplateAndTheme();
+
   const main = doc.querySelector('main');
+
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
-    await loadSection(main.querySelector('.section'), waitForFirstImage);
-  }
 
-  try {
-    /* if desktop (proxy for fast connection) or fonts already loaded, load fonts.css */
-    if (window.innerWidth >= 900 || sessionStorage.getItem('fonts-loaded')) {
-      loadFonts();
+    // 🚫 Do NOT render left nav in iframe preview
+    if (window.self === window.top) {
+      await loadLeftNav(main);
     }
-  } catch (e) {
-    // do nothing
+
+    await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 }
 

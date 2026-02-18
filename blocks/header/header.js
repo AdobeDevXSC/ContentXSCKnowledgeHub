@@ -2,7 +2,7 @@ import { getMetadata } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 
 // media query match that indicates mobile/tablet width
-const isDesktop = window.matchMedia('(min-width: 900px)');
+const isDesktop = window.matchMedia('(min-width: 1000px)');
 
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
@@ -158,6 +158,26 @@ export default async function decorate(block) {
   // prevent mobile nav behavior on window resize
   toggleMenu(nav, navSections, isDesktop.matches);
   isDesktop.addEventListener('change', () => toggleMenu(nav, navSections, isDesktop.matches));
+
+  // Grab the left nav container
+  const leftNavContainer = document.querySelector('.leftnav-container .leftnav');
+  const navSectionsEl = nav.querySelector('.nav-sections');
+
+  if (leftNavContainer && navSectionsEl) {
+    const navSectionsEl = nav.querySelector('.nav-sections');
+
+    if (navSectionsEl) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'mobile-nav-wrapper leftnav';
+
+      navSectionsEl.appendChild(wrapper);
+
+      // Import and decorate directly into wrapper
+      import('../../blocks/leftnav/leftnav.js').then((module) => {
+        module.default(wrapper);
+      });
+    }
+  }
 
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper';

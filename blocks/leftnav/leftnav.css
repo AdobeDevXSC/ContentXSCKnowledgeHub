@@ -1,0 +1,128 @@
+
+.leftnav-container {
+  width: 20vw;
+  min-width: 300px;
+  background-color: white;
+  color: black;
+  padding: 2rem 1rem;
+  height: calc(100vh - var(--nav-height) - 90px);
+  position: sticky;
+  top: calc(var(--nav-height) + 1rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: transform 0.3s ease; /* for slide toggle */
+  border-radius: 40px;
+  margin: 1rem .5rem 1rem 1rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
+}
+
+.leftnav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+}
+
+/* title */
+ .leftnav .nav-title > h3 {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  position: relative;
+}
+
+.leftnav .nav-title > h3::after {
+  content: '';
+  display: block;
+  width: 100px;
+  height: 2px;
+  margin: 0.5rem auto 0;
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.leftnav .aem-parent {
+  padding: 1rem;
+}
+
+.leftnav .uk-heading-bullet::before {
+  content: "";
+  display: inline-block;
+  position: relative;
+  top: 0;
+  vertical-align: middle;
+  height: 35px;
+  margin-right: calc(5px + .2em);
+  border-left: calc(3px + .1em) solid #ED2224;
+}
+
+/* search */
+.leftnav-search {
+  padding: 0 1rem;
+}
+
+.leftnav-search .uk-input {
+  background-color: #f7f7f7;
+  border: none;
+  height: 40px !important;
+}
+
+/* accordion */
+.leftnav .uk-accordion-title {
+  font-weight: 600;
+  font-size: 0.95em;
+  text-transform: uppercase;
+}
+
+.leftnav .uk-nav-default > li > a {
+  font-size: 0.9rem;
+  padding: 5px 10px;
+}
+
+.leftnav .uk-nav-default > li.uk-active > a {
+  font-weight: 700;
+  background-color: rgba(0, 123, 255, 0.08);
+  color: #000;
+  border-radius: 7px;
+  width: fit-content;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul.uk-accordion {
+  margin-top: 0;
+  padding: 10px 0 10px 10px;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li {
+  padding-left: 10px;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li a {
+  font-size: 0.9rem;
+}
+
+.leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li > .uk-accordion-content ul {
+  margin-left: 20px;;
+}
+
+.leftnav .uk-accordion-default .uk-accordion-content {
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+
+/* mobile layout < 1000px */
+@media (width < 1000px) {
+  .leftnav-container {
+    display: none;
+    /* position: fixed;
+    top: var(--nav-height);
+    left: 0;
+    width: 100%;
+    max-height: 100%;
+    transform: translateX(-100%);
+    z-index: 9999; */
+  }
+  .leftnav-container.open {
+    transform: translateX(0);
+  }
+}
