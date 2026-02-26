@@ -13,6 +13,11 @@ function toTitleCase(slug = '') {
     .join(' ');
 }
 
+function formatSectionTitle(slug) {
+  if (slug.toLowerCase() === 'aem') return 'AEM';
+  return toTitleCase(slug);
+}
+
 async function addTitle() {
   const json = await fetchPlaceholders();
   const div = document.createElement('div');
@@ -22,7 +27,7 @@ async function addTitle() {
 }
 
 /* ----------------------------- */
-/* Data Structuring */
+/* Data Structuring (Recursive) */
 /* ----------------------------- */
 
 function buildStructure(data) {
@@ -30,28 +35,34 @@ function buildStructure(data) {
 
   data.forEach((item) => {
     const segments = item.path.split('/').filter(Boolean);
-    const product = segments[1];
+    if (!segments.length) return;
 
-    if (!structure[product]) {
-      structure[product] = {
-        pages: [],
-        subcategories: {},
-      };
-    }
+    // Pages with only one segment (e.g. "/admin/acronyms" → ['admin','acronyms'])
+    // The LAST segment is always the page — it lives in its parent's __pages array.
+    // Only intermediate segments create folder nodes.
 
-    if (segments.length === 3) {
-      structure[product].pages.push(item);
-    }
+    let currentLevel = structure;
 
-    if (segments.length === 4) {
-      const subCategory = segments[2];
+    segments.forEach((segment, index) => {
+      const isLast = index === segments.length - 1;
 
-      if (!structure[product].subcategories[subCategory]) {
-        structure[product].subcategories[subCategory] = [];
+      if (isLast) {
+        // Store the page on the CURRENT level's implicit __pages,
+        // without creating a new child node for this segment.
+        if (!currentLevel.__pages) currentLevel.__pages = [];
+        currentLevel.__pages.push(item);
+      } else {
+        // Intermediate segment → ensure a folder node exists and descend
+        if (!currentLevel.__children) currentLevel.__children = {};
+        if (!currentLevel.__children[segment]) {
+          currentLevel.__children[segment] = {
+            __pages: [],
+            __children: {},
+          };
+        }
+        currentLevel = currentLevel.__children[segment];
       }
-
-      structure[product].subcategories[subCategory].push(item);
-    }
+    });
   });
 
   return structure;
@@ -69,12 +80,11 @@ function filterItems(query) {
   return ALL_ITEMS.filter((item) => {
     const title = item.title?.toLowerCase() || '';
     const path = item.path?.toLowerCase() || '';
-
     let tags = '';
 
     if (item.tags) {
       try {
-        const parsed = JSON.parse(item.tags); // 👈 parse stringified array
+        const parsed = JSON.parse(item.tags);
         if (Array.isArray(parsed)) {
           tags = parsed.join(' ').toLowerCase();
         }
@@ -92,60 +102,76 @@ function filterItems(query) {
 }
 
 /* ----------------------------- */
-/* Render */
+/* Render (Recursive) */
 /* ----------------------------- */
 
 function renderNav(block, items, isSearching = false) {
-  const existing = block.querySelector('.aem-parent');
+  const existing = block.querySelector('.nav-wrapper');
   if (existing) existing.remove();
 
+  // buildStructure now returns an object with __pages and __children at root
   const structure = buildStructure(items);
 
-  const parentWrapper = document.createElement('div');
-  parentWrapper.className = 'aem-parent';
+  const wrapper = document.createElement('div');
+  wrapper.className = 'nav-wrapper';
 
-  const parentTitle = document.createElement('h5');
-  parentTitle.className = 'uk-heading-bullet';
-  parentTitle.textContent = 'AEM';
-  parentWrapper.appendChild(parentTitle);
+  // Pass the root's __children so the accordion renders top-level folders
+  const { el: rootAccordion } = createAccordion(structure.__children || {}, true, isSearching);
 
-  const topAccordion = document.createElement('ul');
-  topAccordion.className = 'uk-accordion-default';
-  topAccordion.setAttribute('uk-accordion', 'multiple: false; animation: false');
+  wrapper.appendChild(rootAccordion);
+  block.append(wrapper);
+}
 
-  Object.keys(structure).sort().forEach((product) => {
-    const productLi = document.createElement('li');
-    if (isSearching) {
-      productLi.classList.add('uk-open');
-    }
+/**
+ * Builds an accordion <ul> for the given tree level.
+ * Returns { el, hasActive } so parent levels can bubble up the active state
+ * and add uk-open to their own <li> when a descendant is the current page.
+ */
+function createAccordion(tree, isRoot = false, isSearching = false) {
+  const ul = document.createElement('ul');
+  ul.className = 'uk-accordion-default';
+  ul.setAttribute('uk-accordion', 'multiple: false; animation: false');
 
-    const productToggle = document.createElement('a');
-    productToggle.className = 'uk-accordion-title';
-    productToggle.href = '#';
-    productToggle.innerHTML = `
-      ${toTitleCase(product)}
+  let anyActive = false;
+
+  Object.keys(tree).sort().forEach((key) => {
+    const node = tree[key];
+
+    const li = document.createElement('li');
+    if (isSearching) li.classList.add('uk-open');
+
+    const toggle = document.createElement('a');
+    toggle.className = 'uk-accordion-title';
+    toggle.href = '#';
+
+    const displayTitle = isRoot
+      ? formatSectionTitle(key)
+      : toTitleCase(key);
+
+    toggle.innerHTML = `
+      ${displayTitle}
       <span uk-accordion-icon></span>
     `;
 
-    const productContent = document.createElement('div');
-    productContent.className = 'uk-accordion-content';
+    const content = document.createElement('div');
+    content.className = 'uk-accordion-content';
 
-    const productData = structure[product];
+    let liHasActive = false;
 
-    /* -------- Direct Pages -------- */
+    /* Render Pages */
+    const pages = node.__pages || [];
+    if (pages.length) {
+      const navList = document.createElement('ul');
+      navList.className = 'uk-nav uk-nav-default';
 
-    if (productData.pages.length) {
-      const pageList = document.createElement('ul');
-      pageList.className = 'uk-nav uk-nav-default';
-
-      productData.pages
+      pages
         .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
         .forEach((item) => {
-          const li = document.createElement('li');
+          const liItem = document.createElement('li');
 
           if (window.location.pathname === item.path) {
-            li.classList.add('uk-active');
-            productLi.classList.add('uk-open');
+            liItem.classList.add('uk-active');
+            liHasActive = true;
           }
 
           const link = document.createElement('a');
@@ -153,80 +179,33 @@ function renderNav(block, items, isSearching = false) {
           link.textContent =
             item.title || toTitleCase(item.path.split('/').pop());
 
-          li.appendChild(link);
-          pageList.appendChild(li);
+          liItem.appendChild(link);
+          navList.appendChild(liItem);
         });
 
-      productContent.appendChild(pageList);
+      content.appendChild(navList);
     }
 
-    /* -------- Subcategories -------- */
-
-    const subcategories = productData?.subcategories;
-
-    if (Object.keys(subcategories).length) {
-      const nestedAccordion = document.createElement('ul');
-      nestedAccordion.className = 'uk-accordion-default';
-      nestedAccordion.setAttribute(
-        'uk-accordion',
-        'multiple: false; animation: false',
-      );
-
-      Object.keys(subcategories).sort().forEach((subCategory) => {
-        const subLi = document.createElement('li');
-
-        if (isSearching) {
-          subLi.classList.add('uk-open');
-        }
-
-        const subToggle = document.createElement('a');
-        subToggle.className = 'uk-accordion-title';
-        subToggle.href = '#';
-        subToggle.innerHTML = `
-          ${toTitleCase(subCategory)}
-          <span uk-accordion-icon></span>
-        `;
-
-        const subContent = document.createElement('div');
-        subContent.className = 'uk-accordion-content';
-
-        const navList = document.createElement('ul');
-        navList.className = 'uk-nav uk-nav-default';
-
-        subcategories[subCategory]
-          .sort((a, b) => (a.title || '').localeCompare(b.title || ''))
-          .forEach((item) => {
-            const li = document.createElement('li');
-
-            if (window.location.pathname === item.path) {
-              li.classList.add('uk-active');
-              subLi.classList.add('uk-open');
-              productLi.classList.add('uk-open');
-            }
-
-            const link = document.createElement('a');
-            link.href = item.path;
-            link.textContent =
-              item.title || toTitleCase(item.path.split('/').pop());
-
-            li.appendChild(link);
-            navList.appendChild(li);
-          });
-
-        subContent.appendChild(navList);
-        subLi.append(subToggle, subContent);
-        nestedAccordion.appendChild(subLi);
-      });
-
-      productContent.appendChild(nestedAccordion);
+    /* Render Children (Recursive) */
+    const children = node.__children || {};
+    if (Object.keys(children).length) {
+      const { el: childAccordion, hasActive: childHasActive } = createAccordion(children, false, isSearching);
+      // If any descendant is active, this li must also open
+      if (childHasActive) liHasActive = true;
+      content.appendChild(childAccordion);
     }
 
-    productLi.append(productToggle, productContent);
-    topAccordion.appendChild(productLi);
+    // Open this li if a direct page matched OR any deeper descendant matched
+    if (liHasActive) {
+      li.classList.add('uk-open');
+      anyActive = true;
+    }
+
+    li.append(toggle, content);
+    ul.appendChild(li);
   });
 
-  parentWrapper.appendChild(topAccordion);
-  block.append(parentWrapper);
+  return { el: ul, hasActive: anyActive };
 }
 
 /* ----------------------------- */
@@ -258,12 +237,19 @@ export default async function decorate(block) {
     const json = await resp.json();
     const data = json?.data || [];
 
-    ALL_ITEMS = data.filter(
-      (item) =>
-        item.path?.startsWith('/aem/') &&
-        item.path !== '/aem' &&
-        item.path !== '/aem/'
-    );
+    /* -------- Blacklist Filtering -------- */
+
+    ALL_ITEMS = data.filter((item) => {
+      const path = item.path || '';
+
+      return (
+        !path.startsWith('/tools/') &&
+        !path.includes('/non-nav/') &&
+        path !== '/aem' &&
+        path !== '/aem/' &&
+        path !== '/nav'
+      );
+    });
 
     renderNav(block, ALL_ITEMS);
 

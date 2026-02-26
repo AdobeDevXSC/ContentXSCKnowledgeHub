@@ -45,7 +45,7 @@
   padding: 1rem;
 }
 
-.leftnav .uk-heading-bullet::before {
+.leftnav .nav-wrapper > ul > li > .uk-accordion-title:before {
   content: "";
   display: inline-block;
   position: relative;
@@ -58,7 +58,7 @@
 
 /* search */
 .leftnav-search {
-  padding: 0 1rem;
+  margin-bottom: 1rem;
 }
 
 .leftnav-search .uk-input {
@@ -72,6 +72,7 @@
   font-weight: 600;
   font-size: 0.95em;
   text-transform: uppercase;
+  column-gap: 5px;
 }
 
 .leftnav .uk-nav-default > li > a {
@@ -107,6 +108,7 @@
 .leftnav .uk-accordion-default .uk-accordion-content {
   margin-top: 10px;
   margin-bottom: 10px;
+  margin-left: 15px;
 }
 
 
