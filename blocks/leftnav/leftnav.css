@@ -45,7 +45,7 @@
   padding: 1rem;
 }
 
-.leftnav .nav-wrapper > ul > li > .uk-accordion-title:before {
+.leftnav .aem-parent > ul > li > .uk-accordion-title:before {
   content: "";
   display: inline-block;
   position: relative;
@@ -108,7 +108,6 @@
 .leftnav .uk-accordion-default .uk-accordion-content {
   margin-top: 10px;
   margin-bottom: 10px;
-  margin-left: 15px;
 }
 
 

@@ -106,14 +106,14 @@ function filterItems(query) {
 /* ----------------------------- */
 
 function renderNav(block, items, isSearching = false) {
-  const existing = block.querySelector('.nav-wrapper');
+  const existing = block.querySelector('.aem-parent');
   if (existing) existing.remove();
 
   // buildStructure now returns an object with __pages and __children at root
   const structure = buildStructure(items);
 
   const wrapper = document.createElement('div');
-  wrapper.className = 'nav-wrapper';
+  wrapper.className = 'aem-parent';
 
   // Pass the root's __children so the accordion renders top-level folders
   const { el: rootAccordion } = createAccordion(structure.__children || {}, true, isSearching);
