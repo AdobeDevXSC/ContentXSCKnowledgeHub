@@ -236,7 +236,7 @@ main {
 @media (width >= 1000px) {
   main {
     flex-direction: row;
-    max-width: 1860px;
+    max-width: 2000px;
   }
 }
 
@@ -250,7 +250,7 @@ main > .section {
   box-sizing: border-box;
 
   border-radius: 20px;
-  padding: 1rem;
+  padding: 0;
   margin: 1rem;
   /* box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08); */
 

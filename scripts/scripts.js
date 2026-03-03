@@ -10,6 +10,7 @@ import {
   loadSection,
   loadSections,
   loadCSS,
+  getMetadata,
 } from './aem.js';
 
 import './uikit.min.js';
@@ -76,6 +77,119 @@ export function decorateMain(main) {
 }
 
 // ---------------------------------------------------------------------------
+// Page Metadata Banner (author + lastModified)
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetches page metadata from the query index for the current path.
+ * @returns {Promise<{author: string, lastModified: string}|null>}
+ */
+async function fetchPageMeta() {
+  try {
+    const resp = await fetch('/query-index.json');
+    if (!resp.ok) throw new Error(`query-index fetch failed: ${resp.status}`);
+    const json = await resp.json();
+    const entries = json.data || json;
+    const currentPath = window.location.pathname;
+    return entries.find((e) => e.path === currentPath) || null;
+  } catch (error) {
+    console.error('Failed to fetch query-index.json:', error);
+    return null;
+  }
+}
+
+/**
+ * Converts a Unix timestamp (seconds) to a human-readable date string.
+ * e.g. 1772560358 → "January 15, 2026"
+ * @param {string|number} timestamp
+ * @returns {string}
+ */
+function formatTimestamp(timestamp) {
+  if (!timestamp) return '';
+  const ms = Number(timestamp) * 1000;
+  if (Number.isNaN(ms)) return '';
+  return new Date(ms).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+}
+
+/**
+ * Injects the author / last-modified banner before the first section in <main>.
+ * Falls back to <meta> tags if the query-index entry has no value.
+ * @param {Element} main
+ */
+async function loadPageMetaBanner(main) {
+  const firstSection = main.querySelector('.section');
+  if (!firstSection) return;
+
+  // Pull from query-index first, then fall back to <meta> tags
+  const indexMeta = await fetchPageMeta();
+
+  const author = (indexMeta && indexMeta.author) || getMetadata('author');
+  const lastModifiedRaw = (indexMeta && indexMeta.lastModified) || getMetadata('lastModified');
+  const lastModified = formatTimestamp(lastModifiedRaw);
+
+  // Nothing to show — skip rendering the banner entirely
+  if (!author && !lastModified) return;
+
+  const banner = document.createElement('div');
+  banner.className = 'page-meta-banner';
+
+  if (author) {
+    const authorEl = document.createElement('span');
+    authorEl.className = 'page-meta-author';
+    authorEl.innerHTML = `<strong>Author:</strong> ${author}`;
+    banner.appendChild(authorEl);
+  }
+
+  if (lastModified) {
+    const modifiedEl = document.createElement('span');
+    modifiedEl.className = 'page-meta-modified';
+    modifiedEl.innerHTML = `<strong>Last Modified:</strong> ${lastModified}`;
+    banner.appendChild(modifiedEl);
+  }
+
+  // Inject styles
+  if (!document.getElementById('page-meta-banner-style')) {
+    const style = document.createElement('style');
+    style.id = 'page-meta-banner-style';
+    style.textContent = `
+      .page-meta-banner {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: wrap;
+        gap: 0;
+        padding: 0.75rem 32px !important;
+        background: rgba(0, 0, 0, 0.04);
+        border-left: 3px solid rgba(0, 0, 0, 0.15);
+        border-radius: 0 4px 4px 0;
+        font-size: 0.8125rem;
+        color: #555;
+        line-height: 1.4;
+        margin-bottom: 0.5rem;
+        width: fit-content;
+        min-width: 200px;
+      }
+      .page-meta-banner strong {
+        color: #222;
+        font-weight: 600;
+      }
+      .page-meta-author,
+      .page-meta-modified {
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  firstSection.insertBefore(banner, firstSection.firstChild);
+}
+
+// ---------------------------------------------------------------------------
 // Global Image Lightbox
 // ---------------------------------------------------------------------------
 
@@ -131,22 +245,19 @@ function createLightbox() {
     }
     .lightbox-close {
       position: absolute;
-      top: -2.5rem;
-      right: 0;
+      top: -3rem;
+      right: -0.5rem;
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid rgba(255, 255, 255, 0.2);
       border-radius: 6px;
       color: #fff;
-      font-size: 1.75rem;
+      font-size: 1.5rem;
       line-height: 1;
       cursor: pointer;
       padding: 0.35rem 0.65rem;
       opacity: 0.85;
       transition: background 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
-      margin: 0;
-      padding: 0 5px 5px 5px;
     }
-
     .lightbox-close:hover,
     .lightbox-close:focus {
       background: rgba(255, 255, 255, 0.2);
@@ -218,20 +329,6 @@ function closeLightbox() {
   if (img) img.src = '';
 }
 
-/**
- * Decorates eligible <img> elements with lightbox click handlers.
- *
- * Skipped automatically:
- *   - Already-decorated images (.lightbox-trigger)
- *   - The lightbox image itself (.lightbox-img)
- *   - Images with data-no-lightbox attribute
- *   - Images inside <a href="..."> links
- *   - Icons / tiny images (w & h both ≤ 32px)
- *
- * Optional data attributes on any <img>:
- *   data-lightbox-src="url"   — open a different (e.g. hi-res) URL
- *   data-lightbox-alt="text"  — override the caption
- */
 function decorateLightboxImages(root = document) {
   const images = root.querySelectorAll(
     'img:not(.lightbox-trigger):not(.lightbox-img):not([data-no-lightbox])',
@@ -242,13 +339,10 @@ function decorateLightboxImages(root = document) {
     img.classList.add('lightbox-trigger');
     img.addEventListener('click', () => {
       const rawSrc = img.dataset.lightboxSrc || img.src;
-
-      // Remove AEM image optimization constraints for full-res display
       const url = new URL(rawSrc);
       url.searchParams.delete('width');
       url.searchParams.delete('format');
       url.searchParams.delete('optimize');
-
       openLightbox(url.toString(), img.dataset.lightboxAlt || img.alt || '');
     });
   });
@@ -257,18 +351,10 @@ function decorateLightboxImages(root = document) {
 function initLightbox() {
   createLightbox();
   const overlay = document.getElementById('global-lightbox');
-
-  // Close on backdrop click (outside the image)
   overlay.querySelector('.lightbox-backdrop').addEventListener('click', closeLightbox);
-  // Close on × button
   overlay.querySelector('.lightbox-close').addEventListener('click', closeLightbox);
-  // Close on Escape
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeLightbox(); });
-
-  // Decorate existing images
   decorateLightboxImages(document);
-
-  // Watch for dynamically added images (fragments, lazy sections, etc.)
   const observer = new MutationObserver((mutations) => {
     mutations.forEach(({ addedNodes }) => {
       addedNodes.forEach((node) => {
@@ -316,7 +402,11 @@ async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
-  initLightbox(); // ← initialise lightbox after page is ready
+  initLightbox();
+
+  // Inject author + last modified banner into the first section
+  const main = document.querySelector('main');
+  if (main) loadPageMetaBanner(main);
 }
 
 loadPage();
