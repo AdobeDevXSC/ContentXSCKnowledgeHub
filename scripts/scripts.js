@@ -140,7 +140,9 @@ async function loadPageMetaBanner(main) {
   if (author) {
     const authorEl = document.createElement('span');
     authorEl.className = 'page-meta-author';
-    authorEl.innerHTML = `<strong>Author:</strong> ${author}`;
+    const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
+    const label = authors.length > 1 ? 'Authors' : 'Author';
+    authorEl.innerHTML = `<strong>${label}:</strong> ${authors.join(', ')}`;
     banner.appendChild(authorEl);
   }
 
