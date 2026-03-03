@@ -277,8 +277,8 @@ main > .section > div.default-content-wrapper {
 
 @media (width >= 1000px) {
   main > .section {
-    border-radius: 40px;
-    padding: 30px;
+    border-radius: 20px;
+    padding: 15px;
     width: 80vw;
   }
 
