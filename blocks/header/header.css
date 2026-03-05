@@ -302,6 +302,17 @@ header nav .nav-sections .mobile-nav-wrapper {
   display: none;
 }
 
+header nav .nav-tools .default-content-wrapper a {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
+}
+
+header nav .nav-tools .default-content-wrapper a .icon {
+  height: 35px;
+  width: 35px;
+}
+
 @media (width < 1000px) {
   header nav .nav-sections .mobile-nav-wrapper {
     display: block;

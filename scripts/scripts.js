@@ -68,17 +68,45 @@ function buildAutoBlocks(main) {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Open all links inside <main> (excluding .leftnav-container) in a new tab
+// ---------------------------------------------------------------------------
+
+/**
+ * Sets target="_blank" and rel="noopener noreferrer" on every <a> inside
+ * `root` that is NOT inside a .leftnav-container element.
+ * @param {Element} root - The element to scope the search to (defaults to <main>)
+ */
+export function decorateMainLinks(root = document.querySelector('main')) {
+  if (!root) return;
+  root.querySelectorAll('a[href]').forEach((link) => {
+    if (link.closest('.leftnav-container')) return;
+    link.setAttribute('target', '_blank');
+    link.setAttribute('rel', 'noopener noreferrer');
+  });
+}
+
 export function decorateMain(main) {
   decorateButtons(main);
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
   decorateBlocks(main);
+  decorateMainLinks(main);
 }
 
 // ---------------------------------------------------------------------------
 // Page Metadata Banner (author + lastModified)
 // ---------------------------------------------------------------------------
+
+/**
+ * Pages on which the author/last-modified banner should NOT appear.
+ * Add any future paths here.
+ */
+const PAGE_META_BANNER_EXCLUDED_PATHS = [
+  '/',
+  '/contact',
+];
 
 /**
  * Fetches page metadata from the query index for the current path.
@@ -118,9 +146,12 @@ function formatTimestamp(timestamp) {
 /**
  * Injects the author / last-modified banner before the first section in <main>.
  * Falls back to <meta> tags if the query-index entry has no value.
+ * Skips rendering on any path listed in PAGE_META_BANNER_EXCLUDED_PATHS.
  * @param {Element} main
  */
 async function loadPageMetaBanner(main) {
+  if (PAGE_META_BANNER_EXCLUDED_PATHS.includes(window.location.pathname)) return;
+
   const firstSection = main.querySelector('.section');
   if (!firstSection) return;
 
@@ -394,6 +425,10 @@ async function loadLazy(doc) {
   loadFooter(doc.querySelector('footer'));
   loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
   loadFonts();
+
+  // Re-run link decoration after lazy sections load, catching any
+  // links injected by blocks that rendered after the eager phase.
+  decorateMainLinks(main);
 }
 
 function loadDelayed() {
