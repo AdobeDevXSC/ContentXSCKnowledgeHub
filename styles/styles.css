@@ -11,13 +11,15 @@
  */
 
 :root {
-  /* colors */
+  /* colors - light mode (default) */
   --background-color: white;
   --light-color: #f8f8f8;
   --dark-color: #505050;
   --text-color: #131313;
   --link-color: #3b63fb;
   --link-hover-color: #1d3ecf;
+  --overlay-color: #f8f8f8;
+  --button-text-color: white;
 
   /* fonts */
   --body-font-family: Adobe Clean,roboto, roboto-fallback, sans-serif;
@@ -82,6 +84,57 @@ body {
 
 body.appear {
   display: block;
+}
+
+/* dark mode - override color variables and force light text */
+body.dark-mode {
+  --background-color: #0d0d0d;
+  --light-color: #1a1a1a;
+  --dark-color: #b0b0b0;
+  --text-color: #ffffff;
+  --link-color: #6b9fff;
+  --link-hover-color: #8fb3ff;
+  --overlay-color: #1a1a1a;
+  --button-text-color: #ffffff;
+}
+
+/* ensure all text is light in dark mode (overrides UIkit, etc.) */
+body.dark-mode,
+body.dark-mode main,
+body.dark-mode main *,
+body.dark-mode h1,
+body.dark-mode h2,
+body.dark-mode h3,
+body.dark-mode h4,
+body.dark-mode h5,
+body.dark-mode h6,
+body.dark-mode p,
+body.dark-mode li,
+body.dark-mode span,
+body.dark-mode div {
+  color: var(--text-color);
+}
+
+body.dark-mode a:any-link {
+  color: var(--link-color);
+}
+
+body.dark-mode a.button:any-link {
+  color: #fff;
+}
+
+body.dark-mode a:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.dark-mode .page-meta-banner {
+  background: rgba(255, 255, 255, 0.08);
+  border-left-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-color);
+}
+
+body.dark-mode .page-meta-banner strong {
+  color: var(--text-color);
 }
 
 header {
@@ -182,7 +235,7 @@ button {
   text-align: center;
   text-decoration: none;
   background-color: var(--link-color);
-  color: var(--background-color);
+  color: var(--button-text-color);
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -259,7 +312,7 @@ main > .section {
 main > .section > div {
   max-width: 1200px;
   /* margin: auto; */
-  padding: 0 24px;
+  padding: 0;
   margin: 1rem 0;
 }
 
@@ -278,12 +331,12 @@ main > .section > div.default-content-wrapper {
 @media (width >= 1000px) {
   main > .section {
     border-radius: 20px;
-    padding: 0;
+    padding: 0 1rem;
     width: 80vw;
   }
 
   main > .section > div {
-    padding: 0 32px;
+    padding: 0;
   }
 }
 

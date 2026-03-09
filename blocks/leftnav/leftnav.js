@@ -109,16 +109,20 @@ function renderNav(block, items, isSearching = false) {
   const existing = block.querySelector('.aem-parent');
   if (existing) existing.remove();
 
-  // buildStructure now returns an object with __pages and __children at root
-  const structure = buildStructure(items);
-
   const wrapper = document.createElement('div');
   wrapper.className = 'aem-parent';
 
-  // Pass the root's __children so the accordion renders top-level folders
-  const { el: rootAccordion } = createAccordion(structure.__children || {}, true, isSearching);
+  if (isSearching && items.length === 0) {
+    const emptyState = document.createElement('p');
+    emptyState.className = 'leftnav-no-results';
+    emptyState.textContent = 'No results found';
+    wrapper.appendChild(emptyState);
+  } else {
+    const structure = buildStructure(items);
+    const { el: rootAccordion } = createAccordion(structure.__children || {}, true, isSearching);
+    wrapper.appendChild(rootAccordion);
+  }
 
-  wrapper.appendChild(rootAccordion);
   block.append(wrapper);
 }
 

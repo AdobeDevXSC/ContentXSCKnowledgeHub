@@ -63,6 +63,10 @@ header nav a:any-link {
   display: flex;
 }
 
+body.dark-mode header nav a:any-link {
+  color: #fff;
+}
+
 /* hamburger */
 header nav .nav-hamburger {
   /* display: none; */
@@ -286,15 +290,19 @@ header nav .nav-sections ul > li > ul > li {
 /* tools */
 header nav .nav-tools {
   grid-area: tools;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 header nav .nav-tools img {
-  width: 35px;
-  height: auto;
-  /* border: 1px solid black;
-  border-radius: 50%; */
   padding: 3px;
-  object-fit:cover;
+  object-fit: cover;
+  box-sizing: border-box;
+}
+
+body.dark-mode header nav .nav-tools img {
+  filter: brightness(0) invert(1);
 }
 
 /** Mobile Left Nav **/
@@ -309,8 +317,8 @@ header nav .nav-tools .default-content-wrapper a {
 }
 
 header nav .nav-tools .default-content-wrapper a .icon {
-  height: 35px;
-  width: 35px;
+  height: 30px;
+  width: 30px;
 }
 
 @media (width < 1000px) {
@@ -325,14 +333,71 @@ header nav .nav-tools .default-content-wrapper a .icon {
 header nav .mobile-nav-wrapper {
   box-sizing: border-box;
   width: 100%;
-  background-color: white;
-  color: black;
+  background-color: var(--light-color);
+  color: var(--text-color);
   padding: 2rem 1rem;
   height: auto;
-  /* height: calc(100vh - var(--nav-height) - 90px); */
   overflow-y: auto;
   overflow-x: hidden;
-  transition: transform 0.3s ease; /* for slide toggle */
-  border-radius: 40px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.12), 0 0 40px rgba(0, 0, 0, 0.08);
+}
+
+/* theme toggle (light/dark mode) */
+header nav .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+}
+
+header nav .theme-toggle-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+header nav .theme-toggle-slider {
+  display: block;
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background-color: var(--dark-color);
+  border-radius: 24px;
+  transition: background-color 0.2s ease;
+}
+
+header nav .theme-toggle-slider::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background-color: var(--background-color);
+  border-radius: 50%;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* checked = dark mode active; warm amber suggests "toggle to light mode" */
+header nav .theme-toggle-input:checked + .theme-toggle-slider {
+  background-color: #ccc;
+}
+
+header nav .theme-toggle-input:checked + .theme-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+header nav .theme-toggle-input:focus-visible + .theme-toggle-slider {
+  outline: 2px solid var(--link-color);
+  outline-offset: 2px;
 }
