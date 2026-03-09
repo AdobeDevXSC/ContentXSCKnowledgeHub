@@ -1,18 +1,18 @@
 
 .leftnav-container {
   width: 20vw;
-  min-width: 300px;
+  min-width: 350px;
   background-color: white;
   color: black;
-  padding: 2rem 1rem;
-  height: calc(100vh - var(--nav-height) - 90px);
+  padding: 1rem;
+  height: calc(100vh - var(--nav-height) - 0);
   position: sticky;
   top: calc(var(--nav-height) + 1rem);
   overflow-y: auto;
   overflow-x: hidden;
   transition: transform 0.3s ease; /* for slide toggle */
   border-radius: 20px;
-  margin: 1rem .5rem 1rem 1rem;
+  margin: 1rem;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05), 0 30px 60px rgba(0, 0, 0, 0.08);
 }
 
@@ -59,6 +59,7 @@
 /* search */
 .leftnav-search {
   margin-bottom: 1rem;
+  padding: 0 1rem;
 }
 
 .leftnav-search .uk-input {
