@@ -1,4 +1,4 @@
-import { getMetadata } from '../../scripts/aem.js';
+import { getMetadata, toggleTheme } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 
 // media query match that indicates mobile/tablet width
@@ -126,10 +126,13 @@ export default async function decorate(block) {
   });
 
   const navBrand = nav.querySelector('.nav-brand');
-  const brandLink = navBrand.querySelector('.button');
+  const brandLink = navBrand?.querySelector('.button') || navBrand?.querySelector('a');
   if (brandLink) {
     brandLink.className = '';
     brandLink.closest('.button-container').className = '';
+    // Home/brand link stays in same tab (do not open in new tab)
+    brandLink.removeAttribute('target');
+    brandLink.removeAttribute('rel');
   }
 
   const navSections = nav.querySelector('.nav-sections');
@@ -144,10 +147,19 @@ export default async function decorate(block) {
         }
       });
 
-      // 👇 Add this to open nav links in a new tab
       navSection.querySelectorAll('a').forEach((link) => {
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener noreferrer');
+        try {
+          const href = link.getAttribute('href') || '';
+          const path = new URL(href, window.location.origin).pathname;
+          const isHomeLink = path === '/' || path === '';
+          if (!isHomeLink) {
+            link.setAttribute('target', '_blank');
+            link.setAttribute('rel', 'noopener noreferrer');
+          }
+        } catch {
+          link.setAttribute('target', '_blank');
+          link.setAttribute('rel', 'noopener noreferrer');
+        }
       });
     });
   }
@@ -184,6 +196,31 @@ export default async function decorate(block) {
       });
     }
   }
+
+  // Theme toggle (top-right)
+  let navTools = nav.querySelector('.nav-tools');
+  if (!navTools) {
+    navTools = document.createElement('div');
+    navTools.className = 'nav-tools';
+    nav.appendChild(navTools);
+  }
+  // nav-tools links stay in same tab (e.g. chat icon, etc.)
+  navTools.querySelectorAll('a').forEach((link) => {
+    link.removeAttribute('target');
+    link.removeAttribute('rel');
+  });
+  const themeToggle = document.createElement('label');
+  themeToggle.className = 'theme-toggle';
+  themeToggle.setAttribute('aria-label', 'Toggle dark mode');
+  themeToggle.innerHTML = `
+    <input type="checkbox" class="theme-toggle-input" aria-label="Dark mode" ${document.body.classList.contains('dark-mode') ? 'checked' : ''}>
+    <span class="theme-toggle-slider"></span>
+  `;
+  themeToggle.querySelector('.theme-toggle-input').addEventListener('change', () => {
+    toggleTheme();
+    themeToggle.querySelector('.theme-toggle-input').checked = document.body.classList.contains('dark-mode');
+  });
+  navTools.appendChild(themeToggle);
 
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper';

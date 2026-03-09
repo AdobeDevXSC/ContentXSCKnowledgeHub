@@ -39,8 +39,17 @@
   <style>
     main.error {
       min-height: calc(100vh - var(--nav-height));
-      display: flex;
+      display: flex !important;
+      flex-direction: column !important;
       align-items: center;
+      justify-content: center;
+      max-width: none;
+    }
+
+    main.error .section {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
     }
 
     main.error .error-number {

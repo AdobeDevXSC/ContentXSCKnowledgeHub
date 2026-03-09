@@ -150,7 +150,7 @@ function formatTimestamp(timestamp) {
  * @param {Element} main
  */
 async function loadPageMetaBanner(main) {
-  if (PAGE_META_BANNER_EXCLUDED_PATHS.includes(window.location.pathname)) return;
+  if (window.isErrorPage || PAGE_META_BANNER_EXCLUDED_PATHS.includes(window.location.pathname)) return;
 
   const firstSection = main.querySelector('.section');
   if (!firstSection) return;
@@ -194,7 +194,7 @@ async function loadPageMetaBanner(main) {
         flex-direction: column;
         flex-wrap: wrap;
         gap: 0;
-        padding: 0.75rem 32px !important;
+        padding: 0.75rem 20px !important;
         background: rgba(0, 0, 0, 0.04);
         border-left: 3px solid rgba(0, 0, 0, 0.15);
         border-radius: 0 4px 4px 0;
@@ -203,7 +203,8 @@ async function loadPageMetaBanner(main) {
         line-height: 1.4;
         margin-bottom: 0.5rem;
         width: fit-content;
-        min-width: 200px;
+        min-width: 180px;
+        margin-left: auto !important;
       }
       .page-meta-banner strong {
         color: #222;
@@ -278,18 +279,20 @@ function createLightbox() {
     }
     .lightbox-close {
       position: absolute;
-      top: -3rem;
-      right: -0.5rem;
+      top: 5px;
+      right: 5px;
       background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      border: 1px solid #000;
       border-radius: 6px;
       color: #fff;
       font-size: 1.5rem;
       line-height: 1;
       cursor: pointer;
       padding: 0.35rem 0.65rem;
-      opacity: 0.85;
+      opacity: 1;
       transition: background 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+      margin: 0;
+      padding-top: 0;
     }
     .lightbox-close:hover,
     .lightbox-close:focus {
@@ -410,7 +413,7 @@ async function loadEager(doc) {
   if (main) {
     decorateMain(main);
     document.body.classList.add('appear');
-    if (window.self === window.top) await loadLeftNav(main);
+    if (window.self === window.top && !window.isErrorPage) await loadLeftNav(main);
     await loadSection(main.querySelector('.section'), waitForFirstImage);
   }
 }

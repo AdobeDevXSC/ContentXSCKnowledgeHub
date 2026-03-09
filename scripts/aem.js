@@ -350,10 +350,34 @@ function createOptimizedPicture(
   return picture;
 }
 
+const THEME_STORAGE_KEY = 'xsc-knowledge-hub-theme';
+
+/**
+ * Apply saved theme preference from localStorage (runs early to avoid flash).
+ */
+export function initTheme() {
+  try {
+    const saved = localStorage.getItem(THEME_STORAGE_KEY);
+    if (saved === 'dark') document.body.classList.add('dark-mode');
+  } catch (e) { /* ignore */ }
+}
+
+/**
+ * Toggle dark mode and persist preference.
+ */
+export function toggleTheme() {
+  document.body.classList.toggle('dark-mode');
+  const isDark = document.body.classList.contains('dark-mode');
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, isDark ? 'dark' : 'light');
+  } catch (e) { /* ignore */ }
+}
+
 /**
  * Set template (page structure) and theme (page styles).
  */
 function decorateTemplateAndTheme() {
+  initTheme();
   const addClasses = (element, classes) => {
     classes.split(',').forEach((c) => {
       element.classList.add(toClassName(c.trim()));
