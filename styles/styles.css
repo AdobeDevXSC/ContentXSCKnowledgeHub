@@ -20,6 +20,7 @@
   --link-hover-color: #1d3ecf;
   --overlay-color: #f8f8f8;
   --button-text-color: white;
+  --adobe-red: #ED2224;
 
   /* fonts */
   --body-font-family: Adobe Clean,roboto, roboto-fallback, sans-serif;
@@ -135,6 +136,19 @@ body.dark-mode .page-meta-banner {
 
 body.dark-mode .page-meta-banner strong {
   color: var(--text-color);
+}
+
+body.dark-mode .page-breadcrumb {
+  color: var(--text-color);
+}
+
+body.dark-mode .page-breadcrumb-item:not(:last-child)::after {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+body.dark-mode .page-breadcrumb-item[aria-current="page"] {
+  color: var(--adobe-red);
+  opacity: 0.9;
 }
 
 header {
