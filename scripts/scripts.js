@@ -80,7 +80,7 @@ function buildAutoBlocks(main) {
 export function decorateMainLinks(root = document.querySelector('main')) {
   if (!root) return;
   root.querySelectorAll('a[href]').forEach((link) => {
-    if (link.closest('.leftnav-container')) return;
+    if (link.closest('.leftnav-container') || link.closest('.page-breadcrumb')) return;
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
   });
@@ -144,7 +144,60 @@ function formatTimestamp(timestamp) {
 }
 
 /**
- * Injects the author / last-modified banner before the first section in <main>.
+ * Converts a URL path segment to a display label.
+ * @param {string} segment
+ * @returns {string}
+ */
+function segmentToLabel(segment) {
+  if (segment.toLowerCase() === 'aem') return 'AEM';
+  return segment
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+}
+
+/**
+ * Builds breadcrumb items from the current pathname.
+ * @returns {Array<{path: string, label: string}>}
+ */
+function buildBreadcrumbItems() {
+  const pathname = window.location.pathname;
+  const segments = pathname.split('/').filter(Boolean);
+  const items = [];
+  let acc = '';
+  segments.forEach((seg) => {
+    acc += `/${seg}`;
+    items.push({ path: acc, label: segmentToLabel(seg) });
+  });
+  return items;
+}
+
+/**
+ * Creates the breadcrumb nav element.
+ * @returns {HTMLElement}
+ */
+function createBreadcrumb() {
+  const items = buildBreadcrumbItems();
+  const nav = document.createElement('nav');
+  nav.className = 'page-breadcrumb';
+  nav.setAttribute('aria-label', 'Breadcrumb');
+  const ol = document.createElement('ol');
+  ol.className = 'page-breadcrumb-list';
+  items.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.className = 'page-breadcrumb-item';
+    if (i === items.length - 1) {
+      li.setAttribute('aria-current', 'page');
+    }
+    li.textContent = item.label;
+    ol.appendChild(li);
+  });
+  nav.appendChild(ol);
+  return nav;
+}
+
+/**
+ * Injects the page-meta wrapper (author/last-modified + breadcrumb) before default-content-wrapper.
  * Falls back to <meta> tags if the query-index entry has no value.
  * Skips rendering on any path listed in PAGE_META_BANNER_EXCLUDED_PATHS.
  * @param {Element} main
@@ -155,40 +208,65 @@ async function loadPageMetaBanner(main) {
   const firstSection = main.querySelector('.section');
   if (!firstSection) return;
 
-  // Pull from query-index first, then fall back to <meta> tags
-  const indexMeta = await fetchPageMeta();
+  const defaultContentWrapper = firstSection.querySelector('.default-content-wrapper');
+  const insertBefore = defaultContentWrapper || firstSection.firstChild;
 
+  const wrapper = document.createElement('div');
+  wrapper.className = 'page-meta-wrapper';
+
+  const breadcrumb = createBreadcrumb();
+  wrapper.appendChild(breadcrumb);
+
+  const indexMeta = await fetchPageMeta();
   const author = (indexMeta && indexMeta.author) || getMetadata('author');
   const lastModifiedRaw = (indexMeta && indexMeta.lastModified) || getMetadata('lastModified');
   const lastModified = formatTimestamp(lastModifiedRaw);
 
-  // Nothing to show — skip rendering the banner entirely
-  if (!author && !lastModified) return;
+  if (author || lastModified) {
+    const banner = document.createElement('div');
+    banner.className = 'page-meta-banner';
 
-  const banner = document.createElement('div');
-  banner.className = 'page-meta-banner';
+    if (author) {
+      const authorEl = document.createElement('span');
+      authorEl.className = 'page-meta-author';
+      const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
+      const label = authors.length > 1 ? 'Authors' : 'Author';
+      authorEl.innerHTML = `<strong>${label}:</strong> ${authors.join(', ')}`;
+      banner.appendChild(authorEl);
+    }
 
-  if (author) {
-    const authorEl = document.createElement('span');
-    authorEl.className = 'page-meta-author';
-    const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
-    const label = authors.length > 1 ? 'Authors' : 'Author';
-    authorEl.innerHTML = `<strong>${label}:</strong> ${authors.join(', ')}`;
-    banner.appendChild(authorEl);
+    if (lastModified) {
+      const modifiedEl = document.createElement('span');
+      modifiedEl.className = 'page-meta-modified';
+      modifiedEl.innerHTML = `<strong>Last Modified:</strong> ${lastModified}`;
+      banner.appendChild(modifiedEl);
+    }
+
+    wrapper.appendChild(banner);
   }
 
-  if (lastModified) {
-    const modifiedEl = document.createElement('span');
-    modifiedEl.className = 'page-meta-modified';
-    modifiedEl.innerHTML = `<strong>Last Modified:</strong> ${lastModified}`;
-    banner.appendChild(modifiedEl);
-  }
+  firstSection.insertBefore(wrapper, insertBefore);
 
-  // Inject styles
   if (!document.getElementById('page-meta-banner-style')) {
     const style = document.createElement('style');
     style.id = 'page-meta-banner-style';
     style.textContent = `
+      .page-meta-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+        width: 100%;
+        
+      }
+      @media (width >= 768px) {
+        .page-meta-wrapper {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: flex-start;
+          margin: 1rem 0 !important;
+        }
+      }
       .page-meta-banner {
         display: flex;
         flex-direction: column;
@@ -201,10 +279,8 @@ async function loadPageMetaBanner(main) {
         font-size: 0.8125rem;
         color: #555;
         line-height: 1.4;
-        margin-bottom: 0.5rem;
         width: fit-content;
         min-width: 180px;
-        margin-left: auto !important;
       }
       .page-meta-banner strong {
         color: #222;
@@ -216,11 +292,43 @@ async function loadPageMetaBanner(main) {
         align-items: center;
         gap: 0.3rem;
       }
+      .page-breadcrumb {
+        font-size: 0.8125rem;
+        color: #555;
+      }
+      .page-breadcrumb-list {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.25rem 0.5rem;
+        list-style: none;
+        margin: 0;
+        padding: 0;
+      }
+      .page-breadcrumb-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .page-breadcrumb-item:not(:last-child)::after {
+        content: '/';
+        color: #999;
+        font-weight: 400;
+      }
+      .page-breadcrumb-item a {
+        color: var(--link-color);
+        text-decoration: none;
+      }
+      .page-breadcrumb-item a:hover {
+        text-decoration: underline;
+      }
+      .page-breadcrumb-item[aria-current="page"] {
+        font-weight: 600;
+        color: #222;
+      }
     `;
     document.head.appendChild(style);
   }
-
-  firstSection.insertBefore(banner, firstSection.firstChild);
 }
 
 // ---------------------------------------------------------------------------
