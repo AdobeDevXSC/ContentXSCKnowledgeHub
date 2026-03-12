@@ -611,13 +611,19 @@ async function loadBlock(block) {
   return block;
 }
 
+/** Block names that have corresponding /blocks/{name}/ modules. Prevents content divs from being treated as blocks. */
+const KNOWN_BLOCKS = new Set([
+  'accordion', 'cards', 'columns', 'footer', 'form', 'fragment', 'header',
+  'hero', 'leftnav', 'notebox', 'table', 'tabs', 'video',
+]);
+
 /**
  * Decorates a block.
  * @param {Element} block The block element
  */
 function decorateBlock(block) {
   const shortBlockName = block.classList[0];
-  if (shortBlockName) {
+  if (shortBlockName && KNOWN_BLOCKS.has(shortBlockName)) {
     block.classList.add('block');
     block.dataset.blockName = shortBlockName;
     block.dataset.blockStatus = 'initialized';
@@ -630,7 +636,8 @@ function decorateBlock(block) {
 }
 
 /**
- * Decorates all blocks in a container element.
+ * Decorates all blocks in a container element. Only divs whose first class
+ * matches a known block name are treated as blocks.
  * @param {Element} main The container element
  */
 function decorateBlocks(main) {
