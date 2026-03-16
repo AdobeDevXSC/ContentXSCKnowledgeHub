@@ -79,8 +79,18 @@ body.dark-mode .leftnav .nav-title > h3::after {
   height: 40px !important;
 }
 
+.leftnav-search .uk-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(237, 34, 36, 0.35);
+}
+
 body.dark-mode .leftnav-search .uk-input {
   background-color: #303030;
+}
+
+body.dark-mode .leftnav-search .uk-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--adobe-red);
 }
 
 body.dark-mode .leftnav-search .uk-input {
@@ -125,21 +135,24 @@ body.dark-mode .leftnav .uk-nav-default a:hover {
 
 .leftnav .uk-nav-default > li > a {
   font-size: 0.9rem;
-  padding: 5px 10px;
+  padding: 0.4em 0.75em;
+  border-radius: 6px;
 }
 
 .leftnav .uk-nav-default > li.uk-active > a {
-  font-weight: 700;
-  background-color: rgba(0, 123, 255, 0.08);
+  font-weight: 600;
+  background-color: rgba(237, 34, 36, 0.08);
   color: var(--text-color);
-  border-radius: 7px;
+  border-radius: 6px;
   width: fit-content;
+  padding: 0.4rem 0.8rem;
 }
 
 body.dark-mode .leftnav .uk-nav-default > li.uk-active > a {
-  background-color: rgba(255, 255, 255, 0.15);
+  background-color: rgba(237, 34, 36, 0.18);
   color: #ffffff;
   opacity: 1;
+  border-left-color: var(--adobe-red);
 }
 
 .leftnav .aem-parent > ul > li > .uk-accordion-content > ul.uk-accordion {

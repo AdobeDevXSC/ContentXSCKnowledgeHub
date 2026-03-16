@@ -324,7 +324,7 @@ main > .section {
 }
 
 main > .section > div {
-  max-width: 1200px;
+  max-width: 1600px;
   /* margin: auto; */
   padding: 0;
   margin: 1rem 0;
