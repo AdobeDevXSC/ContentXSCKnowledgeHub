@@ -10,11 +10,11 @@ header .nav-wrapper.uk-navbar-container {
   position: fixed;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(12px);
+  transition: none; /* prevent flicker when toggling theme */
 }
 
 body.dark-mode header .nav-wrapper.uk-navbar-container {
-  background-color: rgba(26, 26, 26, 0.95);
+  background-color: #1a1a1a;
   border-bottom-color: rgba(255, 255, 255, 0.08);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
@@ -70,7 +70,6 @@ header nav a:any-link {
   color: currentcolor;
   display: flex;
   text-decoration: none;
-  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 body.dark-mode header nav a:any-link {
@@ -88,7 +87,6 @@ header nav .nav-sections .uk-subnav > li > a {
   color: var(--text-color);
   padding: 0.4em 0.6em;
   border-radius: 6px;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 header nav .nav-sections .uk-subnav > li > a:hover {
@@ -327,7 +325,6 @@ header nav .nav-sections ul > li > ul > li {
     padding: 0.4em 0.6em;
     border-radius: 4px;
     display: block;
-    transition: background-color 0.2s ease;
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul > li a:hover {
@@ -380,7 +377,6 @@ header nav .nav-tools .default-content-wrapper a {
   width: 36px;
   height: 36px;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
 }
 
 header nav .nav-tools .default-content-wrapper a:hover {
@@ -455,7 +451,6 @@ header nav .theme-toggle {
   flex-shrink: 0;
   padding: 4px;
   border-radius: 8px;
-  transition: background-color 0.2s ease;
 }
 
 header nav .theme-toggle:hover {
@@ -485,7 +480,6 @@ header nav .theme-toggle-slider {
   height: 24px;
   background-color: var(--dark-color);
   border-radius: 24px;
-  transition: background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
@@ -498,8 +492,8 @@ header nav .theme-toggle-slider::before {
   height: 20px;
   background-color: var(--background-color);
   border-radius: 50%;
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* checked = dark mode active */
