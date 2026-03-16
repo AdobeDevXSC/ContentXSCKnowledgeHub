@@ -392,7 +392,7 @@ function createLightbox() {
       background: rgba(255, 255, 255, 0.1);
       border: 1px solid #000;
       border-radius: 6px;
-      color: #fff;
+      color: #000;
       font-size: 1.5rem;
       line-height: 1;
       cursor: pointer;

@@ -137,6 +137,10 @@ export default async function decorate(block) {
 
   const navSections = nav.querySelector('.nav-sections');
   if (navSections) {
+    const navSectionsList = navSections.querySelector('.default-content-wrapper > ul');
+    if (navSectionsList) {
+      navSectionsList.classList.add('uk-subnav');
+    }
     navSections.querySelectorAll(':scope .default-content-wrapper > ul > li').forEach((navSection) => {
       if (navSection.querySelector('ul')) navSection.classList.add('nav-drop');
       navSection.addEventListener('click', () => {
@@ -223,7 +227,7 @@ export default async function decorate(block) {
   navTools.appendChild(themeToggle);
 
   const navWrapper = document.createElement('div');
-  navWrapper.className = 'nav-wrapper';
+  navWrapper.className = 'nav-wrapper uk-navbar-container';
   navWrapper.append(nav);
   block.append(navWrapper);
 }
