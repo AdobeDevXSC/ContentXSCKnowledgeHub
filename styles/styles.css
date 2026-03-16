@@ -93,8 +93,8 @@ body.dark-mode {
   --light-color: #1a1a1a;
   --dark-color: #b0b0b0;
   --text-color: #ffffff;
-  --link-color: #6b9fff;
-  --link-hover-color: #8fb3ff;
+  --link-color: var(--adobe-red);
+  --link-hover-color: #f05052;
   --overlay-color: #1a1a1a;
   --button-text-color: #ffffff;
 }
@@ -125,7 +125,7 @@ body.dark-mode a.button:any-link {
 }
 
 body.dark-mode a:hover {
-  color: rgba(255, 255, 255, 0.85);
+  color: var(--link-hover-color);
 }
 
 body.dark-mode .page-meta-banner {

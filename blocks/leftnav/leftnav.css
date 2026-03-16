@@ -130,7 +130,7 @@ body.dark-mode .leftnav .uk-nav-default li a {
 }
 
 body.dark-mode .leftnav .uk-nav-default a:hover {
-  color: var(--link-color) !important;
+  color: var(--link-hover-color) !important;
 }
 
 .leftnav .uk-nav-default > li > a {
