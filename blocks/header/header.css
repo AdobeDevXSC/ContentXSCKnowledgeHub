@@ -405,7 +405,8 @@ header nav .nav-sections .mobile-nav-wrapper {
 header nav .nav-tools .default-content-wrapper a {
   padding: 0;
   background-color: transparent;
-  border-radius: 0;
+  border-radius: 7px;
+  box-shadow: none;
 }
 
 header nav .nav-tools .default-content-wrapper a .icon {

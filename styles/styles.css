@@ -225,26 +225,29 @@ a:any-link {
   color: var(--link-color);
   text-decoration: none;
   overflow-wrap: break-word;
+  transition: color 0.2s ease;
 }
 
 a:hover {
   color: var(--link-hover-color);
   text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
-/* buttons */
+/* primary buttons */
 a.button:any-link,
 button {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
   margin: 12px 0;
-  border: 2px solid transparent;
-  border-radius: 2.4em;
-  padding: 0.5em 1.2em;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6em 1.25em;
   font-family: var(--body-font-family);
   font-style: normal;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 0.95rem;
   line-height: 1.25;
   text-align: center;
   text-decoration: none;
@@ -254,6 +257,8 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 a.button:hover,
@@ -262,19 +267,37 @@ button:hover,
 button:focus {
   background-color: var(--link-hover-color);
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+a.button:active,
+button:active {
+  transform: translateY(1px);
 }
 
 button:disabled,
 button:disabled:hover {
   background-color: var(--light-color);
   cursor: unset;
+  box-shadow: none;
 }
 
+/* secondary buttons */
 a.button.secondary,
 button.secondary {
-  background-color: unset;
-  border: 2px solid currentcolor;
-  color: var(--text-color);
+  background-color: transparent;
+  border: 2px solid var(--link-color);
+  color: var(--link-color);
+  box-shadow: none;
+}
+
+a.button.secondary:hover,
+a.button.secondary:focus,
+button.secondary:hover,
+button.secondary:focus {
+  background-color: var(--link-color);
+  color: var(--button-text-color);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }
 
 main img {
