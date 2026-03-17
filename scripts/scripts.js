@@ -16,13 +16,47 @@ import {
 import './uikit.min.js';
 import './uikit-icons.min.js';
 
+function toggleLeftNav() {
+  document.body.classList.toggle('leftnav-collapsed');
+  try {
+    localStorage.setItem(
+      'leftnav-collapsed',
+      document.body.classList.contains('leftnav-collapsed') ? 'true' : 'false',
+    );
+  } catch (e) { /* ignore */ }
+}
+
 async function loadLeftNav(main) {
+  if (localStorage.getItem('leftnav-collapsed') === 'true') {
+    document.body.classList.add('leftnav-collapsed');
+  }
+  const wrapper = document.createElement('div');
+  wrapper.className = 'leftnav-wrapper';
+
   const aside = document.createElement('aside');
   aside.className = 'leftnav-container';
   const block = document.createElement('div');
   block.className = 'block leftnav';
   aside.append(block);
-  main.insertBefore(aside, main.querySelector('.section'));
+
+  const collapseBtn = document.createElement('button');
+  collapseBtn.type = 'button';
+  collapseBtn.className = 'leftnav-collapse-btn';
+  collapseBtn.setAttribute('aria-label', 'Collapse navigation');
+  collapseBtn.innerHTML = '<span uk-icon="icon: chevron-left; ratio: 1.2"></span>';
+  collapseBtn.addEventListener('click', toggleLeftNav);
+
+  const expandBtn = document.createElement('button');
+  expandBtn.type = 'button';
+  expandBtn.className = 'leftnav-expand-btn';
+  expandBtn.setAttribute('aria-label', 'Expand navigation');
+  expandBtn.innerHTML = '<span uk-icon="icon: chevron-right; ratio: 1.2"></span>';
+  expandBtn.addEventListener('click', toggleLeftNav);
+
+  block.prepend(collapseBtn);
+  wrapper.append(aside, expandBtn);
+  main.insertBefore(wrapper, main.querySelector('.section'));
+
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
   loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
   await decorate(block);

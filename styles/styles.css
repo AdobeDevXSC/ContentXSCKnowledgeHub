@@ -236,7 +236,7 @@ a:hover {
 
 /* primary buttons */
 a.button:any-link,
-button {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn) {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
@@ -263,15 +263,15 @@ button {
 
 a.button:hover,
 a.button:focus,
-button:hover,
-button:focus {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):hover,
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):focus {
   background-color: var(--link-hover-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 a.button:active,
-button:active {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):active {
   transform: translateY(1px);
 }
 
@@ -369,7 +369,13 @@ main > .section > div.default-content-wrapper {
   main > .section {
     border-radius: 20px;
     padding: 0 1rem;
-    width: 80vw;
+    flex: 1;
+    min-width: 0;
+  }
+
+  body.leftnav-collapsed main > .section {
+    max-width: 1480px;
+    margin: 0 auto;
   }
 
   main > .section > div {
