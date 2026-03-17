@@ -140,6 +140,7 @@ export function decorateMain(main) {
 const PAGE_META_BANNER_EXCLUDED_PATHS = [
   '/',
   '/contact',
+  '/contact-us',
 ];
 
 /**
