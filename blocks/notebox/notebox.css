@@ -54,8 +54,8 @@
 }
 
 .notebox.uk-alert-danger {
-  background-color: #ffe5e5;
-  color: #b30000;
+  background-color: rgba(237, 34, 36, 0.1);
+  color: var(--adobe-red);
 }
 
 .notebox.uk-alert-success {

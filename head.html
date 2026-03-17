@@ -4,6 +4,15 @@
   move-to-http-header="true"
 >
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
+<script nonce="aem">
+(function(){
+  var d=document.createElement('div');
+  d.id='page-loader';
+  d.innerHTML='<div class="loader-spinner"></div>';
+  d.style.cssText='position:fixed;inset:0;background:var(--background-color,#fff);display:flex;align-items:center;justify-content:center;z-index:9999;transition:opacity .3s ease';
+  document.documentElement.appendChild(d);
+})();
+</script>
 <script nonce="aem" src="/scripts/aem.js" type="module"></script>
 <script nonce="aem" src="/scripts/scripts.js" type="module"></script>
 <link rel="stylesheet" href="/styles/styles.css"/>

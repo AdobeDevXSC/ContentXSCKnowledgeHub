@@ -87,6 +87,38 @@ body.appear {
   display: block;
 }
 
+/* page loader - hides when page is ready */
+#page-loader {
+  transition: opacity 0.3s ease;
+}
+
+#page-loader.loaded {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.loader-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(0,0,0,0.1);
+  border-top-color: var(--link-color, #3b63fb);
+  border-radius: 50%;
+  animation: loader-spin 0.8s linear infinite;
+}
+
+html:has(body.dark-mode) #page-loader {
+  background: #0d0d0d;
+}
+
+html:has(body.dark-mode) #page-loader .loader-spinner {
+  border-color: rgba(255,255,255,0.1);
+  border-top-color: var(--adobe-red);
+}
+
+@keyframes loader-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* dark mode - override color variables and force light text */
 body.dark-mode {
   --background-color: #0d0d0d;
@@ -94,7 +126,7 @@ body.dark-mode {
   --dark-color: #b0b0b0;
   --text-color: #ffffff;
   --link-color: var(--adobe-red);
-  --link-hover-color: #f05052;
+  --link-hover-color: var(--adobe-red);
   --overlay-color: #1a1a1a;
   --button-text-color: #ffffff;
 }
@@ -236,7 +268,7 @@ a:hover {
 
 /* primary buttons */
 a.button:any-link,
-button {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close) {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
@@ -263,15 +295,15 @@ button {
 
 a.button:hover,
 a.button:focus,
-button:hover,
-button:focus {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):hover,
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):focus {
   background-color: var(--link-hover-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 a.button:active,
-button:active {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):active {
   transform: translateY(1px);
 }
 
@@ -369,7 +401,13 @@ main > .section > div.default-content-wrapper {
   main > .section {
     border-radius: 20px;
     padding: 0 1rem;
-    width: 80vw;
+    flex: 1;
+    min-width: 0;
+  }
+
+  body.leftnav-collapsed main > .section {
+    max-width: 1480px;
+    margin: 0 auto;
   }
 
   main > .section > div {
