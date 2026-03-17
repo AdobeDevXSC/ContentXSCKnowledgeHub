@@ -73,12 +73,19 @@ function constructPayload(form) {
   return { payload };
 }
 
+function getAdobeRoutingHeader() {
+  const hostname = window?.location?.hostname || '';
+  const tier = hostname.includes('aem.page') ? 'preview' : 'live';
+  const bucket = hostname.split('.')[0] || hostname;
+  return `tier=${tier},bucket=${bucket}`;
+}
+
 async function prepareRequest(form) {
   const { payload } = constructPayload(form);
   const headers = {
     'Content-Type': 'application/json',
-    // eslint-disable-next-line comma-dangle
-    'x-adobe-form-hostname': window?.location?.hostname
+    'x-adobe-form-hostname': window?.location?.hostname,
+    'x-adobe-routing': getAdobeRoutingHeader(),
   };
   const body = { data: payload };
   let url;
