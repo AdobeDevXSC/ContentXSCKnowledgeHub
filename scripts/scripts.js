@@ -423,25 +423,29 @@ function createLightbox() {
       position: absolute;
       top: 5px;
       right: 5px;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid #000;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
       border-radius: 6px;
-      color: #000;
+      color: rgba(0, 0, 0, 0.85);
       font-size: 1.5rem;
       line-height: 1;
       cursor: pointer;
       padding: 0.35rem 0.65rem;
       opacity: 1;
-      transition: background 0.2s ease, opacity 0.2s ease, border-color 0.2s ease;
+      transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
       margin: 0;
       padding-top: 0;
     }
     .lightbox-close:hover,
     .lightbox-close:focus {
-      background: rgba(255, 255, 255, 0.2);
-      border-color: rgba(255, 255, 255, 0.45);
+      background: rgba(255, 255, 255, 0.95);
+      border-color: rgba(0, 0, 0, 0.7);
+      box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.2);
+      color: #000;
       opacity: 1;
       outline: none;
+      transform: scale(1.08);
     }
     .lightbox-figure {
       margin: 0;
