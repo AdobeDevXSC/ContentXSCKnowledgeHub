@@ -127,7 +127,7 @@ body.dark-mode .leftnav .nav-title > h3::after {
   vertical-align: middle;
   height: 35px;
   margin-right: calc(5px + .2em);
-  border-left: calc(3px + .1em) solid #ED2224;
+  border-left: calc(3px + .1em) solid var(--adobe-red);
 }
 
 /* search */

@@ -548,15 +548,29 @@ function initLightbox() {
 // Page lifecycle
 // ---------------------------------------------------------------------------
 
+function hideLoader() {
+  document.body.classList.add('appear');
+  const loader = document.getElementById('page-loader');
+  if (loader) {
+    loader.classList.add('loaded');
+    loader.addEventListener('transitionend', () => loader.remove(), { once: true });
+  }
+}
+
 async function loadEager(doc) {
-  document.documentElement.lang = 'en';
-  decorateTemplateAndTheme();
-  const main = doc.querySelector('main');
-  if (main) {
-    decorateMain(main);
-    document.body.classList.add('appear');
-    if (window.self === window.top && !window.isErrorPage) await loadLeftNav(main);
-    await loadSection(main.querySelector('.section'), waitForFirstImage);
+  const showPage = () => { try { hideLoader(); } catch (e) { document.body.classList.add('appear'); } };
+  setTimeout(showPage, 8000);
+  try {
+    document.documentElement.lang = 'en';
+    decorateTemplateAndTheme();
+    const main = doc.querySelector('main');
+    if (main) {
+      decorateMain(main);
+      if (window.self === window.top && !window.isErrorPage) await loadLeftNav(main);
+      await loadSection(main.querySelector('.section'), waitForFirstImage);
+    }
+  } finally {
+    showPage();
   }
 }
 
