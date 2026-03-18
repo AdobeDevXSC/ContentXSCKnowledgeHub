@@ -613,8 +613,8 @@ async function loadBlock(block) {
 
 /** Block names that have corresponding /blocks/{name}/ modules. Prevents content divs from being treated as blocks. */
 const KNOWN_BLOCKS = new Set([
-  'accordion', 'cards', 'columns', 'footer', 'form', 'fragment', 'header',
-  'hero', 'leftnav', 'notebox', 'table', 'tabs', 'video',
+  'accordion', 'cards', 'columns', 'feedback-form', 'footer', 'form', 'fragment',
+  'header', 'hero', 'leftnav', 'notebox', 'table', 'tabs', 'video',
 ]);
 
 /**
