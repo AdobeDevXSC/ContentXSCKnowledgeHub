@@ -80,6 +80,7 @@ function filterItems(query) {
   return ALL_ITEMS.filter((item) => {
     const title = item.title?.toLowerCase() || '';
     const path = item.path?.toLowerCase() || '';
+    const body = item.body?.toLowerCase() || '';
     let tags = '';
 
     if (item.tags) {
@@ -96,7 +97,8 @@ function filterItems(query) {
     return (
       title.includes(q) ||
       path.includes(q) ||
-      tags.includes(q)
+      tags.includes(q) ||
+      body.includes(q)
     );
   });
 }
