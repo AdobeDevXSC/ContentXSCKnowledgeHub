@@ -115,9 +115,16 @@ function renderNav(block, items, isSearching = false) {
   wrapper.className = 'aem-parent';
 
   if (isSearching && items.length === 0) {
-    const emptyState = document.createElement('p');
+    const emptyState = document.createElement('div');
     emptyState.className = 'leftnav-no-results';
-    emptyState.textContent = 'No results found';
+    emptyState.innerHTML = `
+      <span class="leftnav-no-results-icon" uk-icon="icon: search; ratio: 1.4"></span>
+      <p class="leftnav-no-results-text">No results found</p>
+      <p class="leftnav-no-results-hint">Can't find what you're looking for?</p>
+      <a class="leftnav-no-results-link" href="https://fluffyjaws.adobe.com/" target="_blank" rel="noopener noreferrer">
+        Try FluffyJaws ↗
+      </a>
+    `;
     wrapper.appendChild(emptyState);
   } else {
     const structure = buildStructure(items);
