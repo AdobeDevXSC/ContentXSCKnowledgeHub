@@ -107,7 +107,8 @@ function filterItems(query) {
 /* Render (Recursive) */
 /* ----------------------------- */
 
-function renderNav(block, items, isSearching = false) {
+function renderNav(block, items, query = '') {
+  const isSearching = !!query;
   const existing = block.querySelector('.aem-parent');
   if (existing) existing.remove();
 
@@ -115,13 +116,15 @@ function renderNav(block, items, isSearching = false) {
   wrapper.className = 'aem-parent';
 
   if (isSearching && items.length === 0) {
+    const encodedQuery = encodeURIComponent(`Tell me more about ${query}`);
+    const fluffyUrl = `https://fluffyjaws.adobe.com/?message=${encodedQuery}`;
     const emptyState = document.createElement('div');
     emptyState.className = 'leftnav-no-results';
     emptyState.innerHTML = `
       <span class="leftnav-no-results-icon" uk-icon="icon: search; ratio: 1.4"></span>
       <p class="leftnav-no-results-text">No results found</p>
-      <p class="leftnav-no-results-hint">Can't find what you're looking for?</p>
-      <a class="leftnav-no-results-link" href="https://fluffyjaws.adobe.com/" target="_blank" rel="noopener noreferrer">
+      <p class="leftnav-no-results-hint">Can't find "${query}"</p>
+      <a class="leftnav-no-results-link" href="${fluffyUrl}" target="_blank" rel="noopener noreferrer">
         Try FluffyJaws ↗
       </a>
     `;
@@ -271,7 +274,7 @@ export default async function decorate(block) {
     input.addEventListener('input', (e) => {
       const query = e.target.value.trim();
       const filtered = filterItems(query);
-      renderNav(block, filtered, !!query);
+      renderNav(block, filtered, query);
     });
   } catch (e) {
     console.error('Left nav failed to load', e);
