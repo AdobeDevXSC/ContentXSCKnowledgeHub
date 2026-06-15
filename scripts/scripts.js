@@ -53,7 +53,7 @@ async function loadLeftNav(main) {
   expandBtn.innerHTML = '<span uk-icon="icon: chevron-right; ratio: 1.2"></span>';
   expandBtn.addEventListener('click', toggleLeftNav);
 
-  block.prepend(collapseBtn);
+  aside.prepend(collapseBtn);
   wrapper.append(aside, expandBtn);
   main.insertBefore(wrapper, main.querySelector('.section'));
 
