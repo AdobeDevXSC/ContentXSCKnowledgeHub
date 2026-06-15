@@ -1,0 +1,8 @@
+.section .page-info-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+.page-info.hidden {
+  display: none;
+}
