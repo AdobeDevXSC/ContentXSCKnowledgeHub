@@ -294,6 +294,31 @@ body.dark-mode .leftnav-no-results-hint {
   column-gap: 5px;
 }
 
+/* expand / collapse toggle icon — kept on every row but muted and slightly
+   smaller so deeply nested trees don't fill the rail with heavy +/- symbols */
+.leftnav .uk-accordion-title [uk-accordion-icon] {
+  transition: color 0.15s ease;
+}
+
+/* size lives on the inner svg (13px width/height attribute), not the span */
+.leftnav .uk-accordion-title [uk-accordion-icon] svg {
+  width: 11px;
+  height: 11px;
+}
+
+.leftnav .uk-accordion-title:hover [uk-accordion-icon] {
+  color: #8a8a8a;
+}
+
+/* dark mode — muted tone, brighten a touch on hover */
+body.dark-mode .leftnav .uk-accordion-title [uk-accordion-icon] {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+body.dark-mode .leftnav .uk-accordion-title:hover [uk-accordion-icon] {
+  color: rgba(255, 255, 255, 0.65);
+}
+
 body.dark-mode .leftnav .uk-accordion-title,
 body.dark-mode .leftnav .uk-accordion-title [uk-icon],
 body.dark-mode .leftnav .uk-nav-default a,
@@ -338,7 +363,7 @@ body.dark-mode .leftnav .uk-nav-default > li.uk-active > a {
 
 .leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li a {
   font-size: 0.9rem;
-  opacity: 0.85;
+  opacity: 1;
 }
 
 body.dark-mode .leftnav .aem-parent > ul > li > .uk-accordion-content > ul > li a:hover {
