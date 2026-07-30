@@ -26,6 +26,26 @@ function toggleLeftNav() {
   } catch (e) { /* ignore */ }
 }
 
+/**
+ * Groups all top-level content sections into a single vertical `.main-content`
+ * container. `main` is a horizontal flex row on desktop (so the left nav can sit
+ * beside the content); without this wrapper every section authored after a
+ * section break becomes its own flex column and the sections fan out
+ * horizontally. Wrapping them keeps content stacked vertically beside the nav.
+ * Safe to run after `decorateSections` (which needs direct children) because
+ * `loadSection`/`loadSections` locate sections with descendant selectors.
+ * @param {Element} main
+ */
+function wrapMainContent(main) {
+  if (main.querySelector(':scope > .main-content')) return;
+  const sections = [...main.querySelectorAll(':scope > .section')];
+  if (!sections.length) return;
+  const contentWrapper = document.createElement('div');
+  contentWrapper.className = 'main-content';
+  main.insertBefore(contentWrapper, sections[0]);
+  sections.forEach((section) => contentWrapper.append(section));
+}
+
 async function loadLeftNav(main) {
   if (localStorage.getItem('leftnav-collapsed') === 'true') {
     document.body.classList.add('leftnav-collapsed');
@@ -55,7 +75,8 @@ async function loadLeftNav(main) {
 
   aside.prepend(collapseBtn);
   wrapper.append(aside, expandBtn);
-  main.insertBefore(wrapper, main.querySelector('.section'));
+  const contentContainer = main.querySelector(':scope > .main-content');
+  main.insertBefore(wrapper, contentContainer || main.querySelector('.section'));
 
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
   loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
@@ -571,6 +592,7 @@ async function loadEager(doc) {
     const main = doc.querySelector('main');
     if (main) {
       decorateMain(main);
+      if (!window.isErrorPage) wrapMainContent(main);
       if (window.self === window.top && !window.isErrorPage) await loadLeftNav(main);
       await loadSection(main.querySelector('.section'), waitForFirstImage);
     }

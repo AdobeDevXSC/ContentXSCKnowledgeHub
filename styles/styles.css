@@ -362,9 +362,20 @@ main {
   }
 }
 
-/* sections */
-main > .section {
+/* content column — groups every content section into a single vertical stack
+   beside the (row-flex) left nav, so authored section breaks render as stacked
+   sections instead of side-by-side columns */
+.main-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 0;
   min-height: calc(100vh - var(--nav-height) - 2rem);
+  margin: 0;
+}
+
+/* sections */
+.main-content > .section {
   display: flex;
   flex-direction: column;
   width: -webkit-fill-available;
@@ -378,18 +389,18 @@ main > .section {
 
 }
 
-main > .section > div {
+.main-content > .section > div {
   max-width: 1600px;
   /* margin: auto; */
   padding: 0;
   margin: 1rem 0;
 }
 
-main > .section:first-of-type > div {
+.main-content > .section:first-of-type > div {
   margin: 0 0 1rem;
 }
 
-main > .section > div.default-content-wrapper {
+.main-content > .section > div.default-content-wrapper {
   margin: 1rem 0;
 }
 
@@ -398,19 +409,21 @@ main > .section > div.default-content-wrapper {
 } */
 
 @media (width >= 1000px) {
-  main > .section {
-    border-radius: 20px;
-    padding: 0 1rem;
+  .main-content {
     flex: 1;
-    min-width: 0;
   }
 
-  body.leftnav-collapsed main > .section {
+  body.leftnav-collapsed .main-content {
     max-width: 1400px;
     margin: 0 auto;
   }
 
-  main > .section > div {
+  .main-content > .section {
+    border-radius: 20px;
+    padding: 0 1rem;
+  }
+
+  .main-content > .section > div {
     padding: 0;
   }
 }
