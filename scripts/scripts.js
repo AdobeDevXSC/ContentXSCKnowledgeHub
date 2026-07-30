@@ -83,6 +83,22 @@ async function loadLeftNav(main) {
   await decorate(block);
 }
 
+// ---------------------------------------------------------------------------
+// Shared: map a content path to its top-level area label (used by the palette)
+// ---------------------------------------------------------------------------
+
+const SECTION_LABELS = {
+  aem: 'AEM',
+  'xsc-resources': 'XSC Resources',
+  'annual-events': 'Annual Events',
+};
+
+function sectionLabelFromPath(path) {
+  const seg = (path || '').split('/').filter(Boolean)[0] || '';
+  if (SECTION_LABELS[seg]) return SECTION_LABELS[seg];
+  return seg ? seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : 'Page';
+}
+
 async function loadFonts() {
   await loadCSS(`${window.hlx.codeBasePath}/styles/fonts.css`);
   try {
@@ -135,7 +151,7 @@ function buildAutoBlocks(main) {
 export function decorateMainLinks(root = document.querySelector('main')) {
   if (!root) return;
   root.querySelectorAll('a[href]').forEach((link) => {
-    if (link.closest('.leftnav-container') || link.closest('.page-breadcrumb')) return;
+    if (link.closest('.leftnav-container') || link.closest('.page-breadcrumb') || link.closest('.home-hub')) return;
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
   });
@@ -217,7 +233,7 @@ function segmentToLabel(segment) {
  * @returns {Array<{path: string, label: string}>}
  */
 function buildBreadcrumbItems() {
-  const pathname = window.location.pathname;
+  const { pathname } = window.location;
   const segments = pathname.split('/').filter(Boolean);
   const items = [];
   let acc = '';
@@ -571,6 +587,127 @@ function initLightbox() {
 }
 
 // ---------------------------------------------------------------------------
+// Command palette (⌘K) — global fuzzy search over the whole knowledge base
+// ---------------------------------------------------------------------------
+
+function initCommandPalette() {
+  if (document.getElementById('cmdk-modal') || !window.UIkit) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'cmdk-modal';
+  modal.className = 'cmdk uk-modal';
+  modal.setAttribute('uk-modal', 'bg-close: true; esc-close: true');
+  modal.innerHTML = `
+    <div class="uk-modal-dialog cmdk-dialog">
+      <div class="cmdk-search">
+        <span uk-icon="icon: search"></span>
+        <input type="text" class="cmdk-input" placeholder="Search the knowledge base…" aria-label="Search the knowledge base" autocomplete="off" spellcheck="false" />
+        <kbd class="cmdk-esc">ESC</kbd>
+      </div>
+      <ul class="cmdk-results" role="listbox" aria-label="Search results"></ul>
+      <div class="cmdk-empty" hidden>No results — try another keyword.</div>
+      <div class="cmdk-foot">
+        <span><kbd>↑</kbd><kbd>↓</kbd>navigate</span>
+        <span><kbd>↵</kbd>open</span>
+        <span><kbd>esc</kbd>close</span>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  window.UIkit.modal(modal);
+
+  const input = modal.querySelector('.cmdk-input');
+  const results = modal.querySelector('.cmdk-results');
+  const empty = modal.querySelector('.cmdk-empty');
+  let data = [];
+  let items = [];
+  let active = -1;
+  let loaded = false;
+
+  async function ensureData() {
+    if (loaded) return;
+    loaded = true;
+    try {
+      const resp = await fetch('/query-index.json');
+      if (resp.ok) {
+        const json = await resp.json();
+        data = (json.data || json || []).filter((e) => e.path
+          && !e.path.startsWith('/tools/')
+          && !e.path.includes('/non-nav/')
+          && e.path !== '/nav');
+      }
+    } catch (e) { /* palette still opens, just empty */ }
+  }
+
+  function render(q) {
+    const query = q.trim().toLowerCase();
+    let matched = data;
+    if (query) {
+      matched = data.filter((e) => (`${e.title || ''} ${e.path || ''} ${e.body || ''}`)
+        .toLowerCase().includes(query));
+    }
+    items = matched.slice(0, 40);
+    if (!items.length) {
+      results.innerHTML = '';
+      empty.hidden = false;
+      active = -1;
+      return;
+    }
+    empty.hidden = true;
+    results.innerHTML = items.map((e, i) => `
+      <li class="cmdk-item${i === 0 ? ' active' : ''}" role="option" data-i="${i}">
+        <span class="cmdk-item-icon" uk-icon="icon: file-text"></span>
+        <span class="cmdk-item-body">
+          <span class="cmdk-item-title">${e.title || sectionLabelFromPath(e.path)}</span>
+          <span class="cmdk-item-path">${e.path}</span>
+        </span>
+        <span class="cmdk-item-tag">${sectionLabelFromPath(e.path)}</span>
+      </li>`).join('');
+    active = 0;
+  }
+
+  function setActive(next) {
+    const lis = [...results.querySelectorAll('.cmdk-item')];
+    if (!lis.length) return;
+    active = (next + lis.length) % lis.length;
+    lis.forEach((li, i) => li.classList.toggle('active', i === active));
+    lis[active].scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(i) {
+    const e = items[i];
+    if (e && e.path) {
+      window.UIkit.modal(modal).hide();
+      window.location.href = e.path;
+    }
+  }
+
+  input.addEventListener('input', () => render(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive(active + 1); } else if (e.key === 'ArrowUp') { e.preventDefault(); setActive(active - 1); } else if (e.key === 'Enter') { e.preventDefault(); if (active >= 0) go(active); }
+  });
+  results.addEventListener('click', (e) => {
+    const li = e.target.closest('.cmdk-item');
+    if (li) go(Number(li.dataset.i));
+  });
+
+  window.UIkit.util.on(modal, 'shown', async () => {
+    await ensureData();
+    input.value = '';
+    render('');
+    input.focus();
+  });
+
+  window.openCommandPalette = () => window.UIkit.modal(modal).show();
+
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
+      e.preventDefault();
+      window.openCommandPalette();
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Page lifecycle
 // ---------------------------------------------------------------------------
 
@@ -626,6 +763,7 @@ async function loadPage() {
   await loadLazy(document);
   loadDelayed();
   initLightbox();
+  initCommandPalette();
 
   // Inject author + last modified banner into the first section
   const main = document.querySelector('main');

@@ -1,69 +1,88 @@
-/* Base Notebox */
+/* Base Notebox — graphite surface with a type-colored accent edge */
 .notebox {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  padding: 2.5rem 1.25rem;
-  border-radius: 0.5rem;
-  margin: 1rem 0;
+  gap: 0.85rem;
+  padding: 1.25rem 1.4rem;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--text-muted);
+  border-radius: var(--radius);
+  margin: 1.25rem 0;
   width: 100%;
-  max-width: 700px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  font-family: Arial, sans-serif;
+  max-width: 720px;
+  background: var(--surface-1);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-primary);
+  font-family: var(--body-font-family);
   position: relative;
   box-sizing: border-box;
 }
 
-/* Icon */
 .notebox-icon {
   flex-shrink: 0;
-  color: inherit; /* icon inherits alert color */
 }
 
-/* Title inside notebox */
 .notebox-title {
   font-weight: 600;
   margin-bottom: 0.25rem;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
 }
 
-/* Content inside notebox */
 .notebox-content {
   font-size: 0.95rem;
-  line-height: 1.5;
+  line-height: 1.6;
   display: flex;
   flex-direction: column;
+  color: var(--text-secondary);
 }
 
-/* Close button */
 .uk-alert-close {
   position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
+  top: 0.6rem;
+  right: 0.6rem;
 }
 
-/* Optional: Custom colors if UIkit doesn't cover all types */
+/* type accents — tinted background + colored edge/icon/title, dark-mode safe */
 .notebox.uk-alert-primary {
-  background-color: #edf2fc;
-  color: #0a3d91;
+  border-left-color: #3b82f6;
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.notebox.uk-alert-primary .notebox-icon,
+.notebox.uk-alert-primary .notebox-title {
+  color: #3b82f6;
 }
 
 .notebox.uk-alert-warning {
-  background-color: #fff4e5;
-  color: #b35600;
+  border-left-color: #e0a13a;
+  background: rgba(224, 161, 58, 0.10);
+}
+
+.notebox.uk-alert-warning .notebox-icon,
+.notebox.uk-alert-warning .notebox-title {
+  color: #e0a13a;
 }
 
 .notebox.uk-alert-danger {
-  background-color: rgba(237, 34, 36, 0.1);
+  border-left-color: var(--adobe-red);
+  background: var(--accent-soft);
+}
+
+.notebox.uk-alert-danger .notebox-icon,
+.notebox.uk-alert-danger .notebox-title {
   color: var(--adobe-red);
 }
 
 .notebox.uk-alert-success {
-  background-color: #e6f8e0;
-  color: #1a5a00;
+  border-left-color: #22a06b;
+  background: rgba(34, 160, 107, 0.10);
 }
 
-/* Paragraph spacing */
+.notebox.uk-alert-success .notebox-icon,
+.notebox.uk-alert-success .notebox-title {
+  color: #22a06b;
+}
+
 .notebox-content p:last-of-type {
   margin-bottom: 0;
 }

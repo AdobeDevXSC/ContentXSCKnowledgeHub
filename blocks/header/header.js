@@ -213,6 +213,17 @@ export default async function decorate(block) {
     link.removeAttribute('target');
     link.removeAttribute('rel');
   });
+  // ⌘K command-palette trigger
+  const searchBtn = document.createElement('button');
+  searchBtn.type = 'button';
+  searchBtn.className = 'nav-search-btn';
+  searchBtn.setAttribute('aria-label', 'Search (Command-K)');
+  searchBtn.innerHTML = '<span uk-icon="icon: search"></span><kbd>⌘K</kbd>';
+  searchBtn.addEventListener('click', () => {
+    if (typeof window.openCommandPalette === 'function') window.openCommandPalette();
+  });
+  navTools.appendChild(searchBtn);
+
   const themeToggle = document.createElement('label');
   themeToggle.className = 'theme-toggle';
   themeToggle.setAttribute('aria-label', 'Toggle dark mode');

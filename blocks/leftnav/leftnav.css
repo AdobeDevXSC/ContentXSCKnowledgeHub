@@ -17,16 +17,17 @@ body.leftnav-collapsed .leftnav-wrapper {
   width: 20vw;
   min-width: 350px;
   min-height: 600px;
-  background-color: var(--light-color);
-  color: var(--text-color);
+  background-color: var(--surface-1);
+  color: var(--text-primary);
   height: auto;
   max-height: calc(100vh - var(--nav-height) - 2rem);
   position: sticky;
   top: calc(var(--nav-height) + 1rem);
   overflow: hidden;
-  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   margin: 1rem;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.12), 0 0 40px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-md);
   transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   backface-visibility: hidden;
 }
@@ -195,8 +196,8 @@ body.dark-mode .leftnav .nav-title > h3::after {
 }
 
 .leftnav-search .uk-input {
-  background-color: #ededed;
-  border: none;
+  background-color: var(--surface-0);
+  border: 1px solid var(--border);
   height: 40px !important;
 }
 
@@ -206,7 +207,7 @@ body.dark-mode .leftnav .nav-title > h3::after {
 }
 
 body.dark-mode .leftnav-search .uk-input {
-  background-color: #303030;
+  background-color: rgba(255, 255, 255, 0.045);
 }
 
 body.dark-mode .leftnav-search .uk-input:focus {
@@ -338,11 +339,12 @@ body.dark-mode .leftnav .uk-nav-default a:hover {
 
 .leftnav .uk-nav-default > li.uk-active > a {
   font-weight: 600;
-  background-color: rgba(237, 34, 36, 0.08);
-  color: var(--text-color);
-  border-radius: 6px;
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border-radius: var(--radius-sm);
   width: fit-content;
   padding: 0.4rem 0.8rem;
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 body.dark-mode .leftnav .uk-nav-default > li.uk-active > a {
@@ -350,6 +352,7 @@ body.dark-mode .leftnav .uk-nav-default > li.uk-active > a {
   color: #ffffff;
   opacity: 1;
   border-left-color: var(--adobe-red);
+  box-shadow: inset 3px 0 0 var(--adobe-red);
 }
 
 .leftnav .aem-parent > ul > li > .uk-accordion-content > ul.uk-accordion {
