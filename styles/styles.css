@@ -873,6 +873,14 @@ hr,
   border-radius: var(--radius-pill);
 }
 
+/* highlighted matches of the search term within result titles/paths */
+.cmdk .cmdk-hl {
+  background: var(--accent-soft);
+  color: inherit;
+  border-radius: 3px;
+  padding: 0 1px;
+}
+
 .cmdk-empty {
   flex: 1 1 auto;
   display: flex;

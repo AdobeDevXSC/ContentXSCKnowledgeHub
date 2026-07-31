@@ -619,6 +619,25 @@ function initLightbox() {
 }
 
 // ---------------------------------------------------------------------------
+// Recent pages — the last few pages visited, surfaced in the ⌘K empty state
+// ---------------------------------------------------------------------------
+
+const RECENT_PAGES_KEY = 'cmdk-recent-pages';
+
+function recordRecentPage() {
+  try {
+    const path = window.location.pathname;
+    if (!path || path === '/' || path === '/index' || window.isErrorPage) return;
+    const title = (document.title || '').trim();
+    if (!title) return;
+    const prev = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
+    const prevList = Array.isArray(prev) ? prev.filter((p) => p && p.path !== path) : [];
+    const list = [{ path, title }, ...prevList].slice(0, 6);
+    localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(list));
+  } catch (e) { /* ignore */ }
+}
+
+// ---------------------------------------------------------------------------
 // Command palette (⌘K) — global fuzzy search over the whole knowledge hub
 // ---------------------------------------------------------------------------
 
@@ -674,6 +693,32 @@ function initCommandPalette() {
       localStorage.setItem(RECENT_KEY, JSON.stringify(list));
     } catch (e) { /* ignore */ }
   }
+
+  function getRecentPages() {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
+      return Array.isArray(v) ? v.filter((p) => p && p.path && p.title).slice(0, 6) : [];
+    } catch (e) { return []; }
+  }
+
+  // Escape authored/user text before injecting into results markup, and wrap
+  // matched query terms in <mark> so hits are visible in titles and paths.
+  const escHtml = (s) => (s || '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+  let highlightTerms = [];
+  function highlight(text) {
+    const esc = escHtml(text);
+    if (!highlightTerms.length) return esc;
+    const parts = highlightTerms
+      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+      .filter(Boolean);
+    if (!parts.length) return esc;
+    return esc.replace(new RegExp(`(${parts.join('|')})`, 'gi'), '<mark class="cmdk-hl">$1</mark>');
+  }
+
+  const clearBtn = (which) => `<button type="button" class="cmdk-clear" data-clear="${which}">Clear</button>`;
+  const groupLi = (label) => `<li class="cmdk-group">${label}</li>`;
 
   // ---- Relevance scoring ---------------------------------------------------
   // Naive `title+path+body` substring matching returned a third of the site for
@@ -804,23 +849,24 @@ function initCommandPalette() {
     } catch (e) { /* palette still opens, just empty */ }
   }
 
-  function itemsHtml(list, activeIndex = 0) {
+  function itemsHtml(list, offset = 0) {
     return list.map((it, i) => {
-      const activeCls = i === activeIndex ? ' active' : '';
+      const di = offset + i;
       if (it.type === 'term') {
-        return `<li class="cmdk-item${activeCls}" role="option" data-i="${i}">
+        return `<li class="cmdk-item" role="option" data-i="${di}">
         <span class="cmdk-item-icon" uk-icon="icon: ${it.icon}"></span>
-        <span class="cmdk-item-body"><span class="cmdk-item-title">${it.term}</span></span>
+        <span class="cmdk-item-body"><span class="cmdk-item-title">${escHtml(it.term)}</span></span>
       </li>`;
       }
       const e = it.entry;
-      return `<li class="cmdk-item${activeCls}" role="option" data-i="${i}">
+      const title = e.title || sectionLabelFromPath(e.path);
+      return `<li class="cmdk-item" role="option" data-i="${di}">
         <span class="cmdk-item-icon" uk-icon="icon: file-text"></span>
         <span class="cmdk-item-body">
-          <span class="cmdk-item-title">${e.title || sectionLabelFromPath(e.path)}</span>
-          <span class="cmdk-item-path">${e.path}</span>
+          <span class="cmdk-item-title">${highlight(title)}</span>
+          <span class="cmdk-item-path">${highlight(e.path)}</span>
         </span>
-        <span class="cmdk-item-tag">${sectionLabelFromPath(e.path)}</span>
+        <span class="cmdk-item-tag">${escHtml(sectionLabelFromPath(e.path))}</span>
       </li>`;
     }).join('');
   }
@@ -828,15 +874,12 @@ function initCommandPalette() {
   // Rich empty state (mirrors the leftnav): icon + "No results found" + the
   // query + a FluffyJaws deep link to ask the assistant about the term.
   function renderNoResults(term) {
-    const esc = (s) => s.replace(/[&<>"']/g, (c) => ({
-      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
-    }[c]));
     const message = encodeURIComponent(`Tell me more about ${term}`);
     const fluffyUrl = `https://fluffyjaws.adobe.com/?message=${message}`;
     empty.innerHTML = `
       <span class="cmdk-noresults-icon" uk-icon="icon: search; ratio: 1.4"></span>
       <p class="cmdk-noresults-text">No results found</p>
-      <p class="cmdk-noresults-hint">Can't find "${esc(term)}"</p>
+      <p class="cmdk-noresults-hint">Can't find "${escHtml(term)}"</p>
       <a class="cmdk-noresults-link" href="${fluffyUrl}"
         target="_blank" rel="noopener noreferrer">Try FluffyJaws ↗</a>`;
   }
@@ -845,21 +888,26 @@ function initCommandPalette() {
     const query = q.trim().toLowerCase();
     const rawQuery = q.trim();
 
-    // Empty state: recent searches (persisted), else suggested topics.
+    // Empty state: recent pages, then recent searches (persisted) or suggestions.
     if (!query) {
       empty.hidden = true;
       results.hidden = false;
-      const recent = getRecent();
-      const usingRecent = recent.length > 0;
-      const terms = usingRecent ? recent : SEARCH_SUGGESTIONS;
+      highlightTerms = [];
+      const recentSearches = getRecent();
+      const usingRecent = recentSearches.length > 0;
+      const suggestions = usingRecent ? recentSearches : SEARCH_SUGGESTIONS;
       const icon = usingRecent ? 'clock' : 'search';
-      items = terms.map((t) => ({ type: 'term', term: t, icon }));
-      const groupLabel = usingRecent
-        ? 'Recent searches<button type="button" class="cmdk-clear">Clear</button>'
-        : 'Suggestions';
-      // No item pre-highlighted in the empty state — nothing is "selected"
-      // until the user types or arrows down. (Search results still default to 0.)
-      results.innerHTML = `<li class="cmdk-group">${groupLabel}</li>${itemsHtml(items, -1)}`;
+      const pageItems = getRecentPages().map((p) => ({ type: 'page', entry: p }));
+      const termItems = suggestions.map((t) => ({ type: 'term', term: t, icon }));
+      items = [...pageItems, ...termItems];
+      // Nothing pre-highlighted — selection only appears on keyboard nav.
+      let html = '';
+      if (pageItems.length) {
+        html += groupLi(`Recent pages${clearBtn('pages')}`) + itemsHtml(pageItems, 0);
+      }
+      const label = usingRecent ? `Recent searches${clearBtn('searches')}` : 'Suggestions';
+      html += groupLi(label) + itemsHtml(termItems, pageItems.length);
+      results.innerHTML = html;
       active = -1;
       return;
     }
@@ -869,6 +917,7 @@ function initCommandPalette() {
     // search — so "adaptive form" still finds a page whose body is about Adaptive
     // Forms, without body noise polluting precise title/path matches.
     const terms = tokenize(query);
+    highlightTerms = [...new Set(terms)].filter((t) => t.length >= 2);
     let pool = data.filter((entry) => qualifies(entry, query, terms));
     if (!pool.length) pool = data.filter((entry) => bodyQualifies(entry, query, terms));
     const scored = pool
@@ -881,6 +930,7 @@ function initCommandPalette() {
       .filter((r) => r.score >= cutoff)
       .slice(0, 40)
       .map((r) => ({ type: 'page', entry: r.entry }));
+
     if (!items.length) {
       results.innerHTML = '';
       renderNoResults(rawQuery);
@@ -891,9 +941,9 @@ function initCommandPalette() {
     }
     empty.hidden = true;
     results.hidden = false;
-    // No item pre-highlighted — a selection only appears once the user navigates
+    // No item pre-highlighted — selection only appears once the user navigates
     // with the keyboard (arrow keys). Mouse users still get :hover feedback.
-    results.innerHTML = itemsHtml(items, -1);
+    results.innerHTML = itemsHtml(items, 0);
     active = -1;
   }
 
@@ -936,8 +986,10 @@ function initCommandPalette() {
     }
   });
   results.addEventListener('click', (e) => {
-    if (e.target.closest('.cmdk-clear')) {
-      try { localStorage.removeItem(RECENT_KEY); } catch (err) { /* ignore */ }
+    const clear = e.target.closest('.cmdk-clear');
+    if (clear) {
+      const key = clear.dataset.clear === 'pages' ? RECENT_PAGES_KEY : RECENT_KEY;
+      try { localStorage.removeItem(key); } catch (err) { /* ignore */ }
       render('');
       input.focus();
       return;
@@ -1027,6 +1079,7 @@ async function loadPage() {
   loadDelayed();
   initLightbox();
   initCommandPalette();
+  recordRecentPage();
 
   // Inject author + last modified banner into the first section
   const main = document.querySelector('main');

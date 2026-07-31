@@ -45,7 +45,7 @@ header nav[aria-expanded="true"] {
   }
 }
 
-@media (width >= 1000px) {
+@media (width >= 1214px) {
   header nav {
     display: flex;
     justify-content: space-between;
@@ -189,7 +189,7 @@ header nav[aria-expanded="true"] .nav-hamburger-icon::after {
   transform: rotate(-45deg);
 }
 
-@media (width >= 1000px) {
+@media (width >= 1214px) {
   header nav .nav-hamburger {
     display: none;
     visibility: hidden;
@@ -256,7 +256,7 @@ header nav .nav-sections ul > li > ul > li {
   font-weight: 500;
 }
 
-@media (width >= 1000px) {
+@media (width >= 1214px) {
   header nav .nav-sections {
     display: block;
     visibility: visible;
@@ -375,6 +375,7 @@ header nav .nav-tools {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-shrink: 0;
 }
 
 header nav .nav-tools .default-content-wrapper {
@@ -432,15 +433,23 @@ header nav .nav-tools .default-content-wrapper a .icon {
     display: block;
   }
 
-  /* Stack the top-nav links as a clean vertical list instead of UIkit's
-     wrapping subnav row (which fans them out into a ragged grid on mobile). */
+  /* Only below 1000px is the leftnav injected into the menu — separate the
+     top-nav links from the page tree that then follows below them. */
+  header nav .nav-sections .uk-subnav {
+    margin: 0 0 1rem;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+/* Below the desktop-nav breakpoint the top-nav collapses into the hamburger, so
+   stack its links vertically instead of UIkit's wrapping subnav row (which
+   otherwise fans them into a ragged, squished grid at ~1000–1213px). */
+@media (width < 1214px) {
   header nav .nav-sections .uk-subnav {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.25rem;
-    margin: 0 0 1rem;
-    padding: 0 0 1rem;
-    border-bottom: 1px solid var(--border);
   }
 
   header nav .nav-sections .uk-subnav > li {
