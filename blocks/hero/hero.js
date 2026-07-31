@@ -2,7 +2,8 @@
  * hero block.
  * The default (image) hero is CSS-only. The `homepage` variation is
  * content-driven: it renders an eyebrow, a title, and a subtitle authored as
- * lines in the block — no search input, styled as the graphite hub hero.
+ * lines in the block, plus a search field that opens the ⌘K palette — styled
+ * as the graphite hub hero.
  * @param {Element} block
  */
 export default function decorate(block) {
@@ -41,6 +42,27 @@ export default function decorate(block) {
     el.innerHTML = subtitle.innerHTML;
     wrap.append(el);
   }
+
+  // Search field — opens the ⌘K command palette (full fuzzy search).
+  const search = document.createElement('div');
+  search.className = 'hero-home-search';
+  search.setAttribute('role', 'button');
+  search.setAttribute('tabindex', '0');
+  search.setAttribute('aria-label', 'Search the knowledge hub');
+  search.innerHTML = `
+    <span uk-icon="icon: search"></span>
+    <span class="hero-home-search-ph">Search the knowledge hub…</span>`;
+  const openSearch = () => {
+    if (typeof window.openCommandPalette === 'function') window.openCommandPalette();
+  };
+  search.addEventListener('click', openSearch);
+  search.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+  wrap.append(search);
 
   block.textContent = '';
   block.classList.add('grid-bg');

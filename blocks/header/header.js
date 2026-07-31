@@ -217,8 +217,8 @@ export default async function decorate(block) {
   const searchBtn = document.createElement('button');
   searchBtn.type = 'button';
   searchBtn.className = 'nav-search-btn';
-  searchBtn.setAttribute('aria-label', 'Search (Command-K)');
-  searchBtn.innerHTML = '<span uk-icon="icon: search"></span><kbd>⌘K</kbd>';
+  searchBtn.setAttribute('aria-label', 'Search');
+  searchBtn.innerHTML = '<span uk-icon="icon: search"></span>';
   searchBtn.addEventListener('click', () => {
     if (typeof window.openCommandPalette === 'function') window.openCommandPalette();
   });

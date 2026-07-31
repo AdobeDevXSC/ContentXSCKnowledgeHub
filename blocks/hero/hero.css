@@ -111,10 +111,44 @@
 }
 
 .hero-home-subtitle {
-  max-width: 46ch;
+  max-width: 500px;
   margin: 0;
   font-size: 1.05rem;
   color: var(--text-secondary);
+}
+
+/* search field — opens the ⌘K palette */
+.hero-home-search {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 460px;
+  margin-top: 1.7rem;
+  padding: 0.85rem 1.1rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--text-muted);
+  cursor: text;
+  transition: border-color var(--dur-fast) var(--ease-snap), box-shadow var(--dur-fast) var(--ease-snap);
+}
+
+.hero-home-search:hover,
+.hero-home-search:focus-visible {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+  outline: none;
+}
+
+.hero-home-search [uk-icon] {
+  color: var(--text-secondary);
+}
+
+.hero-home-search-ph {
+  flex: 1;
+  font-size: 0.95rem;
+  color: var(--text-muted);
 }
 
 @media (width < 1000px) {

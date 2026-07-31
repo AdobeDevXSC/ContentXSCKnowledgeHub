@@ -361,7 +361,7 @@ a:hover {
 
 /* primary buttons */
 a.button:any-link,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn) {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear) {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
@@ -388,15 +388,15 @@ button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):
 
 a.button:hover,
 a.button:focus,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):hover,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):focus {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):hover,
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):focus {
   background-color: var(--link-hover-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 a.button:active,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):active {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):active {
   transform: translateY(1px);
 }
 
@@ -506,7 +506,8 @@ main {
     flex: 1;
   }
 
-  body.leftnav-collapsed .main-content {
+  body.leftnav-collapsed .main-content,
+  body.home .main-content {
     max-width: 1400px;
     margin: 0 auto;
   }
@@ -717,21 +718,38 @@ hr,
 }
 
 /* ===== Command palette (⌘K) ===== */
-.cmdk.uk-modal {
-  align-items: flex-start;
-  justify-content: center;
-  padding: 12vh 1rem 1rem;
-}
-
+/* Center the dialog with absolute positioning (independent of UIkit's open/close
+   state) so UIkit's native fade+slide animation stays smooth on open AND close.
+   A flex-on-open approach snapped the dialog to the corner mid-close. */
 .cmdk .uk-modal-dialog {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
   width: 640px;
   max-width: 94vw;
-  margin: 0;
+  /* Fixed, viewport-relative height (not content-driven) so the modal stays put
+     as results change — clamped so it is never tiny or overwhelming, and capped
+     to the viewport on very short screens. */
+  height: clamp(440px, 76vh, 475px);
+  max-height: calc(100vh - 2rem);
+  margin: auto;
   padding: 0;
   overflow: hidden;
+  background: var(--surface-1);
+  color: var(--text-primary);
+  transition: opacity var(--dur) var(--ease-out), transform var(--dur) var(--ease-out);
+}
+
+/* Fade the backdrop on the SAME timing as the dialog. UIkit's default backdrop
+   transition is faster, so on close the dialog lingered for a moment over an
+   already-gone backdrop — a visible flicker. */
+.cmdk.uk-modal {
+  transition: opacity var(--dur) var(--ease-out);
 }
 
 .cmdk-search {
+  flex: none;
   display: flex;
   align-items: center;
   gap: 0.7rem;
@@ -753,27 +771,41 @@ hr,
   font-family: var(--body-font-family);
   font-size: 1.05rem;
   color: var(--text-primary);
+  padding: 0 0.75rem;
 }
 
 .cmdk-input::placeholder {
   color: var(--text-muted);
 }
 
-.cmdk-esc {
+.cmdk-close {
   flex: none;
-  font-family: var(--mono-font-family);
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-strong);
-  border-radius: 5px;
-  padding: 0.1rem 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-snap), color var(--dur-fast) var(--ease-snap);
+}
+
+.cmdk-close:hover {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .cmdk-results {
+  flex: 1 1 auto;
+  min-height: 0;
   list-style: none;
   margin: 0;
   padding: 0.5rem;
-  max-height: min(56vh, 460px);
   overflow-y: auto;
 }
 
@@ -842,27 +874,96 @@ hr,
 }
 
 .cmdk-empty {
-  padding: 2rem 1rem;
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 0.9rem;
-}
-
-.cmdk-foot {
+  flex: 1 1 auto;
   display: flex;
-  gap: 1.3rem;
-  padding: 0.7rem 1.1rem;
-  border-top: 1px solid var(--border);
-  font-size: 0.72rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 4px;
+  padding: 2.5rem 1rem;
   color: var(--text-muted);
 }
 
-.cmdk-foot kbd {
-  font-family: var(--mono-font-family);
-  border: 1px solid var(--border-strong);
-  border-radius: 4px;
-  padding: 0.05rem 0.35rem;
-  margin-right: 0.25rem;
+/* Only one of the results list / empty state occupies the flex body at a time. */
+.cmdk-results[hidden],
+.cmdk-empty[hidden] {
+  display: none;
+}
+
+.cmdk-noresults-icon {
+  color: var(--text-muted);
+  opacity: 0.6;
+  margin-bottom: 6px;
+}
+
+.cmdk-noresults-text {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cmdk-noresults-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.cmdk-noresults-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 10px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+  text-decoration: none;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-pill);
+  transition: background-color var(--dur-fast) var(--ease-snap), color var(--dur-fast) var(--ease-snap);
+}
+
+.cmdk-noresults-link:hover {
+  background: var(--accent);
+  color: var(--accent-contrast);
+  text-decoration: none;
+}
+
+/* group label for recent-searches / suggestions in the empty state */
+.cmdk-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.7rem 0.7rem 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  list-style: none;
+}
+
+.cmdk-clear {
+  margin: 0;
+  padding: 0.1rem 0.4rem;
+  border: none;
+  border-radius: 5px;
+  background: none;
+  font-family: inherit;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--dur-fast) var(--ease-snap), background-color var(--dur-fast) var(--ease-snap);
+}
+
+.cmdk-clear:hover {
+  color: var(--text-primary);
+  background: rgba(128, 128, 128, 0.12);
 }
 
 /* header ⌘K trigger */
@@ -883,18 +984,6 @@ hr,
 .nav-search-btn:hover {
   border-color: var(--accent);
   color: var(--text-primary);
-}
-
-.nav-search-btn kbd {
-  font-family: var(--mono-font-family);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-@media (width < 1000px) {
-  .nav-search-btn kbd {
-    display: none;
-  }
 }
 
 /* ===== reading layout (long-form doc content) ===== */

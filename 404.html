@@ -38,7 +38,9 @@
   <link rel="stylesheet" href="/styles/styles.css">
   <style>
     main.error {
-      min-height: calc(100vh - var(--nav-height));
+      /* Subtract the nav height twice so the content lands on the TRUE viewport
+         center, not the center of the (below the top-only nav) area. */
+      min-height: calc(100vh - 3 * var(--nav-height));
       display: flex !important;
       flex-direction: column !important;
       align-items: center;
@@ -67,9 +69,7 @@
   <header></header>
   <main class="error">
     <div class="section">
-      <svg viewBox="1 0 38 18" class="error-number">
-        <text x="0" y="17">404</text>
-      </svg>
+      <h1 class="error-number">404</h1>
       <h2 class="error-message">Page Not Found</h2>
       <p class="button-container">
         <a href="/" class="button secondary error-button-home">Go home</a>

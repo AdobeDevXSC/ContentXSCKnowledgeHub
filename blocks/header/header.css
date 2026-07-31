@@ -83,11 +83,12 @@ header nav .nav-sections .uk-subnav > li > a {
   color: var(--text-color);
   padding: 0.4em 0.6em;
   border-radius: 6px;
+  transition: background-color var(--dur-fast) var(--ease-snap), color var(--dur-fast) var(--ease-snap);
 }
 
 header nav .nav-sections .uk-subnav > li > a:hover {
-  background-color: var(--accent-soft);
-  color: var(--accent);
+  background-color: rgba(0, 0, 0, 0.05);
+  color: var(--text-primary);
 }
 
 body.dark-mode header nav .nav-sections .uk-subnav > li > a {
@@ -95,8 +96,8 @@ body.dark-mode header nav .nav-sections .uk-subnav > li > a {
 }
 
 body.dark-mode header nav .nav-sections .uk-subnav > li > a:hover {
-  background-color: var(--accent-soft);
-  color: #ff6a6b;
+  background-color: rgba(255, 255, 255, 0.08);
+  color: #fff;
 }
 
 body.dark-mode header nav .nav-hamburger > button,
@@ -260,6 +261,7 @@ header nav .nav-sections ul > li > ul > li {
     display: block;
     visibility: visible;
     white-space: nowrap;
+    background-color: transparent;
   }
 
   header nav[aria-expanded="true"] .nav-sections {
@@ -428,6 +430,25 @@ header nav .nav-tools .default-content-wrapper a .icon {
 @media (width < 1000px) {
   header nav .nav-sections .mobile-nav-wrapper {
     display: block;
+  }
+
+  /* Stack the top-nav links as a clean vertical list instead of UIkit's
+     wrapping subnav row (which fans them out into a ragged grid on mobile). */
+  header nav .nav-sections .uk-subnav {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+    margin: 0 0 1rem;
+    padding: 0 0 1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  header nav .nav-sections .uk-subnav > li {
+    padding-left: 0;
+  }
+
+  header nav .nav-sections .uk-subnav > li > a {
+    padding: 0.5em 0;
   }
 }
 
