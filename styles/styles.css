@@ -122,6 +122,9 @@
 body {
   display: none;
   margin: 0;
+  /* clip (not hidden) so a full-bleed block can't add a horizontal scrollbar,
+     without turning body into a scroll container (keeps sticky/position intact) */
+  overflow-x: clip;
   background-color: var(--background-color);
   color: var(--text-color);
   font-family: var(--body-font-family);
@@ -361,7 +364,7 @@ a:hover {
 
 /* primary buttons */
 a.button:any-link,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear) {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn) {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
@@ -388,15 +391,15 @@ button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):
 
 a.button:hover,
 a.button:focus,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):hover,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):focus {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):hover,
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):focus {
   background-color: var(--link-hover-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 a.button:active,
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):active {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):active {
   transform: translateY(1px);
 }
 
@@ -519,6 +522,7 @@ main {
 
   .main-content > .section > div {
     padding: 0;
+    /* margin: 0 auto; */
   }
 }
 
@@ -874,13 +878,6 @@ hr,
 }
 
 /* highlighted matches of the search term within result titles/paths */
-.cmdk .cmdk-hl {
-  background: var(--accent-soft);
-  color: inherit;
-  border-radius: 3px;
-  padding: 0 1px;
-}
-
 .cmdk-empty {
   flex: 1 1 auto;
   display: flex;

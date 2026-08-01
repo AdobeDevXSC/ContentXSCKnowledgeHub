@@ -17,13 +17,9 @@ import './uikit.min.js';
 import './uikit-icons.min.js';
 
 function toggleLeftNav() {
+  // Per-page toggle only — not persisted, so every page loads with the nav
+  // expanded (see loadLeftNav).
   document.body.classList.toggle('leftnav-collapsed');
-  try {
-    localStorage.setItem(
-      'leftnav-collapsed',
-      document.body.classList.contains('leftnav-collapsed') ? 'true' : 'false',
-    );
-  } catch (e) { /* ignore */ }
 }
 
 /**
@@ -47,9 +43,8 @@ function wrapMainContent(main) {
 }
 
 async function loadLeftNav(main) {
-  if (localStorage.getItem('leftnav-collapsed') === 'true') {
-    document.body.classList.add('leftnav-collapsed');
-  }
+  // Always load expanded so every article opens with the nav visible; the
+  // collapse toggle is per-page and intentionally not persisted.
   const wrapper = document.createElement('div');
   wrapper.className = 'leftnav-wrapper';
 
@@ -632,7 +627,7 @@ function recordRecentPage() {
     if (!title) return;
     const prev = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
     const prevList = Array.isArray(prev) ? prev.filter((p) => p && p.path !== path) : [];
-    const list = [{ path, title }, ...prevList].slice(0, 6);
+    const list = [{ path, title }, ...prevList].slice(0, 3);
     localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(list));
   } catch (e) { /* ignore */ }
 }
@@ -697,25 +692,14 @@ function initCommandPalette() {
   function getRecentPages() {
     try {
       const v = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
-      return Array.isArray(v) ? v.filter((p) => p && p.path && p.title).slice(0, 6) : [];
+      return Array.isArray(v) ? v.filter((p) => p && p.path && p.title).slice(0, 3) : [];
     } catch (e) { return []; }
   }
 
-  // Escape authored/user text before injecting into results markup, and wrap
-  // matched query terms in <mark> so hits are visible in titles and paths.
+  // Escape authored/user text before injecting into results markup.
   const escHtml = (s) => (s || '').replace(/[&<>"']/g, (c) => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
   }[c]));
-  let highlightTerms = [];
-  function highlight(text) {
-    const esc = escHtml(text);
-    if (!highlightTerms.length) return esc;
-    const parts = highlightTerms
-      .map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-      .filter(Boolean);
-    if (!parts.length) return esc;
-    return esc.replace(new RegExp(`(${parts.join('|')})`, 'gi'), '<mark class="cmdk-hl">$1</mark>');
-  }
 
   const clearBtn = (which) => `<button type="button" class="cmdk-clear" data-clear="${which}">Clear</button>`;
   const groupLi = (label) => `<li class="cmdk-group">${label}</li>`;
@@ -863,8 +847,8 @@ function initCommandPalette() {
       return `<li class="cmdk-item" role="option" data-i="${di}">
         <span class="cmdk-item-icon" uk-icon="icon: file-text"></span>
         <span class="cmdk-item-body">
-          <span class="cmdk-item-title">${highlight(title)}</span>
-          <span class="cmdk-item-path">${highlight(e.path)}</span>
+          <span class="cmdk-item-title">${escHtml(title)}</span>
+          <span class="cmdk-item-path">${escHtml(e.path)}</span>
         </span>
         <span class="cmdk-item-tag">${escHtml(sectionLabelFromPath(e.path))}</span>
       </li>`;
@@ -892,7 +876,6 @@ function initCommandPalette() {
     if (!query) {
       empty.hidden = true;
       results.hidden = false;
-      highlightTerms = [];
       const recentSearches = getRecent();
       const usingRecent = recentSearches.length > 0;
       const suggestions = usingRecent ? recentSearches : SEARCH_SUGGESTIONS;
@@ -917,7 +900,6 @@ function initCommandPalette() {
     // search — so "adaptive form" still finds a page whose body is about Adaptive
     // Forms, without body noise polluting precise title/path matches.
     const terms = tokenize(query);
-    highlightTerms = [...new Set(terms)].filter((t) => t.length >= 2);
     let pool = data.filter((entry) => qualifies(entry, query, terms));
     if (!pool.length) pool = data.filter((entry) => bodyQualifies(entry, query, terms));
     const scored = pool
@@ -1041,11 +1023,18 @@ async function loadEager(doc) {
     if (main) {
       decorateMain(main);
       if (!window.isErrorPage) wrapMainContent(main);
-      // The site homepage (root "/") hides the left nav and centers its content.
+      // The site homepage (root "/") hides the left nav and centers its content;
+      // the hero block breaks itself out to full width (see hero.css).
       const { pathname } = window.location;
       const isHome = pathname === '/' || pathname === '/index';
+      const isTools = pathname.startsWith('/tools/');
+      const isDrafts = pathname.includes('/drafts/');
       if (isHome) document.body.classList.add('home');
-      if (window.self === window.top && !window.isErrorPage && !isHome) await loadLeftNav(main);
+      // Left nav is for article pages only — not the homepage, /tools/** pages,
+      // or anything inside a /drafts/ folder.
+      if (window.self === window.top && !window.isErrorPage && !isHome && !isTools && !isDrafts) {
+        await loadLeftNav(main);
+      }
       await loadSection(main.querySelector('.section'), waitForFirstImage);
     }
   } finally {

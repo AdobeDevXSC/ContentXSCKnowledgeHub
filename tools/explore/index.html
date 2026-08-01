@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>XSC Explorer — Knowledge Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --bg-2: #101014;
+      --surface: rgba(255, 255, 255, 0.038);
+      --surface-hover: rgba(255, 255, 255, 0.07);
+      --border: rgba(255, 255, 255, 0.09);
+      --border-strong: rgba(255, 255, 255, 0.16);
+      --text: #f4f4f6;
+      --text-dim: #9b9ba6;
+      --text-faint: #6a6a76;
+      --accent: #ED2224;
+      --accent-2: #ff6a4d;
+      --glass-blur: 18px;
+      --radius: 18px;
+      --radius-lg: 26px;
+      --shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
+      --ease: cubic-bezier(0.22, 1, 0.36, 1);
+      --grid: rgba(255, 255, 255, 0.035);
+      --card-glow: rgba(237, 34, 36, 0.0);
+    }
+
+    [data-theme="light"] {
+      --bg: #f6f6f8;
+      --bg-2: #eeeef2;
+      --surface: rgba(15, 15, 20, 0.028);
+      --surface-hover: rgba(15, 15, 20, 0.055);
+      --border: rgba(15, 15, 20, 0.1);
+      --border-strong: rgba(15, 15, 20, 0.16);
+      --text: #14141a;
+      --text-dim: #55555f;
+      --text-faint: #8a8a95;
+      --shadow: 0 20px 50px -24px rgba(20, 20, 30, 0.28);
+      --grid: rgba(15, 15, 20, 0.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', roboto, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      transition: background 0.5s var(--ease), color 0.5s var(--ease);
+    }
+
+    h1, h2, h3, .display { font-family: 'Space Grotesk', 'Inter', sans-serif; }
+
+    a { color: inherit; text-decoration: none; }
+
+    ::selection { background: var(--accent); color: #fff; }
+
+    /* ---------------- backdrop ---------------- */
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(var(--grid) 1px, transparent 1px) 0 0 / 26px 26px,
+        linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 60%, transparent 100%);
+    }
+
+    .aurora {
+      position: fixed;
+      inset: -25% -10% auto -10%;
+      height: 90vh;
+      z-index: -1;
+      filter: blur(90px) saturate(140%);
+      opacity: 0.6;
+      pointer-events: none;
+    }
+
+    [data-theme="light"] .aurora { opacity: 0.5; filter: blur(90px) saturate(120%); }
+
+    .aurora span {
+      position: absolute;
+      border-radius: 50%;
+      mix-blend-mode: screen;
+      animation: drift 26s var(--ease) infinite alternate;
+    }
+
+    [data-theme="light"] .aurora span { mix-blend-mode: multiply; }
+
+    .aurora .b1 { width: 42vw; height: 42vw; left: -6%; top: -10%; background: radial-gradient(circle, #ED2224, transparent 65%); }
+    .aurora .b2 { width: 38vw; height: 38vw; right: -4%; top: -14%; background: radial-gradient(circle, #7c5cff, transparent 65%); animation-delay: -8s; }
+    .aurora .b3 { width: 34vw; height: 34vw; left: 34%; top: 4%; background: radial-gradient(circle, #ff8a3d, transparent 65%); animation-delay: -15s; }
+
+    @keyframes drift {
+      0% { transform: translate3d(0, 0, 0) scale(1); }
+      50% { transform: translate3d(4vw, 5vh, 0) scale(1.15); }
+      100% { transform: translate3d(-3vw, 2vh, 0) scale(0.95); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .aurora span { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+
+    /* ---------------- layout ---------------- */
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+
+    /* ---------------- top bar ---------------- */
+    header.bar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      backdrop-filter: blur(var(--glass-blur));
+      -webkit-backdrop-filter: blur(var(--glass-blur));
+      background: color-mix(in srgb, var(--bg) 62%, transparent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .bar-inner { display: flex; align-items: center; gap: 18px; height: 62px; }
+
+    .brand { display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.02em; }
+
+    .brand-mark {
+      width: 30px; height: 30px; border-radius: 9px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: grid; place-items: center;
+      color: #fff; font-family: 'Space Grotesk'; font-weight: 700; font-size: 15px;
+      box-shadow: 0 6px 18px -6px var(--accent);
+    }
+
+    .brand small { color: var(--text-faint); font-weight: 500; }
+
+    .bar-spacer { flex: 1; }
+
+    .bar-search {
+      display: flex; align-items: center; gap: 8px;
+      height: 38px; padding: 0 14px; min-width: 210px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 999px; color: var(--text-dim); font-size: 13.5px; cursor: text;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .bar-search:hover { border-color: var(--border-strong); }
+    .bar-search kbd {
+      margin-left: auto; font-family: inherit; font-size: 11px; color: var(--text-faint);
+      border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px;
+    }
+
+    .icon-btn {
+      width: 38px; height: 38px; display: grid; place-items: center;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 11px; color: var(--text); cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .icon-btn:hover { background: var(--surface-hover); transform: translateY(-1px); }
+
+    /* ---------------- hero ---------------- */
+    .hero { padding: 90px 0 40px; text-align: center; position: relative; }
+
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--text-dim); margin-bottom: 22px;
+    }
+    .eyebrow .dot {
+      width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 0 0 var(--accent); animation: pulse 2.4s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(237, 34, 36, 0.5); }
+      70% { box-shadow: 0 0 0 9px rgba(237, 34, 36, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(237, 34, 36, 0); }
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 7vw, 5.2rem);
+      line-height: 0.98; letter-spacing: -0.04em; font-weight: 700;
+      margin: 0 0 20px;
+    }
+    .hero h1 .grad {
+      background: linear-gradient(115deg, var(--accent) 10%, var(--accent-2) 55%, #ffb37a 90%);
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .hero p.sub {
+      max-width: 560px; margin: 0 auto 34px;
+      font-size: clamp(1rem, 2.2vw, 1.22rem); color: var(--text-dim); line-height: 1.5;
+    }
+
+    /* search centerpiece */
+    .search-wrap { max-width: 660px; margin: 0 auto; position: relative; }
+    .search-box {
+      display: flex; align-items: center; gap: 14px;
+      padding: 6px 8px 6px 22px; height: 64px;
+      background: var(--surface); border: 1px solid var(--border-strong);
+      border-radius: 999px; box-shadow: var(--shadow);
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+    .search-box:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 4px rgba(237, 34, 36, 0.18), var(--shadow);
+    }
+    .search-box svg { flex: none; color: var(--text-dim); }
+    .search-box input {
+      flex: 1; min-width: 0; border: none; background: none; outline: none;
+      color: var(--text); font-family: inherit; font-size: 1.1rem;
+    }
+    .search-box input::placeholder { color: var(--text-faint); }
+    .search-clear {
+      flex: none; height: 48px; padding: 0 22px; border: none; border-radius: 999px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
+      font-family: inherit; font-weight: 600; font-size: 0.95rem; cursor: pointer;
+      transition: transform 0.2s, filter 0.2s;
+    }
+    .search-clear:hover { transform: translateY(-1px); filter: brightness(1.06); }
+
+    /* stats */
+    .stats { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin-top: 30px; }
+    .stat {
+      display: flex; align-items: baseline; gap: 8px;
+      padding: 10px 18px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .stat b { font-family: 'Space Grotesk'; font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; }
+    .stat span { font-size: 0.82rem; color: var(--text-dim); }
+
+    /* ---------------- section headings ---------------- */
+    .section { padding: 40px 0; }
+    .sec-head { display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 22px; gap: 16px; }
+    .sec-head h2 { font-size: 1.5rem; letter-spacing: -0.02em; margin: 0; }
+    .sec-head .muted { color: var(--text-faint); font-size: 0.9rem; }
+
+    /* ---------------- areas bento ---------------- */
+    .bento { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .area-card {
+      position: relative; overflow: hidden;
+      padding: 22px; min-height: 132px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); cursor: pointer;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transition: transform 0.35s var(--ease), border-color 0.3s, background 0.3s;
+      transform-style: preserve-3d;
+    }
+    .area-card::before {
+      content: ''; position: absolute; inset: 0; opacity: 0.16;
+      background: radial-gradient(120% 120% at 100% 0%, var(--c1), transparent 60%);
+      transition: opacity 0.35s;
+    }
+    .area-card:hover { border-color: var(--border-strong); background: var(--surface-hover); }
+    .area-card:hover::before { opacity: 0.32; }
+    .area-card.active { border-color: var(--c1); }
+    .area-card.active::before { opacity: 0.4; }
+    .area-card.feat { grid-column: span 2; grid-row: span 2; min-height: 280px; }
+    .area-badge {
+      width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+      font-family: 'Space Grotesk'; font-weight: 700; font-size: 1.05rem; color: #fff;
+      background: linear-gradient(135deg, var(--c1), var(--c2));
+      box-shadow: 0 8px 22px -8px var(--c1); position: relative; z-index: 1;
+    }
+    .area-card.feat .area-badge { width: 58px; height: 58px; font-size: 1.5rem; border-radius: 16px; }
+    .area-meta { position: relative; z-index: 1; }
+    .area-name { font-family: 'Space Grotesk'; font-weight: 600; font-size: 1.02rem; letter-spacing: -0.01em; margin: 0; }
+    .area-card.feat .area-name { font-size: 1.6rem; margin-bottom: 6px; }
+    .area-count { color: var(--text-dim); font-size: 0.82rem; margin-top: 3px; }
+    .area-card.feat .area-desc { color: var(--text-dim); font-size: 0.95rem; max-width: 78%; margin-top: 10px; line-height: 1.5; }
+
+    /* ---------------- filter bar ---------------- */
+    .filterbar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 20px; }
+    .chip {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 8px 7px 14px; border-radius: 999px; font-size: 0.85rem; font-weight: 500;
+      background: var(--surface); border: 1px solid var(--border-strong); color: var(--text);
+    }
+    .chip b { color: var(--accent-2); }
+    .chip .x { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; cursor: pointer; color: var(--text-dim); }
+    .chip .x:hover { background: var(--surface-hover); color: var(--text); }
+    .sort {
+      margin-left: auto; display: flex; gap: 4px; padding: 4px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: 999px;
+    }
+    .sort button {
+      border: none; background: none; color: var(--text-dim); cursor: pointer;
+      font-family: inherit; font-size: 0.82rem; font-weight: 600; padding: 6px 14px; border-radius: 999px;
+      transition: color 0.2s, background 0.2s;
+    }
+    .sort button.on { background: var(--text); color: var(--bg); }
+
+    /* ---------------- article wall ---------------- */
+    .wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .card {
+      position: relative; padding: 20px; border-radius: var(--radius);
+      background: var(--surface); border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 12px; min-height: 158px;
+      transition: transform 0.3s var(--ease), border-color 0.3s, background 0.3s, box-shadow 0.3s;
+    }
+    .card:hover {
+      transform: translateY(-4px); background: var(--surface-hover);
+      border-color: var(--border-strong); box-shadow: var(--shadow);
+    }
+    .card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em;
+      padding: 4px 10px; border-radius: 999px;
+      color: var(--c1); background: color-mix(in srgb, var(--c1) 15%, transparent);
+      border: 1px solid color-mix(in srgb, var(--c1) 32%, transparent);
+    }
+    .card h3 { font-size: 1.06rem; line-height: 1.28; letter-spacing: -0.01em; margin: 0; font-weight: 600; }
+    .card p { margin: 0; color: var(--text-dim); font-size: 0.88rem; line-height: 1.5; flex: 1;
+      display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card .date { font-size: 0.76rem; color: var(--text-faint); display: flex; align-items: center; gap: 6px; }
+    .card .arrow { color: var(--text-faint); transition: transform 0.25s, color 0.25s; }
+    .card:hover .arrow { transform: translate(3px, -3px); color: var(--accent-2); }
+    mark { background: color-mix(in srgb, var(--accent) 28%, transparent); color: inherit; border-radius: 3px; padding: 0 2px; }
+
+    .empty { text-align: center; padding: 70px 0; color: var(--text-faint); }
+    .empty svg { opacity: 0.4; margin-bottom: 12px; }
+
+    /* reveal animation */
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.6s var(--ease), transform 0.6s var(--ease); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    footer.foot { padding: 50px 0 40px; text-align: center; color: var(--text-faint); font-size: 0.82rem; border-top: 1px solid var(--border); margin-top: 30px; }
+    footer.foot a { color: var(--text-dim); border-bottom: 1px solid var(--border-strong); }
+
+    .banner {
+      margin: 14px auto 0; max-width: 660px; font-size: 0.78rem; color: var(--text-faint);
+      text-align: center;
+    }
+
+    /* ---------------- responsive ---------------- */
+    @media (max-width: 900px) {
+      .bento { grid-template-columns: repeat(2, 1fr); }
+      .area-card.feat { grid-column: span 2; grid-row: span 1; min-height: 150px; }
+      .area-card.feat .area-desc { display: none; }
+      .wall { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 620px) {
+      .wrap { padding: 0 16px; }
+      .bar-search { display: none; }
+      .hero { padding: 60px 0 30px; }
+      .bento { grid-template-columns: 1fr 1fr; }
+      .wall { grid-template-columns: 1fr; }
+      .search-clear { padding: 0 16px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="backdrop"></div>
+  <div class="aurora" aria-hidden="true"><span class="b1"></span><span class="b2"></span><span class="b3"></span></div>
+
+  <header class="bar">
+    <div class="wrap bar-inner">
+      <a class="brand" href="#top">
+        <span class="brand-mark">X</span>
+        <span>XSC Explorer <small>· Knowledge Hub</small></span>
+      </a>
+      <div class="bar-spacer"></div>
+      <div class="bar-search" id="barSearch" role="button" tabindex="0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>Search…</span><kbd>/</kbd>
+      </div>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle theme" title="Toggle theme">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="themeIcon"></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero wrap">
+      <div class="eyebrow reveal"><span class="dot"></span> Central source of truth for every XSC</div>
+      <h1 class="reveal">Explore the <span class="grad">Knowledge Hub</span></h1>
+      <p class="sub reveal">Everything AEM Expert Solutions Consultants need — search, demos, competitive intel, and product deep-dives — in one place.</p>
+      <div class="search-wrap reveal">
+        <div class="search-box">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="q" type="text" placeholder="Search articles, products, acronyms…" autocomplete="off" spellcheck="false" aria-label="Search the knowledge hub">
+          <button class="search-clear" id="clearBtn" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="stats reveal" id="stats"></div>
+      <p class="banner" id="banner"></p>
+    </section>
+
+    <section class="section wrap" id="areasSec">
+      <div class="sec-head reveal">
+        <h2>Browse by area</h2>
+        <span class="muted">Tap an area to filter</span>
+      </div>
+      <div class="bento" id="bento"></div>
+    </section>
+
+    <section class="section wrap" id="wallSec">
+      <div class="filterbar" id="filterbar"></div>
+      <div class="wall" id="wall"></div>
+    </section>
+
+    <footer class="foot wrap">
+      Built live from <code>query-index.json</code> · <span id="footCount">—</span> ·
+      <a href="/">back to the hub →</a>
+    </footer>
+  </main>
+
+  <script>
+    // ---------- fallback data (used only if /query-index.json can't be fetched) ----------
+    const ago = (d) => Math.floor(Date.now() / 1000) - d * 86400;
+    const FALLBACK = [
+      { title: 'Smart and AI Tags', path: '/aem/assets/smart-and-ai-tags', description: 'Auto-tag assets with AI for faster search and organization.', lastModified: ago(1) },
+      { title: 'AI and Semantic Search', path: '/aem/assets/ai-semantic-search', description: 'Find assets by meaning, not just keywords.', lastModified: ago(5) },
+      { title: 'Unified Search', path: '/aem/assets/unified-search', description: '', lastModified: ago(18) },
+      { title: 'Federated Guest Access', path: '/aem/assets/federated-guest-access', description: 'Share assets securely with external collaborators.', lastModified: ago(22) },
+      { title: 'Dynamic Media Overview', path: '/aem/assets/dynamic-media/dynamic-media-overview', description: 'Deliver, transform, and stream rich media at scale.', lastModified: ago(7) },
+      { title: 'Dynamic Media Customer Examples', path: '/aem/assets/dynamic-media/dynamic-media-customer-examples', description: 'Real customer implementations of Dynamic Media.', lastModified: ago(12) },
+      { title: 'Dynamic Media Templates', path: '/aem/assets/dynamic-media/dynamic-media-templates', description: '', lastModified: ago(20) },
+      { title: 'Dynamic Media with OpenAPI – How To Configure', path: '/aem/assets/dynamic-media/dynamic-media-with-openapi-how-to-configure', description: 'Configure the modern Dynamic Media OpenAPI delivery.', lastModified: ago(15) },
+      { title: 'Why Scene7 (DMC) customers should upgrade to AEMCS+DM', path: '/aem/assets/dynamic-media/dm-why-s7-customers-should-upgrade-to-dm', description: 'Positioning the migration from Scene7 to AEM Dynamic Media.', lastModified: ago(9) },
+      { title: 'Dynamic Media BU product updates 2026', path: '/aem/assets/dynamic-media/dm-bu-product-updates-2026', description: 'Latest Dynamic Media roadmap and releases.', lastModified: ago(3) },
+      { title: 'Content Generation with AEM Assets and Photoshop APIs', path: '/aem/assets/content-generation-with-aem-assets-and-photoshop-apis', description: 'Generate and edit assets programmatically.', lastModified: ago(14) },
+      { title: 'Assets Customer Decks', path: '/aem/assets/assets-customer-deck-examples', description: 'Ready-to-use customer presentation decks.', lastModified: ago(4) },
+      { title: 'Content Hub Overview', path: '/aem/assets/content-hub-overview', description: 'Self-serve brand asset distribution.', lastModified: ago(11) },
+      { title: 'Experience Modernization Agent', path: '/aem/agentic/experience-modernization-agent-ema/experience-modernization-agent', description: 'AI agent that modernizes existing AEM experiences.', lastModified: ago(6) },
+      { title: 'EMA Set Up Guide', path: '/aem/agentic/experience-modernization-agent-ema/ema-set-up-guide', description: 'Step-by-step setup for the Experience Modernization Agent.', lastModified: ago(6) },
+      { title: 'Experience Production Agent', path: '/aem/agentic/experience-production-agent', description: '', lastModified: ago(10) },
+      { title: 'AEM Spellforge', path: '/aem/agentic/aem-spellforge', description: '', lastModified: ago(25) },
+      { title: 'AEM MCP', path: '/aem/agentic/aem-mcp', description: 'Model Context Protocol server for AEM.', lastModified: ago(8) },
+      { title: 'AI Surfaces or Harnesses', path: '/aem/agentic/ai-surfaces', description: 'Where AI shows up across the AEM experience.', lastModified: ago(2) },
+      { title: 'Build vs. Buy for AEM Agents', path: '/aem/agentic/build-vs-buy-for-aem-agents', description: 'Non-technical proof points for building on AEM agents.', lastModified: ago(13) },
+      { title: 'Content Discovery Agent', path: '/aem/agentic/content-discovery-agent', description: '', lastModified: ago(16) },
+      { title: 'LLM Optimizer', path: '/aem/llm-optimizer/llm-optimizer', description: 'Optimize brand visibility in AI answers and LLMs.', lastModified: ago(5) },
+      { title: 'Adobe Plus Semrush – Adobe Brand Visibility', path: '/aem/llm-optimizer/adobe-plus-semrush', description: '', lastModified: ago(9) },
+      { title: 'Semrush AIO Adobe LLMO Research Brief', path: '/aem/llm-optimizer/semrush/semrush-aio-adobe-llmo-research-brief1', description: 'Research brief on Semrush AIO + Adobe LLM Optimizer.', lastModified: ago(3) },
+      { title: 'Adobe LLM Optimizer vs. Profound', path: '/aem/llm-optimizer/competitive-documents/adobe-llm-optimizer-vs-profound', description: 'Competitive positioning against Profound.', lastModified: ago(7) },
+      { title: 'Forms Overview', path: '/aem/forms/forms-overview', description: 'Adaptive Forms and Interactive Communications.', lastModified: ago(4) },
+      { title: 'Forms Release Notes', path: '/aem/forms/forms-release-notes', description: '', lastModified: ago(1) },
+      { title: 'Happy Path', path: '/aem/sites/happy-path', description: 'The recommended AEM Sites implementation path.', lastModified: ago(12) },
+      { title: 'Experience Blocks', path: '/aem/sites/experience-blocks', description: 'Reusable, portable experience blocks.', lastModified: ago(19) },
+      { title: 'Experience Workspace', path: '/aem/sites/da-edge/experience-workspace', description: '', lastModified: ago(21) },
+      { title: 'MSM in AEM, DA, EDS', path: '/aem/sites/msm-in-aem-da-eds', description: 'Multi Site Manager across AEM, DA, and Edge Delivery.', lastModified: ago(17) },
+      { title: 'Single Sovereign Architecture (SSA)', path: '/aem/sites/single-sovereign-architecture-ssa', description: '', lastModified: ago(23) },
+      { title: 'Why Edge vs. Headless', path: '/aem/sites/why-edge-vs-headless', description: 'When to choose Edge Delivery over headless.', lastModified: ago(8) },
+      { title: 'AEM Generative Website', path: '/aem/sites/aem-generative-website', description: 'Agent-powered, real-time personalized web experiences.', lastModified: ago(2) },
+      { title: 'Adobe Experience Manager Sites Optimizer: Demo Script', path: '/aem/demo-scripts/sites-optimizer-demo-script', description: 'Demo script for AEM Sites Optimizer.', lastModified: ago(6) },
+      { title: 'Architecture', path: '/aem/aem-overarching/architecture', description: 'AEM reference architecture overview.', lastModified: ago(14) },
+      { title: 'Discovery Questions', path: '/xsc-resources/demo-prep/discovery', description: 'Discovery questions to scope customer needs.', lastModified: ago(5) },
+      { title: 'Team Resources', path: '/xsc-resources/aem-onboarding/team-resources', description: 'Onboarding resources for the XSC team.', lastModified: ago(1) },
+      { title: 'Provisioning', path: '/xsc-resources/aem-onboarding/provisioning', description: 'How to provision AEM environments.', lastModified: ago(20) },
+      { title: 'Knowledge Hub CMS Authoring Guide', path: '/xsc-resources/the-hub-program/2-knowledge-hub-cms-authoring-guide', description: 'How to author content in this hub.', lastModified: ago(10) },
+      { title: '2026 Summit', path: '/annual-events/2026-summit', description: 'Adobe Summit 2026 — sessions and materials.', lastModified: ago(3) },
+      { title: 'March 2026 Team Training (Lehi)', path: '/annual-events/march-2026-team-training-lehi', description: '', lastModified: ago(30) },
+    ];
+
+    // ---------- helpers ----------
+    const ACRONYMS = new Set(['aem', 'llm', 'ai', 'dm', 'msm', 'ssa', 'eds', 'da', 'voc', 'ic', 'af', 's7', 'xsc', 'llmo', 'aio', 'ema', 'mcp', 'cms', 'bu', 'dmc']);
+    const labelize = (seg) => seg.split('-').map((w) => (ACRONYMS.has(w.toLowerCase()) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1))).join(' ');
+    const areaOf = (path) => {
+      const s = path.split('/').filter(Boolean);
+      if (!s.length) return 'home';
+      return s[0] === 'aem' && s.length > 1 ? s[1] : s[0];
+    };
+    const AREA_LABELS = { 'aem-overarching': 'AEM Overarching', 'xsc-resources': 'XSC Resources', 'annual-events': 'Annual Events', 'llm-optimizer': 'LLM Optimizer' };
+    const areaLabel = (a) => AREA_LABELS[a] || labelize(a);
+    const esc = (s) => (s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const relDate = (secs) => {
+      if (!secs) return '';
+      const days = Math.max(0, Math.round((Date.now() / 1000 - Number(secs)) / 86400));
+      if (days === 0) return 'today';
+      if (days === 1) return 'yesterday';
+      if (days < 7) return days + 'd ago';
+      if (days < 30) return Math.round(days / 7) + 'w ago';
+      if (days < 365) return Math.round(days / 30) + 'mo ago';
+      return Math.round(days / 365) + 'y ago';
+    };
+
+    // signature colours per area (stable order)
+    const PALETTE = [
+      ['#ED2224', '#ff6a4d'], ['#7c5cff', '#b18cff'], ['#f5a623', '#ff7a45'], ['#3b82f6', '#22d3ee'],
+      ['#14b8a6', '#34d399'], ['#ec4899', '#f472b6'], ['#6366f1', '#818cf8'], ['#0ea5e9', '#38bdf8'],
+      ['#f43f5e', '#fb7185'], ['#a855f7', '#c084fc'], ['#22c55e', '#4ade80'], ['#eab308', '#facc15'],
+    ];
+
+    // ---------- state ----------
+    let ENTRIES = [];
+    let AREAS = [];
+    let activeArea = null;
+    let sort = 'recent';
+    const $ = (s) => document.querySelector(s);
+
+    function normalize(raw) {
+      return raw
+        .filter((e) => e && e.path
+          && !e.path.startsWith('/tools/')
+          && !e.path.includes('/non-nav/')
+          && !['/nav', '/footer', '/', '/aem', '/aem/'].includes(e.path))
+        .map((e) => {
+          const a = areaOf(e.path);
+          return {
+            title: e.title || labelize(e.path.split('/').filter(Boolean).pop() || 'Untitled'),
+            path: e.path,
+            desc: e.description || '',
+            area: a,
+            areaLabel: areaLabel(a),
+            when: Number(e.lastModified) || 0,
+            hay: `${e.title || ''} ${e.description || ''} ${e.path} ${e.body || ''} ${e.tags || ''}`.toLowerCase(),
+          };
+        });
+    }
+
+    function buildAreas() {
+      const counts = {};
+      ENTRIES.forEach((e) => { counts[e.area] = (counts[e.area] || 0) + 1; });
+      AREAS = Object.keys(counts)
+        .map((a) => ({ key: a, label: areaLabel(a), count: counts[a] }))
+        .sort((x, y) => y.count - x.count);
+      AREAS.forEach((a, i) => { a.colors = PALETTE[i % PALETTE.length]; });
+    }
+
+    // ---------- rendering ----------
+    function countUp(el, target) {
+      const dur = 900; const start = performance.now();
+      const step = (t) => {
+        const p = Math.min(1, (t - start) / dur);
+        const eased = 1 - Math.pow(1 - p, 3);
+        el.textContent = Math.round(target * eased);
+        if (p < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    }
+
+    function renderStats() {
+      const newest = ENTRIES.reduce((m, e) => Math.max(m, e.when), 0);
+      $('#stats').innerHTML = `
+        <div class="stat"><b data-c="${ENTRIES.length}">0</b><span>articles</span></div>
+        <div class="stat"><b data-c="${AREAS.length}">0</b><span>areas</span></div>
+        <div class="stat"><b style="font-size:1rem">${newest ? relDate(newest) : '—'}</b><span>last updated</span></div>`;
+      $('#footCount').textContent = `${ENTRIES.length} articles across ${AREAS.length} areas`;
+    }
+
+    function renderBento() {
+      $('#bento').innerHTML = AREAS.map((a, i) => {
+        const feat = i === 0 ? ' feat' : '';
+        const badge = a.label.replace(/[^A-Za-z0-9]/g, '').slice(0, 2).toUpperCase() || 'X';
+        const descHtml = feat
+          ? `<p class="area-desc">The deepest area of the hub — ${a.count} articles covering ${esc(a.label)}.</p>` : '';
+        return `<div class="area-card${feat} reveal" data-area="${a.key}" style="--c1:${a.colors[0]};--c2:${a.colors[1]}">
+          <div class="area-badge">${esc(badge)}</div>
+          <div class="area-meta">
+            <p class="area-name">${esc(a.label)}</p>
+            <div class="area-count">${a.count} article${a.count === 1 ? '' : 's'}</div>
+            ${descHtml}
+          </div>
+        </div>`;
+      }).join('');
+      revealAll('#bento .reveal');
+    }
+
+    function highlight(text, terms) {
+      const safe = esc(text);
+      if (!terms.length) return safe;
+      const parts = terms.map((t) => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).filter((t) => t.length >= 2);
+      if (!parts.length) return safe;
+      return safe.replace(new RegExp(`(${parts.join('|')})`, 'gi'), '<mark>$1</mark>');
+    }
+
+    function renderWall() {
+      const q = $('#q').value.trim().toLowerCase();
+      const terms = q.split(/\s+/).filter(Boolean);
+      let list = ENTRIES.filter((e) => {
+        if (activeArea && e.area !== activeArea) return false;
+        return terms.every((t) => e.hay.includes(t));
+      });
+      list.sort(sort === 'recent'
+        ? (a, b) => b.when - a.when
+        : (a, b) => a.title.localeCompare(b.title));
+
+      // filter bar
+      const chips = [];
+      if (activeArea) {
+        const a = AREAS.find((x) => x.key === activeArea);
+        chips.push(`<span class="chip" style="--c1:${a.colors[0]}">Area: <b>${esc(a.label)}</b><span class="x" data-clear="area">✕</span></span>`);
+      }
+      if (q) chips.push(`<span class="chip">“${esc(q)}”<span class="x" data-clear="q">✕</span></span>`);
+      $('#filterbar').innerHTML = `
+        <span class="muted" style="font-size:.9rem;color:var(--text-dim)">${list.length} result${list.length === 1 ? '' : 's'}</span>
+        ${chips.join('')}
+        <div class="sort">
+          <button data-sort="recent" class="${sort === 'recent' ? 'on' : ''}">Recent</button>
+          <button data-sort="az" class="${sort === 'az' ? 'on' : ''}">A–Z</button>
+        </div>`;
+
+      if (!list.length) {
+        $('#wall').innerHTML = `<div class="empty" style="grid-column:1/-1">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <p>No articles match — try another keyword.</p></div>`;
+        return;
+      }
+      $('#wall').innerHTML = list.map((e) => {
+        const c = (AREAS.find((x) => x.key === e.area) || { colors: PALETTE[0] }).colors;
+        return `<a class="card reveal" href="${esc(e.path)}" style="--c1:${c[0]};--c2:${c[1]}">
+          <div class="card-top">
+            <span class="tag">${esc(e.areaLabel)}</span>
+            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          </div>
+          <h3>${highlight(e.title, terms)}</h3>
+          ${e.desc ? `<p>${highlight(e.desc, terms)}</p>` : '<p style="color:var(--text-faint)">Open article →</p>'}
+          <div class="date"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>${e.when ? 'Updated ' + relDate(e.when) : ''}</div>
+        </a>`;
+      }).join('');
+      revealAll('#wall .reveal');
+    }
+
+    // ---------- interactions ----------
+    let io;
+    function revealAll(sel) {
+      document.querySelectorAll(sel).forEach((el, i) => {
+        el.style.transitionDelay = Math.min(i * 28, 300) + 'ms';
+        io.observe(el);
+      });
+    }
+
+    function setArea(key) {
+      activeArea = activeArea === key ? null : key;
+      document.querySelectorAll('.area-card').forEach((c) => c.classList.toggle('active', c.dataset.area === activeArea));
+      renderWall();
+      if (activeArea) $('#wallSec').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function setTheme(t) {
+      document.documentElement.dataset.theme = t;
+      try { localStorage.setItem('xsc-explore-theme', t); } catch (e) { /* */ }
+      $('#themeIcon').innerHTML = t === 'dark'
+        ? '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>'
+        : '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>';
+    }
+
+    function wire() {
+      revealAll('.hero .reveal, .sec-head.reveal');
+
+      $('#q').addEventListener('input', renderWall);
+      $('#clearBtn').addEventListener('click', () => { $('#q').value = ''; renderWall(); $('#q').focus(); });
+      $('#bento').addEventListener('click', (e) => { const c = e.target.closest('.area-card'); if (c) setArea(c.dataset.area); });
+      $('#filterbar').addEventListener('click', (e) => {
+        const x = e.target.closest('[data-clear]');
+        if (x) { if (x.dataset.clear === 'area') setArea(activeArea); else { $('#q').value = ''; renderWall(); } return; }
+        const s = e.target.closest('[data-sort]');
+        if (s) { sort = s.dataset.sort; renderWall(); }
+      });
+      $('#themeBtn').addEventListener('click', () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'));
+      $('#barSearch').addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); $('#q').focus(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === '/' && document.activeElement !== $('#q')) { e.preventDefault(); $('#q').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+        if (e.key === 'Escape' && document.activeElement === $('#q')) { $('#q').value = ''; renderWall(); }
+      });
+
+      // subtle cursor-follow glow on the hero aurora
+      window.addEventListener('pointermove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+        document.querySelector('.aurora').style.transform = `translate(${x}px, ${y}px)`;
+      }, { passive: true });
+    }
+
+    async function init() {
+      try { setTheme(localStorage.getItem('xsc-explore-theme') || 'dark'); } catch (e) { setTheme('dark'); }
+      io = new IntersectionObserver((ents) => {
+        ents.forEach((en) => {
+          if (en.isIntersecting) {
+            en.target.classList.add('in');
+            en.target.querySelectorAll?.('b[data-c]').forEach((b) => countUp(b, Number(b.dataset.c)));
+            io.unobserve(en.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      let raw = FALLBACK; let live = false;
+      try {
+        const r = await fetch('/query-index.json', { cache: 'no-store' });
+        if (r.ok) { const j = await r.json(); const d = j.data || j; if (Array.isArray(d) && d.length) { raw = d; live = true; } }
+      } catch (e) { /* use fallback */ }
+
+      ENTRIES = normalize(raw);
+      buildAreas();
+      renderStats();
+      renderBento();
+      wire();
+      renderWall();
+      $('#banner').textContent = live ? '' : 'Preview data — connect to the hub to load the live index.';
+    }
+
+    init();
+  </script>
+</body>
+
+</html>
