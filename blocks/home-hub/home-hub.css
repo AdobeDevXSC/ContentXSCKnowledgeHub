@@ -150,7 +150,7 @@
   display: block;
   margin-top: 3px;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  font-size: 0.9rem;
 }
 
 .home-hub .hub-topic-desc {
@@ -284,7 +284,7 @@
 
 .home-hub .hub-card-title {
   font-family: var(--heading-font-family);
-  font-size: 1.06rem;
+  font-size: 1.3rem;
   font-weight: 600;
   line-height: 1.28;
   letter-spacing: -0.01em;
