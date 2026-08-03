@@ -2,7 +2,7 @@ import { getMetadata, toggleTheme } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
 
 // media query match that indicates mobile/tablet width
-const isDesktop = window.matchMedia('(min-width: 1000px)');
+const isDesktop = window.matchMedia('(min-width: 1214px)');
 
 function closeOnEscape(e) {
   if (e.code === 'Escape') {
@@ -213,6 +213,17 @@ export default async function decorate(block) {
     link.removeAttribute('target');
     link.removeAttribute('rel');
   });
+  // ⌘K command-palette trigger
+  const searchBtn = document.createElement('button');
+  searchBtn.type = 'button';
+  searchBtn.className = 'nav-search-btn';
+  searchBtn.setAttribute('aria-label', 'Search');
+  searchBtn.innerHTML = '<span uk-icon="icon: search"></span>';
+  searchBtn.addEventListener('click', () => {
+    if (typeof window.openCommandPalette === 'function') window.openCommandPalette();
+  });
+  navTools.appendChild(searchBtn);
+
   const themeToggle = document.createElement('label');
   themeToggle.className = 'theme-toggle';
   themeToggle.setAttribute('aria-label', 'Toggle dark mode');

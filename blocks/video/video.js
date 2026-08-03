@@ -14,6 +14,10 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 function getVideoSource(link) {
   if (link.includes('youtube') || link.includes('youtu.be')) return 'youtube';
   if (link.includes('vimeo')) return 'vimeo';
+  // SharePoint / OneDrive / Stream — e.g. Microsoft Teams meeting recordings.
+  // Checked BEFORE the file fallback because these links often end in ".mp4"
+  // yet are share pages, not direct files.
+  if (link.includes('sharepoint.com') || link.includes('1drv.ms')) return 'sharepoint';
   return 'video';
 }
 
@@ -26,6 +30,7 @@ function getVideoTypeLabel(source) {
   const labels = {
     youtube: 'YouTube video',
     vimeo: 'Vimeo video',
+    sharepoint: 'video recording',
     video: 'MP4 video',
   };
   return labels[source] || 'video';
@@ -79,6 +84,34 @@ function embedVimeo(url, autoplay, background) {
   return temp.children.item(0);
 }
 
+/**
+ * Embeds a SharePoint / OneDrive / Stream video (e.g. a Teams meeting recording).
+ * An `_layouts/15/embed.aspx` embed URL is used as-is; a normal "Copy link" share
+ * URL is best-effort converted to an embeddable view. NOTE: the viewer must be
+ * signed in to the tenant (SSO) and have access to the file — embedding does not
+ * bypass SharePoint permissions.
+ * @param {URL} url
+ * @returns {HTMLElement}
+ */
+function embedSharePoint(url) {
+  let src = url.href;
+  if (!/\/_layouts\/15\/embed\.aspx/i.test(url.pathname)) {
+    const embed = new URL(url.href);
+    // Drop the share-resolver prefix (…/:v:/r/…, …/:v:/g/…) and request the embed view.
+    embed.pathname = embed.pathname.replace(/\/:[a-z]:\/[a-z]\//i, '/');
+    embed.searchParams.set('action', 'embedview');
+    src = embed.href;
+  }
+  const temp = document.createElement('div');
+  temp.innerHTML = `<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
+      <iframe src="${src}"
+      style="border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;"
+      frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
+      title="Video recording" loading="lazy" scrolling="no"></iframe>
+    </div>`;
+  return temp.children.item(0);
+}
+
 function getVideoElement(source, autoplay, background) {
   const video = document.createElement('video');
   video.setAttribute('controls', '');
@@ -119,6 +152,12 @@ function loadVideoEmbed(block, link, autoplay, background) {
     embedWrapper.querySelector('iframe').addEventListener('load', () => {
       block.dataset.embedLoaded = true;
     });
+  } else if (source === 'sharepoint') {
+    const embedWrapper = embedSharePoint(url);
+    block.append(embedWrapper);
+    embedWrapper.querySelector('iframe').addEventListener('load', () => {
+      block.dataset.embedLoaded = true;
+    });
   } else {
     const videoEl = getVideoElement(link, autoplay, background);
     block.append(videoEl);
@@ -130,7 +169,11 @@ function loadVideoEmbed(block, link, autoplay, background) {
 
 export default async function decorate(block) {
   const placeholder = block.querySelector('picture');
-  const link = block.querySelector('a').href;
+  // Accept either an authored hyperlink OR a plain-text URL pasted into the block
+  // (long SharePoint/Stream embed URLs often don't get auto-linked).
+  const anchor = block.querySelector('a');
+  const link = anchor ? anchor.href : block.textContent.trim();
+  if (!link) return;
   block.textContent = '';
   block.dataset.embedLoaded = false;
 

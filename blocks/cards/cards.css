@@ -8,13 +8,24 @@
 }
 
 .cards > ul > li {
-  border: 1px solid #dadada;
-  background-color: var(--background-color);
-  padding: 1rem;
+  border: 1px solid var(--border);
+  background-color: var(--surface-1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    border-color var(--dur) var(--ease-out);
+}
+
+.cards > ul > li:hover {
+  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .cards .cards-card-body {
-  margin: 16px;
+  margin: 1rem 1.15rem 1.2rem;
 }
 
 .cards .cards-card-image {

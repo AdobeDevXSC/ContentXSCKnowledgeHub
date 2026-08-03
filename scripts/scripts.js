@@ -17,13 +17,9 @@ import './uikit.min.js';
 import './uikit-icons.min.js';
 
 function toggleLeftNav() {
+  // Per-page toggle only — not persisted, so every page loads with the nav
+  // expanded (see loadLeftNav).
   document.body.classList.toggle('leftnav-collapsed');
-  try {
-    localStorage.setItem(
-      'leftnav-collapsed',
-      document.body.classList.contains('leftnav-collapsed') ? 'true' : 'false',
-    );
-  } catch (e) { /* ignore */ }
 }
 
 /**
@@ -47,9 +43,8 @@ function wrapMainContent(main) {
 }
 
 async function loadLeftNav(main) {
-  if (localStorage.getItem('leftnav-collapsed') === 'true') {
-    document.body.classList.add('leftnav-collapsed');
-  }
+  // Always load expanded so every article opens with the nav visible; the
+  // collapse toggle is per-page and intentionally not persisted.
   const wrapper = document.createElement('div');
   wrapper.className = 'leftnav-wrapper';
 
@@ -81,6 +76,22 @@ async function loadLeftNav(main) {
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
   loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
   await decorate(block);
+}
+
+// ---------------------------------------------------------------------------
+// Shared: map a content path to its top-level area label (used by the palette)
+// ---------------------------------------------------------------------------
+
+const SECTION_LABELS = {
+  aem: 'AEM',
+  'xsc-resources': 'XSC Resources',
+  'annual-events': 'Annual Events',
+};
+
+function sectionLabelFromPath(path) {
+  const seg = (path || '').split('/').filter(Boolean)[0] || '';
+  if (SECTION_LABELS[seg]) return SECTION_LABELS[seg];
+  return seg ? seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()) : 'Page';
 }
 
 async function loadFonts() {
@@ -127,15 +138,40 @@ function buildAutoBlocks(main) {
 // Open all links inside <main> (excluding .leftnav-container) in a new tab
 // ---------------------------------------------------------------------------
 
+// EDS internal-link hosts (*.aem.page, *.aem.live, *.hlx.page, *.hlx.live).
+const EDS_HOST_RE = /\.(?:aem|hlx)\.(?:page|live)$/;
+
 /**
- * Sets target="_blank" and rel="noopener noreferrer" on every <a> inside
- * `root` that is NOT inside a .leftnav-container element.
+ * The AEM/helix pipeline strips the domain from links whose host is an EDS
+ * domain — assuming they are internal — so a link to ANOTHER EDS site ends up
+ * pointing at the current domain. When the visible text kept the full URL (as
+ * autolinked URLs do), restore it as the href.
+ * @param {HTMLAnchorElement} link
+ */
+function restoreEdsLink(link) {
+  const text = link.textContent.trim();
+  if (!/^https?:\/\//i.test(text)) return;
+  let textUrl;
+  try {
+    textUrl = new URL(text);
+  } catch (e) {
+    return;
+  }
+  if (EDS_HOST_RE.test(textUrl.hostname) && link.href !== textUrl.href) {
+    link.href = textUrl.href;
+  }
+}
+
+/**
+ * Restores cross-site EDS links (see restoreEdsLink) and opens every <a> inside
+ * `root` in a new tab, except links inside the left nav, breadcrumb, or home hub.
  * @param {Element} root - The element to scope the search to (defaults to <main>)
  */
 export function decorateMainLinks(root = document.querySelector('main')) {
   if (!root) return;
   root.querySelectorAll('a[href]').forEach((link) => {
-    if (link.closest('.leftnav-container') || link.closest('.page-breadcrumb')) return;
+    restoreEdsLink(link);
+    if (link.closest('.leftnav-container') || link.closest('.page-breadcrumb') || link.closest('.home-hub')) return;
     link.setAttribute('target', '_blank');
     link.setAttribute('rel', 'noopener noreferrer');
   });
@@ -165,20 +201,18 @@ const PAGE_META_BANNER_EXCLUDED_PATHS = [
 ];
 
 /**
- * Fetches page metadata from the query index for the current path.
- * @returns {Promise<{author: string, lastModified: string}|null>}
+ * Fetches all query-index entries.
+ * @returns {Promise<Array>}
  */
-async function fetchPageMeta() {
+async function fetchIndexEntries() {
   try {
     const resp = await fetch('/query-index.json');
     if (!resp.ok) throw new Error(`query-index fetch failed: ${resp.status}`);
     const json = await resp.json();
-    const entries = json.data || json;
-    const currentPath = window.location.pathname;
-    return entries.find((e) => e.path === currentPath) || null;
+    return json.data || json || [];
   } catch (error) {
     console.error('Failed to fetch query-index.json:', error);
-    return null;
+    return [];
   }
 }
 
@@ -200,40 +234,44 @@ function formatTimestamp(timestamp) {
 }
 
 /**
- * Converts a URL path segment to a display label.
- * @param {string} segment
+ * Resolves a breadcrumb label for a path. Prefers the page's real title (correct
+ * casing, no slug artifacts); otherwise de-slugs the segment WITHOUT capitalizing.
+ * @param {string} path Full accumulated path for this crumb
+ * @param {string} segment The last URL segment of that path
+ * @param {Map<string, string>} titleByPath path -> page title
  * @returns {string}
  */
-function segmentToLabel(segment) {
+function segmentLabel(path, segment, titleByPath) {
+  const title = titleByPath.get(path);
+  if (title) return title;
   if (segment.toLowerCase() === 'aem') return 'AEM';
-  return segment
-    .split('-')
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
+  return segment.replace(/-/g, ' ');
 }
 
 /**
  * Builds breadcrumb items from the current pathname.
+ * @param {Map<string, string>} titleByPath path -> page title
  * @returns {Array<{path: string, label: string}>}
  */
-function buildBreadcrumbItems() {
-  const pathname = window.location.pathname;
+function buildBreadcrumbItems(titleByPath) {
+  const { pathname } = window.location;
   const segments = pathname.split('/').filter(Boolean);
   const items = [];
   let acc = '';
   segments.forEach((seg) => {
     acc += `/${seg}`;
-    items.push({ path: acc, label: segmentToLabel(seg) });
+    items.push({ path: acc, label: segmentLabel(acc, seg, titleByPath) });
   });
   return items;
 }
 
 /**
  * Creates the breadcrumb nav element.
+ * @param {Map<string, string>} titleByPath path -> page title
  * @returns {HTMLElement}
  */
-function createBreadcrumb() {
-  const items = buildBreadcrumbItems();
+function createBreadcrumb(titleByPath) {
+  const items = buildBreadcrumbItems(titleByPath);
   const nav = document.createElement('nav');
   nav.className = 'page-breadcrumb';
   nav.setAttribute('aria-label', 'Breadcrumb');
@@ -267,13 +305,16 @@ async function loadPageMetaBanner(main) {
   const defaultContentWrapper = firstSection.querySelector('.default-content-wrapper');
   const insertBefore = defaultContentWrapper || firstSection.firstChild;
 
+  const entries = await fetchIndexEntries();
+  const titleByPath = new Map(entries.map((e) => [e.path, e.title]));
+
   const wrapper = document.createElement('div');
   wrapper.className = 'page-meta-wrapper';
 
-  const breadcrumb = createBreadcrumb();
+  const breadcrumb = createBreadcrumb(titleByPath);
   wrapper.appendChild(breadcrumb);
 
-  const indexMeta = await fetchPageMeta();
+  const indexMeta = entries.find((e) => e.path === window.location.pathname) || null;
   const author = (indexMeta && indexMeta.author) || getMetadata('author');
   const lastModifiedRaw = (indexMeta && indexMeta.lastModified) || getMetadata('lastModified');
   const lastModified = formatTimestamp(lastModifiedRaw);
@@ -351,6 +392,8 @@ async function loadPageMetaBanner(main) {
       .page-breadcrumb {
         font-size: 0.8125rem;
         color: #555;
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
       }
       .page-breadcrumb-list {
         display: flex;
@@ -571,6 +614,393 @@ function initLightbox() {
 }
 
 // ---------------------------------------------------------------------------
+// Recent pages — the last few pages visited, surfaced in the ⌘K empty state
+// ---------------------------------------------------------------------------
+
+const RECENT_PAGES_KEY = 'cmdk-recent-pages';
+
+function recordRecentPage() {
+  try {
+    const path = window.location.pathname;
+    if (!path || path === '/' || path === '/index' || window.isErrorPage) return;
+    const title = (document.title || '').trim();
+    if (!title) return;
+    const prev = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
+    const prevList = Array.isArray(prev) ? prev.filter((p) => p && p.path !== path) : [];
+    const list = [{ path, title }, ...prevList].slice(0, 3);
+    localStorage.setItem(RECENT_PAGES_KEY, JSON.stringify(list));
+  } catch (e) { /* ignore */ }
+}
+
+// ---------------------------------------------------------------------------
+// Command palette (⌘K) — global fuzzy search over the whole knowledge hub
+// ---------------------------------------------------------------------------
+
+function initCommandPalette() {
+  // Skip on error pages (e.g. 404). They load a standalone HTML that does not
+  // include uikit.min.css, so the modal would have no `display: none` rule and
+  // render visible — and there's nothing to search on an error page anyway.
+  if (window.isErrorPage || document.getElementById('cmdk-modal') || !window.UIkit) return;
+
+  const modal = document.createElement('div');
+  modal.id = 'cmdk-modal';
+  modal.className = 'cmdk uk-modal';
+  modal.setAttribute('uk-modal', 'bg-close: true; esc-close: true');
+  modal.innerHTML = `
+    <div class="uk-modal-dialog cmdk-dialog">
+      <div class="cmdk-search">
+        <span uk-icon="icon: search"></span>
+        <input type="text" class="cmdk-input" placeholder="Search the knowledge hub…" aria-label="Search the knowledge hub" autocomplete="off" spellcheck="false" />
+        <button type="button" class="cmdk-close" aria-label="Close search"><span uk-icon="icon: close"></span></button>
+      </div>
+      <ul class="cmdk-results" role="listbox" aria-label="Search results"></ul>
+      <div class="cmdk-empty" hidden></div>
+    </div>`;
+  document.body.appendChild(modal);
+  window.UIkit.modal(modal);
+  modal.querySelector('.cmdk-close').addEventListener('click', () => window.UIkit.modal(modal).hide());
+
+  const input = modal.querySelector('.cmdk-input');
+  const results = modal.querySelector('.cmdk-results');
+  const empty = modal.querySelector('.cmdk-empty');
+  let data = [];
+  let items = [];
+  let active = -1;
+  let loaded = false;
+
+  // Recent searches (last 5, persisted) with a suggested-topics fallback.
+  const RECENT_KEY = 'cmdk-recent';
+  const SEARCH_SUGGESTIONS = ['AEM', 'Assets', 'Dynamic Media', 'Experience Modernization Agent', 'Experience Workspace'];
+
+  function getRecent() {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_KEY) || '[]');
+      return Array.isArray(v) ? v.slice(0, 5) : [];
+    } catch (e) { return []; }
+  }
+
+  function addRecent(term) {
+    const t = (term || '').trim();
+    if (!t) return;
+    try {
+      const list = [t, ...getRecent().filter((x) => x.toLowerCase() !== t.toLowerCase())]
+        .slice(0, 5);
+      localStorage.setItem(RECENT_KEY, JSON.stringify(list));
+    } catch (e) { /* ignore */ }
+  }
+
+  function getRecentPages() {
+    try {
+      const v = JSON.parse(localStorage.getItem(RECENT_PAGES_KEY) || '[]');
+      return Array.isArray(v) ? v.filter((p) => p && p.path && p.title).slice(0, 3) : [];
+    } catch (e) { return []; }
+  }
+
+  // Escape authored/user text before injecting into results markup.
+  const escHtml = (s) => (s || '').replace(/[&<>"']/g, (c) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[c]));
+
+  const clearBtn = (which) => `<button type="button" class="cmdk-clear" data-clear="${which}">Clear</button>`;
+  const groupLi = (label) => `<li class="cmdk-group">${label}</li>`;
+
+  // ---- Relevance scoring ---------------------------------------------------
+  // Naive `title+path+body` substring matching returned a third of the site for
+  // short queries (e.g. "ema" matched "sch-ema", "d-ema-nd"). We tokenize on word
+  // boundaries and score by WHERE a term hits — title/path count far more than
+  // body — plus acronym matching so "ema" finds "Experience Modernization Agent"
+  // (its initials) rather than every page with those three letters mid-word.
+  const STOP_WORDS = new Set(['the', 'a', 'an', 'and', 'or', 'of', 'to', 'in', 'on', 'for', 'with', 'vs', 'via', 'how', 'your']);
+  const tokenize = (s) => (s || '').toLowerCase().match(/[a-z0-9]+/g) || [];
+  const someStartsWith = (list, prefix) => list.some((w) => w.startsWith(prefix));
+
+  // Initials of a title, with and without stop words, so "voc" matches
+  // "Voice of the Customer" and "ema" matches "Experience Modernization Agent".
+  function titleAcronyms(title) {
+    const words = tokenize(title);
+    return [
+      words.map((w) => w[0]).join(''),
+      words.filter((w) => !STOP_WORDS.has(w)).map((w) => w[0]).join(''),
+    ];
+  }
+
+  function buildSearchMeta(e) {
+    const titleTokens = tokenize(e.title);
+    const pathTokens = tokenize(e.path);
+    const bodyTokens = tokenize(e.body);
+    // Body word -> occurrence count, so frequent terms rank higher in a full-text
+    // (body) match, e.g. a page that says "adaptive" 15 times outranks one that
+    // mentions it once.
+    const bodyFreq = new Map();
+    bodyTokens.forEach((w) => bodyFreq.set(w, (bodyFreq.get(w) || 0) + 1));
+    const [allInitials, noStopInitials] = titleAcronyms(e.title);
+    return {
+      titleLc: (e.title || '').toLowerCase(),
+      titleTokens,
+      titleSet: new Set(titleTokens),
+      pathTokens,
+      pathSet: new Set(pathTokens),
+      pathNorm: ` ${pathTokens.join(' ')} `,
+      descSet: new Set(tokenize(e.description)),
+      bodyFreq,
+      bodyNorm: ` ${bodyTokens.join(' ')} `,
+      allInitials,
+      noStopInitials,
+    };
+  }
+
+  function scoreEntry(entry, query, terms) {
+    const m = entry.searchMeta;
+    if (!m) return 0;
+    let s = 0;
+    // Whole-query signals.
+    if (m.titleLc === query) s += 100; // exact title
+    if (query === m.allInitials || query === m.noStopInitials) {
+      s += 80; // exact acronym — "ema" === initials of "Experience Modernization Agent"
+    } else if (query.length >= 2
+      && (m.allInitials.startsWith(query) || m.noStopInitials.startsWith(query))) {
+      s += 45; // acronym prefix
+    }
+    // Multi-word phrase adjacency — the words appearing together is a strong
+    // signal, weighted by which field they appear together in.
+    if (terms.length >= 2) {
+      if (m.titleLc.includes(query)) s += 50;
+      else if (m.pathNorm.includes(` ${query}`)) s += 30;
+      else if (m.bodyNorm.includes(` ${query}`)) s += 20;
+    }
+    // Per-term signals — a hit in the title/path is worth far more than in the body.
+    terms.forEach((t) => {
+      if (m.titleSet.has(t)) s += 30; // whole word in title
+      else if (someStartsWith(m.titleTokens, t)) s += 16; // word-prefix in title
+      else if (m.titleLc.includes(t)) s += 5; // substring in title (fallback)
+      if (m.pathSet.has(t)) s += 12;
+      else if (someStartsWith(m.pathTokens, t)) s += 5;
+      if (m.descSet.has(t)) s += 8; // whole word in description
+      const freq = m.bodyFreq.get(t); // whole word in body, weighted by frequency
+      if (freq) s += Math.min(freq, 6) * 3;
+    });
+    return s;
+  }
+
+  // A term counts as present only when it hits a prominent field — title, path,
+  // or description — never the body alone.
+  function prominentMatch(m, t) {
+    return m.titleSet.has(t)
+      || someStartsWith(m.titleTokens, t)
+      || m.titleLc.includes(t)
+      || m.pathSet.has(t)
+      || someStartsWith(m.pathTokens, t)
+      || m.descSet.has(t);
+  }
+
+  // An entry qualifies only when EVERY query term is prominently present, so a
+  // two-word query like "experience modernization" no longer surfaces pages that
+  // merely contain the common word "experience". A whole-query acronym qualifies too.
+  function qualifies(entry, query, terms) {
+    const m = entry.searchMeta;
+    if (!m) return false;
+    if (query === m.allInitials || query === m.noStopInitials) return true;
+    if (query.length >= 2 && query.indexOf(' ') === -1
+      && (m.allInitials.startsWith(query) || m.noStopInitials.startsWith(query))) return true;
+    return terms.every((t) => prominentMatch(m, t));
+  }
+
+  // Fallback tier: the query is present in the body content — the whole phrase
+  // for multi-word queries, or a whole word for single-word queries. Used only
+  // when no page qualifies prominently, so full-text noise never pollutes precise
+  // title/path matches (e.g. "adaptive form" still finds the Forms Overview page).
+  function bodyQualifies(entry, query, terms) {
+    const m = entry.searchMeta;
+    if (!m) return false;
+    if (terms.length >= 2) return m.bodyNorm.includes(` ${query}`);
+    return m.bodyFreq.has(terms[0]);
+  }
+
+  async function ensureData() {
+    if (loaded) return;
+    loaded = true;
+    try {
+      const resp = await fetch('/query-index.json');
+      if (resp.ok) {
+        const json = await resp.json();
+        data = (json.data || json || []).filter((e) => e.path
+          && !e.path.startsWith('/tools/')
+          && !e.path.includes('/non-nav/')
+          && e.path !== '/nav');
+        // Precompute per-entry search tokens once, not on every keystroke.
+        data.forEach((e) => { e.searchMeta = buildSearchMeta(e); });
+      }
+    } catch (e) { /* palette still opens, just empty */ }
+  }
+
+  function itemsHtml(list, offset = 0) {
+    return list.map((it, i) => {
+      const di = offset + i;
+      if (it.type === 'term') {
+        return `<li class="cmdk-item" role="option" data-i="${di}">
+        <span class="cmdk-item-icon" uk-icon="icon: ${it.icon}"></span>
+        <span class="cmdk-item-body"><span class="cmdk-item-title">${escHtml(it.term)}</span></span>
+      </li>`;
+      }
+      const e = it.entry;
+      const title = e.title || sectionLabelFromPath(e.path);
+      return `<li class="cmdk-item" role="option" data-i="${di}">
+        <span class="cmdk-item-icon" uk-icon="icon: file-text"></span>
+        <span class="cmdk-item-body">
+          <span class="cmdk-item-title">${escHtml(title)}</span>
+          <span class="cmdk-item-path">${escHtml(e.path)}</span>
+        </span>
+        <span class="cmdk-item-tag">${escHtml(sectionLabelFromPath(e.path))}</span>
+      </li>`;
+    }).join('');
+  }
+
+  // Rich empty state (mirrors the leftnav): icon + "No results found" + the
+  // query + a FluffyJaws deep link to ask the assistant about the term.
+  function renderNoResults(term) {
+    const message = encodeURIComponent(`Tell me more about ${term}`);
+    const fluffyUrl = `https://fluffyjaws.adobe.com/?message=${message}`;
+    empty.innerHTML = `
+      <span class="cmdk-noresults-icon" uk-icon="icon: search; ratio: 1.4"></span>
+      <p class="cmdk-noresults-text">No results found</p>
+      <p class="cmdk-noresults-hint">Can't find "${escHtml(term)}"</p>
+      <a class="cmdk-noresults-link" href="${fluffyUrl}"
+        target="_blank" rel="noopener noreferrer">Try FluffyJaws ↗</a>`;
+  }
+
+  function render(q) {
+    const query = q.trim().toLowerCase();
+    const rawQuery = q.trim();
+
+    // Empty state: recent pages, then recent searches (persisted) or suggestions.
+    if (!query) {
+      empty.hidden = true;
+      results.hidden = false;
+      const recentSearches = getRecent();
+      const usingRecent = recentSearches.length > 0;
+      const suggestions = usingRecent ? recentSearches : SEARCH_SUGGESTIONS;
+      const icon = usingRecent ? 'clock' : 'search';
+      const pageItems = getRecentPages().map((p) => ({ type: 'page', entry: p }));
+      const termItems = suggestions.map((t) => ({ type: 'term', term: t, icon }));
+      items = [...pageItems, ...termItems];
+      // Nothing pre-highlighted — selection only appears on keyboard nav.
+      let html = '';
+      if (pageItems.length) {
+        html += groupLi(`Recent pages${clearBtn('pages')}`) + itemsHtml(pageItems, 0);
+      }
+      const label = usingRecent ? `Recent searches${clearBtn('searches')}` : 'Suggestions';
+      html += groupLi(label) + itemsHtml(termItems, pageItems.length);
+      results.innerHTML = html;
+      active = -1;
+      return;
+    }
+
+    // Two-tier search. Tier 1: pages with every query term in a prominent field
+    // (title/path/description). Tier 2, only when Tier 1 is empty: full-text body
+    // search — so "adaptive form" still finds a page whose body is about Adaptive
+    // Forms, without body noise polluting precise title/path matches.
+    const terms = tokenize(query);
+    let pool = data.filter((entry) => qualifies(entry, query, terms));
+    if (!pool.length) pool = data.filter((entry) => bodyQualifies(entry, query, terms));
+    const scored = pool
+      .map((entry) => ({ entry, score: scoreEntry(entry, query, terms) }))
+      .filter((r) => r.score > 0)
+      .sort((a, b) => b.score - a.score
+        || (a.entry.title || '').localeCompare(b.entry.title || ''));
+    const cutoff = scored.length ? Math.max(10, scored[0].score * 0.3) : 0;
+    items = scored
+      .filter((r) => r.score >= cutoff)
+      .slice(0, 40)
+      .map((r) => ({ type: 'page', entry: r.entry }));
+
+    if (!items.length) {
+      results.innerHTML = '';
+      renderNoResults(rawQuery);
+      empty.hidden = false;
+      results.hidden = true;
+      active = -1;
+      return;
+    }
+    empty.hidden = true;
+    results.hidden = false;
+    // No item pre-highlighted — selection only appears once the user navigates
+    // with the keyboard (arrow keys). Mouse users still get :hover feedback.
+    results.innerHTML = itemsHtml(items, 0);
+    active = -1;
+  }
+
+  function setActive(next) {
+    const lis = [...results.querySelectorAll('.cmdk-item')];
+    if (!lis.length) return;
+    active = (next + lis.length) % lis.length;
+    lis.forEach((li, i) => li.classList.toggle('active', i === active));
+    lis[active].scrollIntoView({ block: 'nearest' });
+  }
+
+  function go(i) {
+    const it = items[i];
+    if (!it) return;
+    if (it.type === 'term') {
+      input.value = it.term;
+      render(it.term);
+      input.focus();
+      return;
+    }
+    const { entry } = it;
+    if (entry && entry.path) {
+      addRecent(input.value);
+      window.UIkit.modal(modal).hide();
+      window.location.href = entry.path;
+    }
+  }
+
+  input.addEventListener('input', () => render(input.value));
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActive(active < 0 ? 0 : active + 1); // first press selects the first item
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActive(active < 0 ? -1 : active - 1); // first press selects the last item
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (active >= 0) go(active); // opens only once an item is keyboard-selected
+    }
+  });
+  results.addEventListener('click', (e) => {
+    const clear = e.target.closest('.cmdk-clear');
+    if (clear) {
+      const key = clear.dataset.clear === 'pages' ? RECENT_PAGES_KEY : RECENT_KEY;
+      try { localStorage.removeItem(key); } catch (err) { /* ignore */ }
+      render('');
+      input.focus();
+      return;
+    }
+    const li = e.target.closest('.cmdk-item');
+    if (li) go(Number(li.dataset.i));
+  });
+
+  // Reset to the empty state BEFORE the open animation, so the modal never
+  // animates in showing the previous query/results and then snaps to empty
+  // (that snap is the flicker). ensureData is fire-and-forget: the empty state
+  // needs no data, and once it loads we re-render if the user already typed.
+  window.UIkit.util.on(modal, 'beforeshow', () => {
+    input.value = '';
+    render('');
+    ensureData().then(() => { if (input.value.trim()) render(input.value); });
+  });
+  window.UIkit.util.on(modal, 'shown', () => input.focus());
+  // Reset once closed — runs after the fade completes (modal already hidden),
+  // so it's invisible and the palette always reopens in a clean state.
+  window.UIkit.util.on(modal, 'hidden', () => {
+    input.value = '';
+    render('');
+  });
+
+  window.openCommandPalette = () => window.UIkit.modal(modal).show();
+}
+
+// ---------------------------------------------------------------------------
 // Page lifecycle
 // ---------------------------------------------------------------------------
 
@@ -593,7 +1023,18 @@ async function loadEager(doc) {
     if (main) {
       decorateMain(main);
       if (!window.isErrorPage) wrapMainContent(main);
-      if (window.self === window.top && !window.isErrorPage) await loadLeftNav(main);
+      // The site homepage (root "/") hides the left nav and centers its content;
+      // the hero block breaks itself out to full width (see hero.css).
+      const { pathname } = window.location;
+      const isHome = pathname === '/' || pathname === '/index';
+      const isTools = pathname.startsWith('/tools/');
+      const isDrafts = pathname.includes('/drafts/');
+      if (isHome) document.body.classList.add('home');
+      // Left nav is for article pages only — not the homepage, /tools/** pages,
+      // or anything inside a /drafts/ folder.
+      if (window.self === window.top && !window.isErrorPage && !isHome && !isTools && !isDrafts) {
+        await loadLeftNav(main);
+      }
       await loadSection(main.querySelector('.section'), waitForFirstImage);
     }
   } finally {
@@ -626,6 +1067,8 @@ async function loadPage() {
   await loadLazy(document);
   loadDelayed();
   initLightbox();
+  initCommandPalette();
+  recordRecentPage();
 
   // Inject author + last modified banner into the first section
   const main = document.querySelector('main');
