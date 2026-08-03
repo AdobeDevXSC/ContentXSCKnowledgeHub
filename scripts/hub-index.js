@@ -15,6 +15,7 @@ const TOPIC_LABELS = {
   'sites-optimizer': 'Sites Optimizer',
   'brand-concierge': 'Brand Concierge',
   'demo-scripts': 'Demo Scripts',
+  'dynamic-media': 'Dynamic Media',
 };
 
 // signature colour duos assigned per topic (stable, by size rank)
@@ -39,6 +40,9 @@ export const labelize = (seg) => seg.split('-').map((w) => {
 export const topicOf = (path) => {
   const s = path.split('/').filter(Boolean);
   if (!s.length) return 'home';
+  // Dynamic Media lives under Assets in the content tree but is surfaced as
+  // its own top-level topic on the homepage.
+  if (s[0] === 'aem' && s[1] === 'assets' && s[2] === 'dynamic-media') return 'dynamic-media';
   return s[0] === 'aem' && s.length > 1 ? s[1] : s[0];
 };
 
