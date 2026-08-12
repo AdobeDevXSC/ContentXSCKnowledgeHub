@@ -83,6 +83,25 @@ body.leftnav-collapsed .leftnav-container {
   transform: translateX(-105%);
 }
 
+/* ===== homepage overlay =====
+   On the homepage the nav floats over the content instead of taking a column
+   in the flex row, so opening it never pushes the hero/content aside. It loads
+   collapsed (see loadEager) and slides in over the page when opened. */
+body.home .leftnav-wrapper {
+  position: fixed;
+  top: var(--nav-height);
+  left: 0;
+  bottom: 0;
+  width: auto;
+  min-width: 0;
+  z-index: 90;
+  pointer-events: none;
+}
+
+body.home .leftnav-container {
+  pointer-events: auto;
+}
+
 .leftnav-collapse-btn {
   position: absolute;
   top: 1rem;
@@ -131,6 +150,12 @@ body.leftnav-collapsed .leftnav-expand-btn {
 body.dark-mode .leftnav-expand-btn {
   background-color: #1a1a1a;
   box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+/* the expand button lives inside the (pointer-events:none) homepage wrapper,
+   so it must re-enable clicks to be usable while the nav is collapsed */
+body.home .leftnav-expand-btn {
+  pointer-events: auto;
 }
 
 .leftnav {

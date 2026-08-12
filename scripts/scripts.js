@@ -1023,16 +1023,18 @@ async function loadEager(doc) {
     if (main) {
       decorateMain(main);
       if (!window.isErrorPage) wrapMainContent(main);
-      // The site homepage (root "/") hides the left nav and centers its content;
-      // the hero block breaks itself out to full width (see hero.css).
+      // The homepage (root "/") centers its content and keeps its full-width
+      // hero (see hero.css). Its left nav loads collapsed and, when opened,
+      // overlays the content instead of pushing it (see leftnav.css body.home).
       const { pathname } = window.location;
       const isHome = pathname === '/' || pathname === '/index';
       const isTools = pathname.startsWith('/tools/');
       const isDrafts = pathname.includes('/drafts/');
-      if (isHome) document.body.classList.add('home');
-      // Left nav is for article pages only — not the homepage, /tools/** pages,
+      // On the homepage start collapsed so the nav is closed on page load.
+      if (isHome) document.body.classList.add('home', 'leftnav-collapsed');
+      // Left nav loads on the homepage and article pages — not /tools/** pages
       // or anything inside a /drafts/ folder.
-      if (window.self === window.top && !window.isErrorPage && !isHome && !isTools && !isDrafts) {
+      if (window.self === window.top && !window.isErrorPage && !isTools && !isDrafts) {
         await loadLeftNav(main);
       }
       await loadSection(main.querySelector('.section'), waitForFirstImage);
