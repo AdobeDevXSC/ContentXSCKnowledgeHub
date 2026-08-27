@@ -1,0 +1,25 @@
+name: Notify Power Automate on Publish
+
+on:
+  repository_dispatch:
+    types: [resource-published, resource-unpublished]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Log raw payload (for confirming field names)
+        run: echo '${{ toJson(github.event.client_payload) }}'
+
+      - name: Send publish event to Power Automate
+        run: |
+          curl -X POST "${{ secrets.POWER_AUTOMATE_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -H "X-Shared-Secret: ${{ secrets.SHARED_SECRET }}" \
+            -d '{
+              "path": "${{ github.event.client_payload.path }}",
+              "status": "${{ github.event.action }}",
+              "repo": "${{ github.repository }}",
+              "actor": "${{ github.actor }}",
+              "timestamp": "${{ github.event.client_payload.timestamp }}"
+            }'
