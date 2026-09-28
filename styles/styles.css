@@ -236,15 +236,8 @@ body.dark-mode a:hover {
   color: var(--link-hover-color);
 }
 
-body.dark-mode .page-meta-banner {
-  background: rgba(255, 255, 255, 0.08);
-  border-left-color: rgba(255, 255, 255, 0.2);
-  color: var(--text-color);
-}
-
-body.dark-mode .page-meta-banner strong {
-  color: var(--text-color);
-}
+/* .page-meta-banner now themes itself via design tokens (--surface-1,
+   --border, --accent, --text-*), so no dark-mode overrides are needed. */
 
 body.dark-mode .page-breadcrumb {
   color: var(--text-color);

@@ -322,23 +322,27 @@ async function loadPageMetaBanner(main) {
   const lastModified = formatTimestamp(lastModifiedRaw);
 
   if (author || lastModified) {
+    const AUTHOR_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M10 10a3.4 3.4 0 100-6.8A3.4 3.4 0 0010 10zm0 1.6c-3.4 0-6.2 1.85-6.2 4.1 0 .6.48 1.1 1.08 1.1h10.24c.6 0 1.08-.5 1.08-1.1 0-2.25-2.78-4.1-6.2-4.1z"/></svg>';
+    const MODIFIED_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 5.75V10l2.9 1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
     const banner = document.createElement('div');
     banner.className = 'page-meta-banner';
 
+    const row = (cls, icon, label, value) => {
+      const el = document.createElement('span');
+      el.className = cls;
+      el.innerHTML = `<span class="page-meta-icon">${icon}</span><span class="page-meta-text"><span class="page-meta-label">${label}</span><span class="page-meta-value">${value}</span></span>`;
+      return el;
+    };
+
     if (author) {
-      const authorEl = document.createElement('span');
-      authorEl.className = 'page-meta-author';
       const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
       const label = authors.length > 1 ? 'Authors' : 'Author';
-      authorEl.innerHTML = `<strong>${label}:</strong> ${authors.join(', ')}`;
-      banner.appendChild(authorEl);
+      banner.appendChild(row('page-meta-author', AUTHOR_ICON, label, authors.join(', ')));
     }
 
     if (lastModified) {
-      const modifiedEl = document.createElement('span');
-      modifiedEl.className = 'page-meta-modified';
-      modifiedEl.innerHTML = `<strong>Last Modified:</strong> ${lastModified}`;
-      banner.appendChild(modifiedEl);
+      banner.appendChild(row('page-meta-modified', MODIFIED_ICON, 'Last Modified', lastModified));
     }
 
     wrapper.appendChild(banner);
@@ -369,27 +373,53 @@ async function loadPageMetaBanner(main) {
       .page-meta-banner {
         display: flex;
         flex-direction: column;
-        flex-wrap: wrap;
-        gap: 0;
-        padding: 0.75rem 20px !important;
-        background: rgba(0, 0, 0, 0.04);
-        border-left: 3px solid rgba(0, 0, 0, 0.15);
-        border-radius: 0 4px 4px 0;
+        gap: 0.7rem;
+        padding: 0.85rem 1rem !important;
+        background: var(--surface-1);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: var(--radius-sm);
+        box-shadow: var(--shadow-sm);
         font-size: 0.8125rem;
-        color: #555;
-        line-height: 1.4;
+        line-height: 1.35;
         width: fit-content;
-        min-width: 180px;
-      }
-      .page-meta-banner strong {
-        color: #222;
-        font-weight: 600;
+        min-width: 210px;
+        max-width: 440px;
       }
       .page-meta-author,
       .page-meta-modified {
         display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+      .page-meta-icon {
+        display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        margin-top: 1px;
+        border-radius: var(--radius-pill);
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .page-meta-text {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+      .page-meta-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .page-meta-value {
+        color: var(--text-primary);
+        font-weight: 500;
       }
       .page-breadcrumb {
         font-size: 0.8125rem;
