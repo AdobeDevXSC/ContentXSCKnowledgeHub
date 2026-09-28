@@ -363,11 +363,27 @@ async function loadPageMetaBanner(main) {
         
       }
       @media (width >= 768px) {
+        /* Take the author card out of flow (pinned top-right) so the wrapper is
+           only as tall as the breadcrumb — otherwise the tall card forces a gap
+           between the breadcrumb and the article title. */
         .page-meta-wrapper {
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin: 1rem 0 !important;
+          display: block;
+          position: relative;
+          margin: 1rem 0 0 !important;
+        }
+        .page-meta-wrapper .page-meta-banner {
+          position: absolute;
+          top: 0;
+          right: 0;
+          margin: 0;
+        }
+        /* Pull the first article title up to sit just under the breadcrumb
+           (the tall author card no longer reserves vertical space). */
+        .page-meta-wrapper + .default-content-wrapper {
+          margin-top: 0;
+        }
+        .page-meta-wrapper + .default-content-wrapper > :first-child {
+          margin-top: 0.5rem;
         }
       }
       .page-meta-banner {
