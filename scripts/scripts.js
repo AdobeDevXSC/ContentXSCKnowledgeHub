@@ -375,16 +375,20 @@ async function loadPageMetaBanner(main) {
         flex-direction: column;
         gap: 0.7rem;
         padding: 0.85rem 1rem !important;
-        background: var(--surface-1);
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--surface-1), #fff 10%) 0%, var(--surface-1) 55%, color-mix(in srgb, var(--surface-1), #000 3%) 100%);
         border: 1px solid var(--border);
         border-left: 3px solid var(--accent);
         border-radius: var(--radius-sm);
-        box-shadow: var(--shadow-sm);
+        box-shadow:
+          var(--shadow-md),
+          inset 0 1px 0 color-mix(in srgb, var(--surface-1), #fff 55%);
         font-size: 0.8125rem;
         line-height: 1.35;
         width: fit-content;
         min-width: 210px;
         max-width: 440px;
+        backdrop-filter: saturate(1.1);
       }
       .page-meta-author,
       .page-meta-modified {
@@ -401,8 +405,12 @@ async function loadPageMetaBanner(main) {
         height: 24px;
         margin-top: 1px;
         border-radius: var(--radius-pill);
-        background: var(--accent-soft);
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--accent-soft), #fff 45%) 0%, var(--accent-soft) 100%);
         color: var(--accent);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.55),
+          inset 0 0 0 1px var(--accent-soft);
       }
       .page-meta-text {
         display: flex;
