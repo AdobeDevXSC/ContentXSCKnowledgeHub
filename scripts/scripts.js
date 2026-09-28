@@ -58,14 +58,14 @@ async function loadLeftNav(main) {
   collapseBtn.type = 'button';
   collapseBtn.className = 'leftnav-collapse-btn';
   collapseBtn.setAttribute('aria-label', 'Collapse navigation');
-  collapseBtn.innerHTML = '<span uk-icon="icon: chevron-left; ratio: 1.2"></span>';
+  collapseBtn.innerHTML = '<svg class="leftnav-toggle-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path fill="currentColor" d="M17.5 1H2.5C1.12197 1 0 2.13599 0 3.53125L0 16.4688C0 17.864 1.12197 19 2.5 19H17.5C18.878 19 20 17.864 20 16.4688V3.53125C20 2.13599 18.878 1 17.5 1ZM1.66667 2.40625C1.66667 1.94152 2.04101 2.6875 2.5 2.6875H17.5C17.959 2.6875 18.3333 1.94152 18.3333 2.40625V2.125H1.66667V2.40625ZM1.66667 16.4688V2.6875H4.44444V17.3125H2.5C2.04101 17.3125 1.66667 16.9335 1.66667 16.4688ZM17.5 17.3125H6.11111V2.6875H18.3333V16.4688C18.3333 16.9335 17.959 17.3125 17.5 17.3125Z"></path><path fill="currentColor" d="M8.0763 10.6228C7.97614 10.396 7.97614 10.1402 8.0763 9.91336C8.12647 9.80006 8.19886 9.69764 8.29005 9.61215L10.9204 7.27118C11.3062 6.90863 11.9331 6.90863 12.3189 7.27118C12.7051 7.63281 12.7051 8.22059 12.3189 8.58222L11.3765 9.3407L14.9917 9.3407C15.5381 9.3407 15.9805 9.75635 15.9805 10.2681C15.9805 10.7799 15.5381 11.1956 14.9917 11.1956H11.3765L12.3188 11.954C12.7051 12.3157 12.7051 12.9034 12.3188 13.2651C12.126 13.4464 11.8726 13.537 11.6196 13.537C11.3667 13.537 11.1133 13.4464 10.9204 13.2651L8.29004 10.9241C8.19879 10.8386 8.12648 10.7362 8.0763 10.6228Z"></path></svg>';
   collapseBtn.addEventListener('click', toggleLeftNav);
 
   const expandBtn = document.createElement('button');
   expandBtn.type = 'button';
   expandBtn.className = 'leftnav-expand-btn';
   expandBtn.setAttribute('aria-label', 'Expand navigation');
-  expandBtn.innerHTML = '<span uk-icon="icon: chevron-right; ratio: 1.2"></span>';
+  expandBtn.innerHTML = '<svg class="leftnav-toggle-icon" width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true"><g transform="translate(20 0) scale(-1 1)"><path fill="currentColor" d="M17.5 1H2.5C1.12197 1 0 2.13599 0 3.53125L0 16.4688C0 17.864 1.12197 19 2.5 19H17.5C18.878 19 20 17.864 20 16.4688V3.53125C20 2.13599 18.878 1 17.5 1ZM1.66667 2.40625C1.66667 1.94152 2.04101 2.6875 2.5 2.6875H17.5C17.959 2.6875 18.3333 1.94152 18.3333 2.40625V2.125H1.66667V2.40625ZM1.66667 16.4688V2.6875H4.44444V17.3125H2.5C2.04101 17.3125 1.66667 16.9335 1.66667 16.4688ZM17.5 17.3125H6.11111V2.6875H18.3333V16.4688C18.3333 16.9335 17.959 17.3125 17.5 17.3125Z"></path><path fill="currentColor" d="M8.0763 10.6228C7.97614 10.396 7.97614 10.1402 8.0763 9.91336C8.12647 9.80006 8.19886 9.69764 8.29005 9.61215L10.9204 7.27118C11.3062 6.90863 11.9331 6.90863 12.3189 7.27118C12.7051 7.63281 12.7051 8.22059 12.3189 8.58222L11.3765 9.3407L14.9917 9.3407C15.5381 9.3407 15.9805 9.75635 15.9805 10.2681C15.9805 10.7799 15.5381 11.1956 14.9917 11.1956H11.3765L12.3188 11.954C12.7051 12.3157 12.7051 12.9034 12.3188 13.2651C12.126 13.4464 11.8726 13.537 11.6196 13.537C11.3667 13.537 11.1133 13.4464 10.9204 13.2651L8.29004 10.9241C8.19879 10.8386 8.12648 10.7362 8.0763 10.6228Z"></path></g></svg>';
   expandBtn.addEventListener('click', toggleLeftNav);
 
   aside.prepend(collapseBtn);
@@ -74,7 +74,9 @@ async function loadLeftNav(main) {
   main.insertBefore(wrapper, contentContainer || main.querySelector('.section'));
 
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
-  loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
+  // Await the CSS so the nav has its constrained (scrollable) layout before
+  // decorate measures it to scroll the active page into view.
+  await loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
   await decorate(block);
 }
 
@@ -320,23 +322,27 @@ async function loadPageMetaBanner(main) {
   const lastModified = formatTimestamp(lastModifiedRaw);
 
   if (author || lastModified) {
+    const AUTHOR_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="currentColor"><path d="M10 10a3.4 3.4 0 100-6.8A3.4 3.4 0 0010 10zm0 1.6c-3.4 0-6.2 1.85-6.2 4.1 0 .6.48 1.1 1.08 1.1h10.24c.6 0 1.08-.5 1.08-1.1 0-2.25-2.78-4.1-6.2-4.1z"/></svg>';
+    const MODIFIED_ICON = '<svg viewBox="0 0 20 20" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="10" r="7"/><path d="M10 5.75V10l2.9 1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
     const banner = document.createElement('div');
     banner.className = 'page-meta-banner';
 
+    const row = (cls, icon, label, value) => {
+      const el = document.createElement('span');
+      el.className = cls;
+      el.innerHTML = `<span class="page-meta-icon">${icon}</span><span class="page-meta-text"><span class="page-meta-label">${label}</span><span class="page-meta-value">${value}</span></span>`;
+      return el;
+    };
+
     if (author) {
-      const authorEl = document.createElement('span');
-      authorEl.className = 'page-meta-author';
       const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
       const label = authors.length > 1 ? 'Authors' : 'Author';
-      authorEl.innerHTML = `<strong>${label}:</strong> ${authors.join(', ')}`;
-      banner.appendChild(authorEl);
+      banner.appendChild(row('page-meta-author', AUTHOR_ICON, label, authors.join(', ')));
     }
 
     if (lastModified) {
-      const modifiedEl = document.createElement('span');
-      modifiedEl.className = 'page-meta-modified';
-      modifiedEl.innerHTML = `<strong>Last Modified:</strong> ${lastModified}`;
-      banner.appendChild(modifiedEl);
+      banner.appendChild(row('page-meta-modified', MODIFIED_ICON, 'Last Modified', lastModified));
     }
 
     wrapper.appendChild(banner);
@@ -357,37 +363,87 @@ async function loadPageMetaBanner(main) {
         
       }
       @media (width >= 768px) {
+        /* Take the author card out of flow (pinned top-right) so the wrapper is
+           only as tall as the breadcrumb — otherwise the tall card forces a gap
+           between the breadcrumb and the article title. */
         .page-meta-wrapper {
-          flex-direction: row;
-          justify-content: space-between;
-          align-items: flex-start;
-          margin: 1rem 0 !important;
+          display: block;
+          position: relative;
+          margin: 1rem 0 0 !important;
+        }
+        .page-meta-wrapper .page-meta-banner {
+          position: absolute;
+          top: 0;
+          right: 0;
+          margin: 0;
+        }
+        /* Pull the first article title up to sit just under the breadcrumb
+           (the tall author card no longer reserves vertical space). */
+        .page-meta-wrapper + .default-content-wrapper {
+          margin-top: 0;
+        }
+        .page-meta-wrapper + .default-content-wrapper > :first-child {
+          margin-top: 0.5rem;
         }
       }
       .page-meta-banner {
         display: flex;
         flex-direction: column;
-        flex-wrap: wrap;
-        gap: 0;
-        padding: 0.75rem 20px !important;
-        background: rgba(0, 0, 0, 0.04);
-        border-left: 3px solid rgba(0, 0, 0, 0.15);
-        border-radius: 0 4px 4px 0;
+        gap: 0.7rem;
+        padding: 0.85rem 1rem !important;
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--surface-1), #fff 10%) 0%, var(--surface-1) 55%, color-mix(in srgb, var(--surface-1), #000 3%) 100%);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: var(--radius-sm);
+        box-shadow:
+          var(--shadow-md),
+          inset 0 1px 0 color-mix(in srgb, var(--surface-1), #fff 55%);
         font-size: 0.8125rem;
-        color: #555;
-        line-height: 1.4;
+        line-height: 1.35;
         width: fit-content;
-        min-width: 180px;
-      }
-      .page-meta-banner strong {
-        color: #222;
-        font-weight: 600;
+        min-width: 210px;
+        max-width: 440px;
+        backdrop-filter: saturate(1.1);
       }
       .page-meta-author,
       .page-meta-modified {
         display: flex;
+        align-items: flex-start;
+        gap: 0.6rem;
+      }
+      .page-meta-icon {
+        display: inline-flex;
         align-items: center;
-        gap: 0.3rem;
+        justify-content: center;
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        margin-top: 1px;
+        border-radius: var(--radius-pill);
+        background:
+          linear-gradient(180deg, color-mix(in srgb, var(--accent-soft), #fff 45%) 0%, var(--accent-soft) 100%);
+        color: var(--accent);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.55),
+          inset 0 0 0 1px var(--accent-soft);
+      }
+      .page-meta-text {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
+        min-width: 0;
+      }
+      .page-meta-label {
+        font-size: 0.6875rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-muted);
+      }
+      .page-meta-value {
+        color: var(--text-primary);
+        font-weight: 500;
       }
       .page-breadcrumb {
         font-size: 0.8125rem;
