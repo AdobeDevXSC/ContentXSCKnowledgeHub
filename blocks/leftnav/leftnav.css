@@ -127,7 +127,7 @@ body.dark-mode .leftnav-collapse-btn {
 .leftnav-expand-btn {
   display: none;
   position: fixed;
-  top: calc(var(--nav-height) + 3rem);
+  top: calc(var(--nav-height) + 1rem);
   left: 0;
   z-index: 100;
   width: 36px;
