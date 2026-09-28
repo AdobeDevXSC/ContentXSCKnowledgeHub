@@ -74,7 +74,9 @@ async function loadLeftNav(main) {
   main.insertBefore(wrapper, contentContainer || main.querySelector('.section'));
 
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
-  loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
+  // Await the CSS so the nav has its constrained (scrollable) layout before
+  // decorate measures it to scroll the active page into view.
+  await loadCSS(`${window.hlx.codeBasePath}/blocks/leftnav/leftnav.css`);
   await decorate(block);
 }
 

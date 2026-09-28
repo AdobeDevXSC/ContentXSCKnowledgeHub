@@ -167,6 +167,44 @@ function createAccordion(tree, isRoot = false) {
 }
 
 /* ----------------------------- */
+/* Reveal the active page on load */
+/* ----------------------------- */
+
+/**
+ * The active page's accordion branch is already opened, but on a deeply nested
+ * page it renders below the fold. Scroll the nav's own scroll container (never
+ * the page) so the highlighted item sits centred and visible on load.
+ */
+function scrollActiveIntoView(scroller) {
+  const active = scroller.querySelector('li.uk-active');
+  if (!active) return;
+  // The accordion opens asynchronously (UIkit), so heights aren't final on the
+  // first frame. Re-check each frame until the item is centred and visible, or
+  // give up after ~30 frames.
+  let attempts = 0;
+  const step = () => {
+    attempts += 1;
+    if (attempts > 30) return;
+    // Wait until the nav is in its final, constrained layout (CSS applied and
+    // the content actually overflows). Before then, nothing is clipped and the
+    // item looks "visible" even though it will drop below the fold once the
+    // max-height kicks in.
+    if (scroller.scrollHeight <= scroller.clientHeight) {
+      requestAnimationFrame(step);
+      return;
+    }
+    const sRect = scroller.getBoundingClientRect();
+    const aRect = active.getBoundingClientRect();
+    const visible = aRect.top >= sRect.top && aRect.bottom <= sRect.bottom;
+    if (visible) return;
+    const delta = (aRect.top - sRect.top) - (scroller.clientHeight / 2 - aRect.height / 2);
+    scroller.scrollTop += delta;
+    requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+/* ----------------------------- */
 /* Main Decorator */
 /* ----------------------------- */
 
@@ -195,6 +233,7 @@ export default async function decorate(block) {
     });
 
     renderNav(block, items);
+    scrollActiveIntoView(block);
   } catch (e) {
     console.error('Left nav failed to load', e);
   }
