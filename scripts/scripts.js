@@ -394,7 +394,6 @@ async function loadPageMetaBanner(main) {
         background:
           linear-gradient(180deg, color-mix(in srgb, var(--surface-1), #fff 10%) 0%, var(--surface-1) 55%, color-mix(in srgb, var(--surface-1), #000 3%) 100%);
         border: 1px solid var(--border);
-        border-left: 3px solid var(--accent);
         border-radius: var(--radius-sm);
         box-shadow:
           var(--shadow-md),
@@ -444,6 +443,27 @@ async function loadPageMetaBanner(main) {
       .page-meta-value {
         color: var(--text-primary);
         font-weight: 500;
+      }
+      /* Dark mode: drop the gloss for a flat, quiet card. */
+      body.dark-mode .page-meta-banner {
+        background: var(--surface-1);
+        border-color: rgba(255, 255, 255, 0.07);
+        box-shadow: none;
+        backdrop-filter: none;
+        gap: 0.85rem;
+      }
+      body.dark-mode .page-meta-icon {
+        background: var(--accent-soft);
+        box-shadow: none;
+      }
+      body.dark-mode .page-meta-label {
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        color: rgba(255, 255, 255, 0.45);
+      }
+      body.dark-mode .page-meta-value {
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.92);
       }
       .page-breadcrumb {
         font-size: 0.8125rem;
