@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Brew ratio calculator · Fréscopa widget demo</title>
+  <!--
+    Standalone demo of the brew-ratio widget: a direct link that works on its own.
+    It loads the widget's own three files and does what the widget block does on a page:
+    inject the HTML, copy this page's query parameters onto the widget, run decorate().
+    In a real page, authors paste brew-ratio.html instead; this file is only for sharing.
+  -->
+  <link rel="stylesheet" href="./brew-ratio.css">
+  <style>
+    html, body { margin: 0; background: #f8f5ee; }
+    body { padding: 16px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="brew-ratio" id="widget"></div>
+  </main>
+  <script type="module">
+    import decorate from './brew-ratio.js';
+
+    const widget = document.getElementById('widget');
+    new URLSearchParams(window.location.search).forEach((value, key) => {
+      // Same as the widget block: query parameters become data- attributes
+      if (/^[a-z]\w*$/i.test(key)) widget.dataset[key] = value;
+    });
+    try {
+      const resp = await fetch('./brew-ratio.html');
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      widget.innerHTML = await resp.text();
+      decorate(widget);
+    } catch (err) {
+      widget.textContent = `The calculator could not load (${err.message}).`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,31 @@
+<section class="brew" aria-labelledby="brew-title">
+  <p class="brew__eyebrow">Fréscopa brew guide</p>
+  <h2 class="brew__title" id="brew-title">Brew ratio calculator</h2>
+  <div class="brew__group">
+    <span class="brew__group-label" id="brew-method-label">Method</span>
+    <div class="brew__seg" role="group" aria-labelledby="brew-method-label" data-methods></div>
+  </div>
+  <div class="brew__group">
+    <span class="brew__group-label" id="brew-mode-label">Start from</span>
+    <div class="brew__seg" role="group" aria-labelledby="brew-mode-label">
+      <button type="button" class="brew__seg-btn" data-mode="coffee" aria-pressed="true">Coffee</button>
+      <button type="button" class="brew__seg-btn" data-mode="water" aria-pressed="false">Water</button>
+    </div>
+  </div>
+  <div class="brew__inputs">
+    <label class="brew__field">
+      <span class="brew__label" data-amount-label>Coffee</span>
+      <span class="brew__number"><input type="number" inputmode="decimal" data-amount><span class="brew__unit">g</span></span>
+    </label>
+    <label class="brew__field">
+      <span class="brew__label">Ratio <span class="brew__ratio-out" data-ratio-out>1:16</span></span>
+      <input type="range" class="brew__range" data-ratio>
+    </label>
+  </div>
+  <p class="brew__sr" aria-live="polite" data-announce></p>
+  <div class="brew__result">
+    <p class="brew__result-label" data-result-label>Water</p>
+    <p class="brew__result-value" data-result-value>320 g</p>
+    <p class="brew__result-note" data-result-note></p>
+  </div>
+</section>
