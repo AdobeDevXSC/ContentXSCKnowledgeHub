@@ -11,6 +11,7 @@ import {
   loadSections,
   loadCSS,
   getMetadata,
+  buildBlock,
 } from './aem.js';
 
 import './uikit.min.js';
@@ -23,6 +24,7 @@ import './uikit-icons.min.js';
 function buildWidgetAutoBlocks(main) {
   const widgetLinks = [...main.querySelectorAll('a[href*="/widgets/"]')];
   widgetLinks.forEach((link) => {
+    console.log("link: ", link)
     if (link.closest('.widget')) return;
     const newLink = link.cloneNode(true);
     const widgetBlock = buildBlock('widget', { elems: [newLink] });
@@ -156,6 +158,7 @@ function buildAutoBlocks(main) {
         });
       });
     }
+    console.log("hello there")
     buildWidgetAutoBlocks(main);
   } catch (error) {
     console.error('Auto Blocking failed', error);
