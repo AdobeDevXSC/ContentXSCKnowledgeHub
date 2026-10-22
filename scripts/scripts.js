@@ -16,6 +16,31 @@ import {
 import './uikit.min.js';
 import './uikit-icons.min.js';
 
+/**
+ * Turns `/widgets/...` links into widget blocks.
+ * @param {Element} main The container element
+ */
+function buildWidgetAutoBlocks(main) {
+  const widgetLinks = [...main.querySelectorAll('a[href*="/widgets/"]')];
+  widgetLinks.forEach((link) => {
+    if (link.closest('.widget')) return;
+    const newLink = link.cloneNode(true);
+    const widgetBlock = buildBlock('widget', { elems: [newLink] });
+    const p = link.closest('p');
+    if (
+      p
+      && p.querySelectorAll('a').length === 1
+      && p.querySelector('a') === link
+      && p.textContent.trim() === link.textContent.trim()
+    ) {
+      p.replaceWith(widgetBlock);
+    } else {
+      link.replaceWith(widgetBlock);
+    }
+  });
+}
+
+
 function toggleLeftNav() {
   // Per-page toggle only — not persisted, so every page loads with the nav
   // expanded (see loadLeftNav).
@@ -131,6 +156,7 @@ function buildAutoBlocks(main) {
         });
       });
     }
+    buildWidgetAutoBlocks(main);
   } catch (error) {
     console.error('Auto Blocking failed', error);
   }
