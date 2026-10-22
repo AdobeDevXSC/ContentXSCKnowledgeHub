@@ -57,7 +57,6 @@
 .hero.homepage {
   box-sizing: border-box; /* so width:100vw includes the padding (no overflow) */
   position: relative;
-  overflow: hidden;
   min-height: 0;
   width: 100vw;
   margin: 0 0 1.5rem calc(50% - 50vw);
@@ -68,11 +67,14 @@
   border-radius: 0;
 }
 
-/* restrained aurora backdrop (clipped to the hero box) */
+/* restrained aurora backdrop. Clipping lives here (not on .hero.homepage) so
+   the search dropdown can escape the hero's bottom edge; the aurora fills the
+   hero via inset:0 and its blurred blobs still clip at the hero's bounds. */
 .hero-aurora {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
   opacity: 0.45;
   filter: blur(80px) saturate(135%);
   pointer-events: none;
@@ -126,9 +128,13 @@ body.dark-mode .hero-aurora span {
   100% { transform: translate3d(-3%, 2%, 0) scale(0.95); }
 }
 
+/* above the aurora backdrop (z:0) AND above downstream positioned blocks —
+   the home-hub bento's badges create z:1 stacking contexts that would
+   otherwise poke through the suggestions dropdown. Still below the sticky
+   header's z:20 so the dropdown never hides it. */
 .hero-home {
   position: relative;
-  z-index: 1;
+  z-index: 10;
   max-width: 760px;
   margin: 0 auto;
 }
@@ -192,15 +198,23 @@ body.dark-mode .hero-aurora span {
   color: var(--text-secondary);
 }
 
-/* live search — filters the home-hub wall */
+/* live search — filters the home-hub wall AND surfaces an article dropdown.
+   The searchbox is the positioning context for the dropdown; the pill itself
+   is a sibling of the dropdown panel so focus-within on the box lifts both. */
+.hero-home-searchbox {
+  position: relative;
+  width: 100%;
+  max-width: 620px;
+  margin: 1.7rem auto 0;
+  z-index: 2;
+}
+
 .hero-home-search {
   display: flex;
   align-items: center;
   gap: 12px;
   width: 100%;
-  max-width: 620px;
   height: 60px;
-  margin: 1.7rem auto 0;
   padding: 6px 8px 6px 20px;
   background: var(--surface-1);
   border: 1px solid var(--border-strong);
@@ -210,7 +224,7 @@ body.dark-mode .hero-aurora span {
   box-sizing: border-box;
 }
 
-.hero-home-search:focus-within {
+.hero-home-searchbox:focus-within .hero-home-search {
   border-color: var(--accent);
   box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-lg);
 }
@@ -294,9 +308,154 @@ body.dark-mode .hero-aurora span {
   color: var(--text-secondary);
 }
 
+/* ===== Suggestions dropdown ===== */
+.hero-home-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  box-sizing: border-box; /* keep padding inside max-height/width (no overflow) */
+  max-height: min(60vh, 480px);
+  overflow: hidden auto; /* titles/paths truncate; vertical scrolls when needed */
+  padding: 8px;
+  scroll-padding-block: 8px; /* scrollIntoView leaves breathing room at edges */
+  background: var(--surface-1);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  animation: hero-dd-in var(--dur) var(--ease-out);
+  text-align: left;
+}
+
+body.dark-mode .hero-home-dropdown {
+  background: var(--surface-2);
+}
+
+.hero-home-dropdown[hidden] {
+  display: none;
+}
+
+@keyframes hero-dd-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-home-dd-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  box-sizing: border-box; /* 100% width + 12px padding without overflowing */
+  padding: 10px 12px;
+  margin: 0;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius);
+  color: var(--text-primary);
+  font-family: inherit;
+  text-decoration: none; /* <a> is for click/open-in-new-tab, not for underlining */
+  text-align: left;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-snap);
+}
+
+.hero-home-dd-item + .hero-home-dd-item {
+  margin-top: 2px;
+}
+
+.hero-home-dd-item:hover,
+.hero-home-dd-item.active,
+.hero-home-dd-item:focus-visible {
+  background: var(--accent-soft);
+  text-decoration: none;
+  outline: none;
+}
+
+.hero-home-dd-dot {
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentcolor 0%, transparent);
+  background-clip: padding-box;
+}
+
+.hero-home-dd-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.hero-home-dd-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-home-dd-title mark {
+  background: transparent;
+  color: var(--accent);
+  font-weight: 700;
+  padding: 0;
+}
+
+.hero-home-dd-path {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hero-home-dd-tag {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--c, var(--accent)) 12%, transparent);
+  color: var(--c, var(--accent));
+  border: 1px solid color-mix(in srgb, var(--c, var(--accent)) 25%, transparent);
+}
+
+/* custom scrollbar inside the dropdown — slimmer than the browser default */
+.hero-home-dropdown::-webkit-scrollbar {
+  width: 10px;
+}
+
+.hero-home-dropdown::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border: 3px solid var(--surface-1);
+  border-radius: 999px;
+}
+
+body.dark-mode .hero-home-dropdown::-webkit-scrollbar-thumb {
+  border-color: var(--surface-2);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-home-dot,
   .hero-aurora span {
+    animation: none;
+  }
+
+  .hero-home-dropdown {
     animation: none;
   }
 
@@ -308,5 +467,9 @@ body.dark-mode .hero-aurora span {
 @media (width < 1000px) {
   .hero.homepage {
     padding: 2rem 1.35rem;
+  }
+
+  .hero-home-dd-tag {
+    display: none; /* room is tight on phones; the title alone is enough */
   }
 }

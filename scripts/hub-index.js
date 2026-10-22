@@ -85,6 +85,29 @@ export function highlight(text, terms) {
   return safe.replace(new RegExp(`(${parts.join('|')})`, 'gi'), '<mark>$1</mark>');
 }
 
+// Lightweight relevance scoring for the homepage dropdown. Title hits
+// outweigh description hits, description outweighs path/tag. A full-phrase
+// substring match in the title gets a big bump so "edge functions" lands
+// "AEM Edge Functions" at the top rather than tied with any page that
+// mentions either word.
+export function scoreEntry(entry, query, terms) {
+  const titleLc = entry.title.toLowerCase();
+  const descLc = entry.desc.toLowerCase();
+  const titleTokens = (titleLc.match(/[a-z0-9]+/g) || []);
+  let s = 0;
+  if (titleLc === query) s += 100;
+  if (query.length >= 2 && titleLc.includes(query)) s += 40;
+  if (query.length >= 2 && descLc.includes(query)) s += 10;
+  terms.forEach((t) => {
+    if (titleTokens.includes(t)) s += 25;
+    else if (titleTokens.some((w) => w.startsWith(t))) s += 14;
+    else if (titleLc.includes(t)) s += 5;
+    if (descLc.includes(t)) s += 4;
+    if (entry.tokens.includes(t)) s += 2;
+  });
+  return s;
+}
+
 export function normalizeEntries(raw) {
   return raw.filter((e) => e && isContentPath(e.path)).map((e) => {
     const t = topicOf(e.path);

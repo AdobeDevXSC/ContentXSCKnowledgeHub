@@ -31,11 +31,13 @@
 
 /* ---------------- section head ---------------- */
 .home-hub .hub-head {
-  display: flex;
+  display: none; /* Hiding temporarily until team decides whether to keep the section head or not. */
+
+  /* display: flex;
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.2rem; */
 }
 
 .home-hub .hub-title {
@@ -55,9 +57,11 @@
 
 /* ---------------- topics bento ---------------- */
 .home-hub .hub-bento {
-  display: grid;
+  display: none; /* Hiding temporarily until team decides whether to keep the section head or not. */
+
+  /* display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: 16px; */
 }
 
 .home-hub .hub-topic {
