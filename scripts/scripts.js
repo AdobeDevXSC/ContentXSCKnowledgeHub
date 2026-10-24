@@ -403,6 +403,12 @@ async function loadPageMetaBanner(main) {
           right: 0;
           margin: 0;
         }
+        /* Reserve space on the right for the pinned author card so the
+           breadcrumb and the first heading don't run underneath it. */
+        .page-meta-wrapper .page-breadcrumb,
+        .page-meta-wrapper + .default-content-wrapper > :first-child {
+          padding-right: clamp(240px, 32%, 360px);
+        }
         /* Pull the first article title up to sit just under the breadcrumb
            (the tall author card no longer reserves vertical space). */
         .page-meta-wrapper + .default-content-wrapper {

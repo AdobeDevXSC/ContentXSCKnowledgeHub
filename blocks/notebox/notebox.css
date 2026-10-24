@@ -20,6 +20,13 @@
 
 .notebox-icon {
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+
+  /* match the first text line's box so the icon centers on that line
+     regardless of whether a title is present or the content wraps */
+  min-height: calc(0.95rem * 1.6);
+  line-height: 1;
 }
 
 .notebox-title {
@@ -84,5 +91,6 @@
 }
 
 .notebox-content p:last-of-type {
+  margin-top: 0;
   margin-bottom: 0;
 }

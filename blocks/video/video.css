@@ -2,6 +2,10 @@
   text-align: center;
   max-width: 900px;
   margin: 24px auto;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  background-color: var(--surface-2);
 }
 
 .video[data-embed-loaded='false']:not(.placeholder) {
@@ -16,12 +20,14 @@
 
 .video video {
   max-width: 100%;
+  display: block;
 }
 
 .video .video-placeholder {
   width: 100%;
   aspect-ratio: 16 / 9;
   position: relative;
+  cursor: pointer;
 }
 
 .video .video-placeholder > * {
@@ -30,6 +36,19 @@
   justify-content: center;
   position: absolute;
   inset: 0;
+}
+
+.video .video-placeholder::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0%) 55%, rgb(0 0 0 / 35%));
+  pointer-events: none;
+  transition: background var(--dur) var(--ease-out);
+}
+
+.video .video-placeholder:hover::after {
+  background: linear-gradient(180deg, rgb(0 0 0 / 10%) 0%, rgb(0 0 0 / 45%));
 }
 
 .video[data-embed-loaded='true'] .video-placeholder,
@@ -45,14 +64,31 @@
   object-fit: cover;
 }
 
+.video .video-placeholder-play {
+  z-index: 1;
+}
+
 .video .video-placeholder-play button {
   position: relative;
   display: block;
-  width: 44px;
-  height: 44px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  outline: 2px solid;
+  outline: none;
+  border: none;
   padding: 0;
+  background-color: var(--accent);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 30%), 0 0 0 0 var(--accent-ring);
+  cursor: pointer;
+  transition: transform var(--dur) var(--ease-out),
+    box-shadow var(--dur) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-snap);
+}
+
+.video .video-placeholder-play button:hover {
+  transform: scale(1.08);
+  background-color: var(--accent-hover);
+  box-shadow: 0 14px 36px rgb(0 0 0 / 36%), 0 0 0 8px var(--accent-ring);
 }
 
 .video .video-placeholder-play button::before {
@@ -64,15 +100,13 @@
   height: 24px;
   border-top: 12px solid transparent;
   border-bottom: 12px solid transparent;
-  border-left: 18px solid;
+  border-left: 18px solid #fff;
   top: 50%;
-  left: calc(50% + 2px);
+  left: calc(50% + 3px);
   transform: translate(-50%, -50%);
 }
 
-.video .video-placeholder-play button:focus,
 .video .video-placeholder-play button:focus-visible {
-  outline: 2px solid black;
-  outline-offset: 2px;
-  background-color: black;
+  outline: 3px solid #fff;
+  outline-offset: 3px;
 }

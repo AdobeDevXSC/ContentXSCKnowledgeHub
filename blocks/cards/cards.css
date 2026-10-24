@@ -3,13 +3,16 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(257px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 24px;
 }
 
 .cards > ul > li {
-  border: 1px solid var(--border);
+  position: relative;
+  display: flex;
+  flex-direction: column;
   background-color: var(--surface-1);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
   overflow: hidden;
@@ -19,21 +22,64 @@
 }
 
 .cards > ul > li:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   border-color: var(--border-strong);
   box-shadow: var(--shadow-md);
 }
 
-.cards .cards-card-body {
-  margin: 1rem 1.15rem 1.2rem;
-}
-
 .cards .cards-card-image {
   line-height: 0;
+  overflow: hidden;
 }
 
 .cards > ul > li img {
   width: 100%;
   aspect-ratio: 4 / 3;
   object-fit: cover;
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+
+.cards > ul > li:hover img {
+  transform: scale(1.03);
+}
+
+.cards .cards-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 1.1rem 1.25rem 1.3rem;
+  flex: 1;
+}
+
+.cards .cards-card-body > :first-child {
+  margin-top: 0;
+}
+
+.cards .cards-card-body > :last-child {
+  margin-bottom: 0;
+}
+
+.cards .cards-card-body :where(h1, h2, h3, h4, h5, h6) {
+  margin: 0;
+  font-size: var(--heading-font-size-xs);
+  line-height: 1.25;
+  color: var(--text-primary);
+}
+
+.cards .cards-card-body p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--body-font-size-xs);
+  line-height: 1.55;
+}
+
+.cards .cards-card-body a:any-link {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cards .cards-card-body a:hover {
+  color: var(--accent-hover);
+  text-decoration: underline;
 }

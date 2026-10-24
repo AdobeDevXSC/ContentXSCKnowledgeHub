@@ -4,7 +4,12 @@
   max-width: 100%;
   font-size: var(--body-font-size-xs);
   overflow-x: auto;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border-strong);
+  scrollbar-width: none;
+}
+
+.tabs .tabs-list::-webkit-scrollbar {
+  display: none;
 }
 
 @media (width >= 600px) {
@@ -15,22 +20,39 @@
 
 /* !important beats the global bare-<button> primary styling */
 .tabs .tabs-list button {
+  position: relative;
   flex: 0 0 max-content;
   margin: 0 !important;
-  padding: 0.6em 1em !important;
+  padding: 0.9em 1.15em !important;
   border: none !important;
-  border-bottom: 2px solid transparent !important;
   border-radius: 0 !important;
   background-color: transparent !important;
-  color: var(--text-secondary) !important;
+  color: var(--text-primary) !important;
   box-shadow: none !important;
+  opacity: 0.55;
   font-family: var(--body-font-family);
-  font-weight: 600;
-  line-height: unset;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
   text-align: initial;
   white-space: nowrap;
   cursor: pointer;
-  transition: color var(--dur-fast) var(--ease-snap), border-color var(--dur-fast) var(--ease-snap);
+  transition: opacity var(--dur-fast) var(--ease-snap),
+    color var(--dur-fast) var(--ease-snap);
+}
+
+.tabs .tabs-list button::after {
+  content: '';
+  position: absolute;
+  left: 1.15em;
+  right: 1.15em;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background-color: transparent;
+  transition: background-color var(--dur-fast) var(--ease-snap),
+    left var(--dur) var(--ease-out),
+    right var(--dur) var(--ease-out);
 }
 
 .tabs .tabs-list button p {
@@ -38,16 +60,33 @@
 }
 
 .tabs .tabs-list button:hover,
-.tabs .tabs-list button:focus {
+.tabs .tabs-list button:focus-visible {
   color: var(--text-primary) !important;
   background-color: transparent !important;
+  opacity: 1;
+}
+
+.tabs .tabs-list button:hover::after {
+  background-color: var(--border-strong);
+}
+
+.tabs .tabs-list button:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: -4px;
+  border-radius: var(--radius-sm) !important;
 }
 
 .tabs .tabs-list button[aria-selected='true'] {
   color: var(--accent) !important;
-  border-bottom-color: var(--accent) !important;
   background-color: transparent !important;
+  opacity: 1;
   cursor: default;
+}
+
+.tabs .tabs-list button[aria-selected='true']::after {
+  left: 0.6em;
+  right: 0.6em;
+  background-color: var(--accent);
 }
 
 .tabs .tabs-panel {
