@@ -479,8 +479,8 @@ main {
 }
 
 .main-content > .section > div {
-  max-width: 1600px;
-  /* margin: auto; */
+  width: 100%;
+  max-width: 1400px;
   padding: 0;
   margin: 1rem 0;
 }
@@ -1013,4 +1013,3 @@ hr,
   text-underline-offset: 0.15em;
   text-decoration-color: var(--accent-ring);
 }
-
