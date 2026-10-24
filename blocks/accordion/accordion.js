@@ -4,13 +4,12 @@ export default function decorate(block) {
   accordion.className = 'uk-accordion-default';
   accordion.setAttribute('uk-accordion', '');
 
-  [...block.children].forEach((row, index) => {
+  [...block.children].forEach((row) => {
     const titleCell = row.children[0];
     const bodyCell = row.children[1];
 
     // Create <li> for each accordion item
     const li = document.createElement('li');
-    if (index === 0) li.className = 'uk-open'; // optional: open first item
 
     // Create <a> for title
     const a = document.createElement('a');

@@ -1,64 +1,93 @@
-.accordion details {
+.main-content > .section > .accordion-wrapper {
+  max-width: 1080px;
+  width: 100%;
+}
+
+.accordion .uk-accordion {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.accordion .uk-accordion > li {
+  margin: 0;
+  background: var(--surface-1);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   overflow: hidden;
-  background: var(--surface-1);
+  transition: border-color var(--dur) var(--ease-snap), box-shadow var(--dur) var(--ease-snap);
 }
 
-/* stylelint-disable-next-line no-descending-specificity */
-.accordion details + details {
-  margin-top: 16px;
+.accordion .uk-accordion > li + li {
+  margin-top: 12px;
 }
 
-.accordion details p {
-  margin-bottom: 0.8em;
+.accordion .uk-accordion > li.uk-open {
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-sm);
 }
 
-.accordion details summary {
-  position: relative;
-  padding: 0.9rem 46px 0.9rem 16px;
-  cursor: pointer;
-  list-style: none;
+.accordion .uk-accordion-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  font-family: var(--heading-font-family);
+  font-size: 18px;
   font-weight: 600;
-  overflow: auto;
-  transition: background-color var(--dur-fast) var(--ease-snap);
+  line-height: 1.3;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background-color var(--dur-fast) var(--ease-snap), color var(--dur-fast) var(--ease-snap);
 }
 
-.accordion details[open] summary {
-  background-color: var(--surface-2);
+.accordion .uk-accordion-title:hover,
+.accordion .uk-accordion-title:focus-visible {
+  background-color: var(--accent-soft);
+  color: var(--text-primary);
+  outline: none;
 }
 
-.accordion details summary:focus,
-.accordion details summary:hover {
-  background-color: var(--surface-2);
+.accordion .uk-accordion-title:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--accent-ring);
 }
 
-.accordion details summary::-webkit-details-marker {
-  display: none;
+.accordion .uk-accordion-title > :where(h1, h2, h3, h4, h5, h6, p) {
+  margin: 0;
+  font-size: inherit;
+  color: inherit;
 }
 
-.accordion details summary::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  right: 18px;
-  transform: translateY(-50%) rotate(135deg);
-  width: 7px;
-  height: 7px;
-  border: 2px solid var(--accent);
-  border-width: 2px 2px 0 0;
-  transition: transform var(--dur) var(--ease-out);
+.accordion .uk-accordion-title [uk-accordion-icon] {
+  flex: none;
+  margin: 0;
+  color: var(--accent);
 }
 
-.accordion details[open] summary::after {
-  transform: translateY(-50%) rotate(-45deg);
-}
-
-.accordion details .accordion-item-body {
-  padding: 16px;
-}
-
-.accordion details[open] .accordion-item-body {
+.accordion .uk-accordion-content {
+  margin: 0;
+  padding: 16px 20px 20px;
   border-top: 1px solid var(--border);
-  background-color: var(--surface-1);
+  color: var(--text-secondary);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.accordion .uk-accordion-content > :first-child {
+  margin-top: 0;
+}
+
+.accordion .uk-accordion-content > :last-child {
+  margin-bottom: 0;
+}
+
+@media (width < 600px) {
+  .accordion .uk-accordion-title {
+    padding: 14px 16px;
+  }
+
+  .accordion .uk-accordion-content {
+    padding: 14px 16px 16px;
+  }
 }

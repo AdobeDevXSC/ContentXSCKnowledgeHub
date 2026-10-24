@@ -1,14 +1,25 @@
 .columns > div {
   display: flex;
   flex-direction: column;
+  gap: 1.5rem;
 }
 
 .columns img {
+  display: block;
   width: 100%;
+  border-radius: var(--radius);
 }
 
 .columns > div > div {
   order: 1;
+}
+
+.columns > div > div > :first-child {
+  margin-top: 0;
+}
+
+.columns > div > div > :last-child {
+  margin-bottom: 0;
 }
 
 .columns > div > .columns-img-col {
@@ -17,13 +28,14 @@
 
 .columns > div > .columns-img-col img {
   display: block;
+  box-shadow: var(--shadow-md);
 }
 
 @media (width >= 1000px) {
   .columns > div {
     align-items: center;
     flex-direction: unset;
-    gap: 24px;
+    gap: 3rem;
   }
 
   .columns > div > div {

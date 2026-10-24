@@ -1,7 +1,11 @@
 .table {
   width: 100%;
   overflow-x: auto;
-  margin: 0.5rem 0;
+  margin: 1rem 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background-color: var(--surface-1);
+  box-shadow: var(--shadow-sm);
 }
 
 .table table {
@@ -18,24 +22,35 @@
 }
 
 .table table thead tr {
-  border-top: 1px solid var(--border-strong);
+  background-color: var(--surface-2);
   border-bottom: 1px solid var(--border-strong);
-  background-color: var(--surface-1);
 }
 
 .table table tbody tr {
   border-bottom: 1px solid var(--border);
 }
 
+.table table tbody tr:last-child {
+  border-bottom: 0;
+}
+
 .table table th {
   font-weight: 700;
   color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.78rem;
 }
 
 .table table th,
 .table table td {
-  padding: 0.6em 0.75em;
+  padding: 0.85em 1em;
   text-align: left;
+  color: var(--text-primary);
+}
+
+.table table td {
+  color: var(--text-secondary);
 }
 
 .table table th p,
@@ -47,14 +62,14 @@
   margin-top: 0.25em;
 }
 
-/* no header variant */
-.table.no-header table tbody tr {
-  border-top: 1px solid var(--border);
-}
-
 /* striped variant */
 .table.striped tbody tr:nth-child(odd) {
-  background-color: rgba(128, 128, 128, 0.06);
+  background-color: rgb(128 128 128 / 5%);
+}
+
+/* no header variant */
+.table.no-header table tbody tr:first-child {
+  border-top: 0;
 }
 
 /* bordered variant */
