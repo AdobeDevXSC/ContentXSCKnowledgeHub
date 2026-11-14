@@ -1,0 +1,15 @@
+authors = []
+description = "Stage Knowledge Hub Closed User Groups with Adobe Okta login"
+language = "javascript"
+manifest_version = 3
+name = "knowledge-hub-stage-cug"
+service_id = ""
+
+[scripts]
+  build = "npm run build"
+  post_init = "npm install"
+
+[local_server]
+  [local_server.backends]
+    [local_server.backends.origin]
+      url = "https://stage--contentxscknowledgehub--adobedevxsc.aem.live"

@@ -1,0 +1,5 @@
+.env
+bin/
+pkg/
+node_modules/
+src/generated/

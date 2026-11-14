@@ -1,0 +1,13 @@
+{
+  "name": "knowledge-hub-stage-cug",
+  "private": true,
+  "type": "module",
+  "description": "Stage-only AEM Edge Function for Knowledge Hub CUG with Adobe Okta OIDC",
+  "dependencies": {
+    "@fastly/js-compute": "^3.46.0"
+  },
+  "scripts": {
+    "build": "node scripts/gen-build-env.mjs && js-compute-runtime ./src/index.js ./bin/main.wasm",
+    "test": "node --test 'test/**/*.test.mjs'"
+  }
+}
