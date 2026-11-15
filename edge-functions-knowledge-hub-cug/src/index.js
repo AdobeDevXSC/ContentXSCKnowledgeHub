@@ -176,6 +176,9 @@ export async function handleRequest(request) {
 
   try {
     const { env, missing } = await getEnvironment();
+    // request.url can be the edge function's debug host behind the CDN, so
+    // OAuth redirects must use the public origin of the matched site.
+    env.PUBLIC_ORIGIN = site.PUBLIC_ORIGIN;
     if (missing.length) {
       return new Response(`Edge Function configuration is incomplete: ${missing.join(', ')}`, {
         status: 503,
