@@ -43,12 +43,12 @@ function buildSignUpDialog(doc) {
     </form>
     <h2 id="anonymous-home-dialog-title">Request access</h2>
     <p>Adobe employees can get access to the Knowledge Hub by subscribing to the
-      <strong>${ACCESS_GROUP}</strong> group in Adobe IAM.</p>
-    <p class="anonymous-home-dialog-note">Adobe IAM requires the GlobalProtect VPN or a
+      <strong>${ACCESS_GROUP}</strong> group in the Adobe IAM Portal.</p>
+    <p class="anonymous-home-dialog-note">The Adobe IAM Portal requires the GlobalProtect VPN or a
       Cloud Secure Edge–registered device. Once your subscription is approved, return here and sign in.</p>
     <p class="anonymous-home-dialog-actions">
       <a class="button anonymous-home-dialog-subscribe" href="${ACCESS_GROUP_SUBSCRIBE_URL}"
-        target="_blank" rel="noopener noreferrer">Subscribe in Adobe IAM</a>
+        target="_blank" rel="noopener noreferrer">Subscribe in the Adobe IAM Portal</a>
     </p>`;
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
