@@ -495,10 +495,6 @@ body.anonymous-home .anonymous-home-container {
   overflow: hidden;
 }
 
-.hero.homepage.anonymous-home .hero-aurora {
-  opacity: 0.55;
-}
-
 .anonymous-home-actions {
   margin: 2rem 0 0;
 }
