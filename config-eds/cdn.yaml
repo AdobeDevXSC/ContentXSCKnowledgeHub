@@ -7,6 +7,7 @@ data:
         when:
           allOf:
             - { reqProperty: domain, equals: "stage.xscknowledgehub.adobe.com" }
+            - { reqProperty: path, notLike: "/adobe/experimental/compute*" }
         action:
           type: selectAemOrigin
           originName: edgefunction-knowledge-hub-stage-cug
