@@ -7,6 +7,7 @@ import {
 } from './okta.js';
 import { describeAttribute, evaluatePolicy } from './abac.js';
 import { SecretStoreManager } from './lib/config.js';
+import { withPublicOrigin } from './lib/public-origin.js';
 import { siteForRequest } from './sites.js';
 import { homeDocumentAction, isHtmlDocumentNavigation } from './home-routing.js';
 import BUILD_ENV from './generated/build-env.js';
@@ -17,6 +18,13 @@ const CUG_LOGIN_PATH_HEADER = 'x-aem-cug-login-path';
 
 let environmentPromise;
 
+function configurationDiagnostic(phase, error) {
+  const diagnostic = new Error();
+  diagnostic.name = error?.name || 'Error';
+  diagnostic.diagnosticPhase = phase;
+  return diagnostic;
+}
+
 async function loadEnvironment() {
   let config;
   try {
@@ -24,13 +32,19 @@ async function loadEnvironment() {
   } catch {
     config = { get: () => null };
   }
-  const get = (key) => config.get(key) || BUILD_ENV[key] || '';
+  const get = (key) => {
+    try {
+      return config.get(key) || BUILD_ENV[key] || '';
+    } catch (error) {
+      throw configurationDiagnostic(`config:${key}`, error);
+    }
+  };
   const secret = async (key) => {
     try {
       return await SecretStoreManager.getSecret(key);
     } catch (error) {
       if (error?.name === 'MissingSecretError') return BUILD_ENV[key] || '';
-      throw error;
+      throw configurationDiagnostic(`secret:${key}`, error);
     }
   };
   const [
@@ -174,22 +188,28 @@ export async function handleRequest(request) {
   const site = siteForRequest(request, url);
   if (!site) return new Response('Not Found', { status: 404, headers: noStore });
 
+  let failurePhase = 'configuration';
   try {
     const { env, missing } = await getEnvironment();
-    // request.url can be the edge function's debug host behind the CDN, so
-    // OAuth redirects must use the public origin of the matched site.
-    env.PUBLIC_ORIGIN = site.PUBLIC_ORIGIN;
     if (missing.length) {
       return new Response(`Edge Function configuration is incomplete: ${missing.join(', ')}`, {
         status: 503,
         headers: noStore,
       });
     }
-    if (url.pathname.startsWith('/auth/')) return handleAuthRoute(request, env, url);
+    failurePhase = 'request handling';
+    if (url.pathname.startsWith('/auth/')) {
+      return handleAuthRoute(request, withPublicOrigin(env, site), url);
+    }
     return await proxyWithCug(request, env, site, url);
-  } catch {
-    console.error('Knowledge Hub CUG request failed');
-    return new Response('Edge Function error', { status: 502, headers: noStore });
+  } catch (error) {
+    const errorType = error?.name || 'Error';
+    const errorPhase = error?.diagnosticPhase || failurePhase;
+    console.error(`Knowledge Hub CUG request failed during ${errorPhase} (${errorType})`);
+    return new Response(`Edge Function error (${errorPhase}: ${errorType})`, {
+      status: 503,
+      headers: noStore,
+    });
   }
 }
 

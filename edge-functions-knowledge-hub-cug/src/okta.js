@@ -3,6 +3,7 @@ import {
   b64urlEncode, randomString, sha256, signHS256, verifyHS256, verifyRS256,
 } from './jwt.js';
 import { subjectAttributes } from './abac.js';
+import { publicOrigin } from './lib/public-origin.js';
 
 export const SESSION_COOKIE = 'cug_session';
 const TX_COOKIE = 'cug_tx';
@@ -63,11 +64,6 @@ function redirect(location, cookies = []) {
   const headers = new Headers({ location, 'cache-control': 'no-store' });
   cookies.forEach((c) => headers.append('set-cookie', c));
   return new Response(null, { status: 302, headers });
-}
-
-// Behind the Adobe CDN, req.url may not carry the public host, so use the configured one.
-function publicOrigin(env, url) {
-  return (env.PUBLIC_ORIGIN || url.origin).replace(/\/+$/, '');
 }
 
 function callbackUrl(env, url) {
@@ -238,16 +234,17 @@ export async function callback(request, env) {
 export async function logout(request, env) {
   const url = new URL(request.url);
   const cookies = [clearCookie(SESSION_COOKIE), clearCookie(IDT_COOKIE, '/auth')];
+  const home = `${publicOrigin(env, url)}/`;
   // Adobe's corporate Okta can't register a sign-out redirect, so only end the local session
-  if (env.OKTA_LOCAL_LOGOUT) return redirect('/', cookies);
+  if (env.OKTA_LOCAL_LOGOUT) return redirect(home, cookies);
   const idToken = getCookie(request, IDT_COOKIE);
   const { end_session_endpoint: endSession } = await discovery(env);
-  if (!idToken || !endSession) return redirect('/', cookies);
+  if (!idToken || !endSession) return redirect(home, cookies);
 
   const target = new URL(endSession);
   target.search = new URLSearchParams({
     id_token_hint: idToken,
-    post_logout_redirect_uri: `${publicOrigin(env, url)}/`,
+    post_logout_redirect_uri: home,
   }).toString();
   return redirect(target.href, cookies);
 }
