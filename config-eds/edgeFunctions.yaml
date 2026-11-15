@@ -3,3 +3,14 @@ version: "1"
 data:
   functions:
     - name: knowledge-hub-stage-cug
+  secrets:
+    - key: XSC_OKTA_ISSUER
+      value: "${{XSC_OKTA_ISSUER}}"
+    - key: XSC_OKTA_CLIENT_ID
+      value: "${{XSC_OKTA_CLIENT_ID}}"
+    - key: XSC_OKTA_CLIENT_SECRET
+      value: "${{XSC_OKTA_CLIENT_SECRET}}"
+    - key: XSC_SESSION_SECRET
+      value: "${{XSC_SESSION_SECRET}}"
+    - key: XSC_SITE_TOKEN
+      value: "${{XSC_SITE_TOKEN}}"

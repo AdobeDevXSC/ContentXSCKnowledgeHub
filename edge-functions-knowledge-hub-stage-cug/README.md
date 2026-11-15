@@ -21,17 +21,17 @@ protected content.
 Set these values in Adobe's secure configuration stores. Do not commit the
 values or paste secrets into chat.
 
-`config_default`:
+`secret_default` (sourced from Cloud Manager secret variables by
+`config-eds/edgeFunctions.yaml`):
 
 - `XSC_OKTA_ISSUER` (use the Stage issuer above)
 - `XSC_OKTA_CLIENT_ID`
-- Optional: `XSC_OKTA_SCOPES` and `XSC_OKTA_GROUPS_CLAIM`
-
-`secret_default`:
-
 - `XSC_OKTA_CLIENT_SECRET`
 - `XSC_SESSION_SECRET` (at least 32 characters)
 - `XSC_SITE_TOKEN` (the site-authentication token for the Stage EDS origin)
+
+Optional `XSC_OKTA_SCOPES` and `XSC_OKTA_GROUPS_CLAIM` values can be added to
+`config_default`.
 
 The function fails closed with HTTP 503 when required configuration is missing.
 Logout is local-only because the Adobe corporate self-service app does not

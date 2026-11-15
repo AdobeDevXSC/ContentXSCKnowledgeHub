@@ -27,22 +27,27 @@ async function loadEnvironment() {
   const secret = async (key) => {
     try {
       return await SecretStoreManager.getSecret(key);
-    } catch {
-      return BUILD_ENV[key] || '';
+    } catch (error) {
+      if (error?.name === 'MissingSecretError') return BUILD_ENV[key] || '';
+      throw error;
     }
   };
   const [
+    oktaIssuerSecret,
+    oktaClientIdSecret,
     oktaClientSecret,
     sessionSecret,
     siteToken,
   ] = await Promise.all([
+    secret('XSC_OKTA_ISSUER'),
+    secret('XSC_OKTA_CLIENT_ID'),
     secret('XSC_OKTA_CLIENT_SECRET'),
     secret('XSC_SESSION_SECRET'),
     secret('XSC_SITE_TOKEN'),
   ]);
   const env = {
-    OKTA_ISSUER: get('XSC_OKTA_ISSUER'),
-    OKTA_CLIENT_ID: get('XSC_OKTA_CLIENT_ID'),
+    OKTA_ISSUER: oktaIssuerSecret || get('XSC_OKTA_ISSUER'),
+    OKTA_CLIENT_ID: oktaClientIdSecret || get('XSC_OKTA_CLIENT_ID'),
     OKTA_CLIENT_SECRET: oktaClientSecret,
     OKTA_SCOPES: get('XSC_OKTA_SCOPES'),
     OKTA_GROUPS_CLAIM: get('XSC_OKTA_GROUPS_CLAIM'),
