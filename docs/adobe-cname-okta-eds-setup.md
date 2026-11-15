@@ -145,7 +145,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: token <VALUE>" https
 
 ## Step 5: Edge Function
 
-Start from a working reference (`edge-functions-knowledge-hub-stage-cug` in
+Start from a working reference (`edge-functions-knowledge-hub-cug` in
 `AdobeDevXSC/ContentXSCKnowledgeHub`, or `edge-functions-xsc-demo` in `ynaka-adobe/AEM-p154856`).
 Must-haves:
 - Hardcode `PUBLIC_HOST`, `PUBLIC_ORIGIN = https://<HOST>`, `ORIGIN_HOSTNAME` in `src/sites.js`.
