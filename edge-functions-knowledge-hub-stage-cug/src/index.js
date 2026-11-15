@@ -8,6 +8,7 @@ import {
 import { describeAttribute, evaluatePolicy } from './abac.js';
 import { SecretStoreManager } from './lib/config.js';
 import { siteForRequest } from './sites.js';
+import { anonymousHomepage } from './anonymous-home.js';
 import BUILD_ENV from './generated/build-env.js';
 
 const CUG_REQUIRED_HEADER = 'x-aem-cug-required';
@@ -137,6 +138,8 @@ async function proxyWithCug(request, env, site, url) {
 
   if (cugRequired) {
     const session = await getSession(request, env);
+    const homepage = anonymousHomepage(request, url, session);
+    if (homepage) return homepage;
     if (!session) {
       const isNavigation = request.method === 'GET'
         && (request.headers.get('accept') || '').includes('text/html');

@@ -16,6 +16,11 @@ existing `x-aem-cug-*` headers. The Okta application's access-group assignment
 limits who can authenticate; page-level CUG policies continue to come from the
 protected content.
 
+An unauthenticated HTML navigation to the protected root (`/`) receives a
+public sign-in page; signing in returns to the Knowledge Hub. Authenticated
+root requests and all other protected paths continue through the existing CUG
+policy checks.
+
 ## Secure configuration
 
 Set these values in Adobe's secure configuration stores. Do not commit the
