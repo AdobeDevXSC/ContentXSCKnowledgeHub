@@ -8,7 +8,7 @@ import {
 import { describeAttribute, evaluatePolicy } from './abac.js';
 import { SecretStoreManager } from './lib/config.js';
 import { siteForRequest } from './sites.js';
-import { anonymousHomepage } from './anonymous-home.js';
+import { homeDocumentAction, isHtmlDocumentNavigation } from './home-routing.js';
 import BUILD_ENV from './generated/build-env.js';
 
 const CUG_REQUIRED_HEADER = 'x-aem-cug-required';
@@ -113,6 +113,20 @@ async function handleAuthRoute(request, env, url) {
 }
 
 async function proxyWithCug(request, env, site, url) {
+  let session;
+  let publicHome = false;
+  if (isHtmlDocumentNavigation(request, url)) {
+    session = await getSession(request, env);
+    const action = homeDocumentAction(request, url, session);
+    if (action?.type === 'redirect') {
+      return new Response(null, {
+        status: 302,
+        headers: { ...noStore, location: action.location },
+      });
+    }
+    publicHome = action?.type === 'public';
+  }
+
   const originUrl = `https://${site.ORIGIN_HOSTNAME}${url.pathname}${url.search}`;
   const headers = new Headers(request.headers);
   headers.delete('cookie');
@@ -136,10 +150,8 @@ async function proxyWithCug(request, env, site, url) {
   responseHeaders.delete(CUG_LOGIN_PATH_HEADER);
   responseHeaders.delete('age');
 
-  if (cugRequired) {
-    const session = await getSession(request, env);
-    const homepage = anonymousHomepage(request, url, session);
-    if (homepage) return homepage;
+  if (cugRequired && !publicHome) {
+    session ??= await getSession(request, env);
     if (!session) {
       const isNavigation = request.method === 'GET'
         && (request.headers.get('accept') || '').includes('text/html');

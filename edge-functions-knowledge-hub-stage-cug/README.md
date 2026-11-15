@@ -16,10 +16,13 @@ existing `x-aem-cug-*` headers. The Okta application's access-group assignment
 limits who can authenticate; page-level CUG policies continue to come from the
 protected content.
 
-An unauthenticated HTML navigation to the protected root (`/`) receives a
-public sign-in page; signing in returns to the Knowledge Hub. Authenticated
-root requests and all other protected paths continue through the existing CUG
-policy checks.
+An unauthenticated HTML navigation to the protected root (`/`) redirects to
+`/home`, which is served from the public `home.docx` EDS document. The function
+allows unauthenticated HTML navigations to that exact path through the CUG
+check; a signed-in request to `/home` redirects to the normal `/` homepage.
+All other protected paths continue through the existing CUG policy checks.
+Author and publish `home.docx` through DA before relying on the public landing
+page.
 
 ## Secure configuration
 
