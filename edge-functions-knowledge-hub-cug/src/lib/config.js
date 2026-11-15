@@ -1,14 +1,14 @@
 /// <reference types="@fastly/js-compute" />
 
 import { SecretStore } from 'fastly:secret-store';
+import { getSecretsMap } from './secret-map.js';
 
 export class SecretStoreManager {
   static instance = null;
 
   constructor() {
     this.store = null;
-    this.secretsMap = null;
-    this.secretsMapLoaded = false;
+    this.secretMapState = {};
   }
 
   static getInstance() {
@@ -21,17 +21,10 @@ export class SecretStoreManager {
   async getSecret(key) {
     if (!this.store) this.store = new SecretStore('secret_default');
 
-    if (!this.secretsMapLoaded) {
-      this.secretsMapLoaded = true;
-      try {
-        const entry = await this.store.get('secrets');
-        if (entry) this.secretsMap = JSON.parse(entry.plaintext());
-      } catch {
-        this.secretsMap = null;
-      }
+    const secretsMap = await getSecretsMap(this.store, this.secretMapState);
+    if (secretsMap && Object.prototype.hasOwnProperty.call(secretsMap, key)) {
+      return secretsMap[key];
     }
-
-    if (this.secretsMap && key in this.secretsMap) return this.secretsMap[key];
 
     const secret = await this.store.get(key);
     if (!secret) {
