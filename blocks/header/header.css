@@ -552,3 +552,49 @@ header nav .theme-toggle-input:focus-visible + .theme-toggle-slider {
   outline: 2px solid var(--link-color);
   outline-offset: 2px;
 }
+
+header nav .nav-tools .nav-auth-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0.45rem 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  background-color: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease-snap);
+}
+
+header nav .nav-tools .nav-auth-link:hover {
+  background-color: var(--accent-hover);
+  color: var(--accent-contrast);
+}
+
+header nav .nav-tools .nav-auth-link:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+@media (width < 600px) {
+  header nav {
+    gap: 0 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  header nav .nav-tools {
+    gap: 0.25rem;
+  }
+
+  header nav .nav-brand img {
+    width: 84px;
+  }
+
+  header nav .nav-tools .nav-auth-link {
+    padding: 0.35rem 0.6rem;
+    font-size: 0.8rem;
+  }
+}

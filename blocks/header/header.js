@@ -1,5 +1,7 @@
 import { getMetadata, toggleTheme } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
+// eslint-disable-next-line import/extensions
+import { getAuthControl, isStageAuthHost } from './auth.mjs';
 
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 1214px)');
@@ -236,6 +238,35 @@ export default async function decorate(block) {
     themeToggle.querySelector('.theme-toggle-input').checked = document.body.classList.contains('dark-mode');
   });
   navTools.appendChild(themeToggle);
+
+  if (isStageAuthHost(window.location.hostname)) {
+    const returnTo = `${window.location.pathname}${window.location.search}`;
+    const authLink = document.createElement('a');
+    authLink.className = 'nav-auth-link';
+    const signIn = getAuthControl(false, returnTo);
+    authLink.href = signIn.href;
+    authLink.textContent = signIn.label;
+    navTools.appendChild(authLink);
+
+    fetch('/auth/me', { cache: 'no-store', credentials: 'same-origin' })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Authentication status request failed: ${response.status}`);
+        return response.json();
+      })
+      .then(({ authenticated }) => {
+        if (typeof authenticated !== 'boolean') {
+          throw new Error('Authentication status response is invalid');
+        }
+        const action = getAuthControl(authenticated, returnTo);
+        authLink.href = action.href;
+        authLink.textContent = action.label;
+      })
+      .catch((error) => {
+        // Keep the sign-in link available if status lookup fails.
+        // eslint-disable-next-line no-console
+        console.error('Unable to determine Knowledge Hub authentication state', error);
+      });
+  }
 
   const navWrapper = document.createElement('div');
   navWrapper.className = 'nav-wrapper uk-navbar-container';
