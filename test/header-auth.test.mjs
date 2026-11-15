@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-// eslint-disable-next-line import/extensions
-import { getAuthControl, isStageAuthHost } from '../blocks/header/auth.mjs';
+import {
+  getAuthControl, getUserInitials, getUserMenuItems, isStageAuthHost,
+} from '../blocks/header/auth.mjs'; // eslint-disable-line import/extensions
 
 test('enables auth controls only on the Stage public host', () => {
   assert.equal(isStageAuthHost('stage.xscknowledgehub.adobe.com'), true);
@@ -25,4 +26,16 @@ test('does not use an external sign-in return destination', () => {
 
 test('creates a sign-out link for authenticated users', () => {
   assert.deepEqual(getAuthControl(true), { label: 'Sign out', href: '/auth/logout' });
+});
+
+test('derives user initials from the name, then the email', () => {
+  assert.equal(getUserInitials('Yuji Nakagawa', 'ynaka@adobe.com'), 'YN');
+  assert.equal(getUserInitials('Ana Maria Lopez'), 'AL');
+  assert.equal(getUserInitials('', 'ynaka@adobe.com'), 'YN');
+  assert.equal(getUserInitials(), '?');
+});
+
+test('ends the user menu with Sign out', () => {
+  const items = getUserMenuItems();
+  assert.deepEqual(items.at(-1), { label: 'Sign out', href: '/auth/logout', variant: 'danger' });
 });

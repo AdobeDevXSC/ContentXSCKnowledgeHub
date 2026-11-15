@@ -1,7 +1,8 @@
 import { getMetadata, toggleTheme } from '../../scripts/aem.js';
 import { loadFragment } from '../fragment/fragment.js';
-// eslint-disable-next-line import/extensions
-import { getAuthControl, isStageAuthHost } from './auth.mjs';
+import {
+  getAuthControl, getUserInitials, getUserMenuItems, isStageAuthHost,
+} from './auth.mjs'; // eslint-disable-line import/extensions
 
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 1214px)');
@@ -103,6 +104,80 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
     window.removeEventListener('keydown', closeOnEscape);
     nav.removeEventListener('focusout', closeOnFocusLost);
   }
+}
+
+/**
+ * Builds the signed-in user pill and its flyout menu.
+ * @param {{name?: string, email?: string}} user
+ */
+function buildUserMenu({ name = '', email = '' }) {
+  const displayName = name.trim() || email.trim() || 'Signed in';
+  const initials = getUserInitials(name, email);
+  const wrapper = document.createElement('div');
+  wrapper.className = 'nav-user';
+
+  const toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'nav-user-toggle';
+  toggle.setAttribute('aria-haspopup', 'menu');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.innerHTML = '<span class="nav-user-avatar" aria-hidden="true"></span><span class="nav-user-name"></span>';
+  toggle.querySelector('.nav-user-avatar').textContent = initials;
+  toggle.querySelector('.nav-user-name').textContent = displayName;
+
+  const menu = document.createElement('div');
+  menu.className = 'nav-user-menu';
+  menu.id = 'nav-user-menu';
+  menu.hidden = true;
+  toggle.setAttribute('aria-controls', menu.id);
+  menu.innerHTML = `
+    <div class="nav-user-menu-profile">
+      <span class="nav-user-avatar nav-user-avatar-lg" aria-hidden="true"></span>
+      <div class="nav-user-menu-identity">
+        <p class="nav-user-menu-name"></p>
+        <p class="nav-user-menu-email"></p>
+      </div>
+    </div>
+    <ul class="nav-user-menu-items" role="menu"></ul>`;
+  menu.querySelector('.nav-user-avatar').textContent = initials;
+  menu.querySelector('.nav-user-menu-name').textContent = displayName;
+  const emailEl = menu.querySelector('.nav-user-menu-email');
+  if (email && email !== displayName) emailEl.textContent = email;
+  else emailEl.remove();
+
+  const list = menu.querySelector('.nav-user-menu-items');
+  getUserMenuItems().forEach(({ label, href, variant }) => {
+    const li = document.createElement('li');
+    li.setAttribute('role', 'none');
+    const link = document.createElement('a');
+    link.setAttribute('role', 'menuitem');
+    link.href = href;
+    link.textContent = label;
+    if (variant) link.classList.add(`nav-user-menu-${variant}`);
+    li.append(link);
+    list.append(li);
+  });
+
+  const setOpen = (open) => {
+    menu.hidden = !open;
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  toggle.addEventListener('click', (event) => {
+    event.stopPropagation();
+    setOpen(menu.hidden);
+  });
+  document.addEventListener('click', (event) => {
+    if (!wrapper.contains(event.target)) setOpen(false);
+  });
+  wrapper.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !menu.hidden) {
+      setOpen(false);
+      toggle.focus();
+    }
+  });
+
+  wrapper.append(toggle, menu);
+  return wrapper;
 }
 
 /**
@@ -253,13 +328,11 @@ export default async function decorate(block) {
         if (!response.ok) throw new Error(`Authentication status request failed: ${response.status}`);
         return response.json();
       })
-      .then(({ authenticated }) => {
-        if (typeof authenticated !== 'boolean') {
+      .then((user) => {
+        if (typeof user?.authenticated !== 'boolean') {
           throw new Error('Authentication status response is invalid');
         }
-        const action = getAuthControl(authenticated, returnTo);
-        authLink.href = action.href;
-        authLink.textContent = action.label;
+        if (user.authenticated) authLink.replaceWith(buildUserMenu(user));
       })
       .catch((error) => {
         // Keep the sign-in link available if status lookup fails.

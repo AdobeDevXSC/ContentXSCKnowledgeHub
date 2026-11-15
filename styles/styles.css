@@ -363,7 +363,7 @@ a:hover {
 
 /* primary buttons (widgets opt out; see blocks/widget/widget.css) */
 a.button:any-link:where(:not([data-block-name="widget"] *)),
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):where(:not([data-block-name="widget"] *)) {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):not(.nav-user-toggle):where(:not([data-block-name="widget"] *)) {
   box-sizing: border-box;
   display: inline-block;
   max-width: 100%;
@@ -390,15 +390,15 @@ button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):
 
 a.button:hover:where(:not([data-block-name="widget"] *)),
 a.button:focus:where(:not([data-block-name="widget"] *)),
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):hover:where(:not([data-block-name="widget"] *)),
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):focus:where(:not([data-block-name="widget"] *)) {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):not(.nav-user-toggle):hover:where(:not([data-block-name="widget"] *)),
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):not(.nav-user-toggle):focus:where(:not([data-block-name="widget"] *)) {
   background-color: var(--link-hover-color);
   cursor: pointer;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
 }
 
 a.button:active:where(:not([data-block-name="widget"] *)),
-button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):active:where(:not([data-block-name="widget"] *)) {
+button:not(.leftnav-collapse-btn):not(.leftnav-expand-btn):not(.lightbox-close):not(.uk-button):not(.nav-search-btn):not(.cmdk-close):not(.cmdk-clear):not(.hub-topic):not(.hub-sort-btn):not(.hero-home-clear):not(.hub-more-btn):not(.anonymous-home-signup):not(.anonymous-home-dialog-close):not(.nav-user-toggle):active:where(:not([data-block-name="widget"] *)) {
   transform: translateY(1px);
 }
 

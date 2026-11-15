@@ -579,6 +579,139 @@ header nav .nav-tools .nav-auth-link:focus-visible {
   outline-offset: 2px;
 }
 
+header nav .nav-tools .nav-user {
+  position: relative;
+}
+
+header nav .nav-tools .nav-user-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 36px;
+  margin: 0;
+  padding: 0.2rem 0.85rem 0.2rem 0.2rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-family: var(--body-font-family);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-snap);
+}
+
+header nav .nav-tools .nav-user-toggle:hover,
+header nav .nav-tools .nav-user-toggle[aria-expanded="true"] {
+  border-color: var(--accent);
+}
+
+header nav .nav-tools .nav-user-toggle:focus-visible {
+  outline: 2px solid var(--accent-ring);
+  outline-offset: 2px;
+}
+
+header nav .nav-user-avatar {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast, #fff);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+header nav .nav-user-avatar-lg {
+  width: 48px;
+  height: 48px;
+  font-size: 1rem;
+}
+
+header nav .nav-user-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  width: 280px;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-lg);
+  text-align: left;
+}
+
+header nav .nav-user-menu[hidden] {
+  display: none;
+}
+
+header nav .nav-user-menu-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.25rem 0.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+header nav .nav-user-menu-identity {
+  min-width: 0;
+}
+
+header nav .nav-user-menu-name,
+header nav .nav-user-menu-email {
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+header nav .nav-user-menu-name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+header nav .nav-user-menu-email {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+}
+
+header nav .nav-user-menu-items {
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+header nav .nav-user-menu .nav-user-menu-items a:any-link {
+  display: block;
+  padding: 0.5rem 0.5rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  text-decoration: none;
+}
+
+header nav .nav-user-menu .nav-user-menu-items a:any-link:hover,
+header nav .nav-user-menu .nav-user-menu-items a:any-link:focus-visible {
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+
+header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger {
+  color: var(--accent);
+}
+
+header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger:hover,
+header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger:focus-visible {
+  color: var(--accent);
+}
+
 @media (width < 600px) {
   header nav {
     gap: 0 0.5rem;
@@ -596,5 +729,13 @@ header nav .nav-tools .nav-auth-link:focus-visible {
   header nav .nav-tools .nav-auth-link {
     padding: 0.35rem 0.6rem;
     font-size: 0.8rem;
+  }
+
+  header nav .nav-tools .nav-user-toggle {
+    padding-right: 0.2rem;
+  }
+
+  header nav .nav-tools .nav-user-name {
+    display: none;
   }
 }
