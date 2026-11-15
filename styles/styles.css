@@ -256,6 +256,12 @@ header {
   height: var(--nav-height);
 }
 
+/* signed-out landing (/home): no protected nav or footer chrome */
+body.anonymous-home header,
+body.anonymous-home footer {
+  display: none;
+}
+
 header .header,
 footer .footer {
   visibility: hidden;

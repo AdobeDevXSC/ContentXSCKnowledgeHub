@@ -14,6 +14,8 @@ import {
   buildBlock,
 } from './aem.js';
 
+// eslint-disable-next-line import/extensions
+import { decorateAnonymousHome, isAnonymousHomePath } from './anonymous-home.mjs';
 import './uikit.min.js';
 import './uikit-icons.min.js';
 
@@ -1128,7 +1130,13 @@ async function loadEager(doc) {
     document.documentElement.lang = 'en';
     decorateTemplateAndTheme();
     const main = doc.querySelector('main');
-    if (main) {
+    if (main && isAnonymousHomePath(window.location.pathname)) {
+      // The signed-out landing page: branded hero only. The nav, footer, and
+      // search data are CUG-protected, so none of that chrome is loaded here.
+      document.body.classList.add('anonymous-home');
+      decorateAnonymousHome(main);
+      await loadCSS(`${window.hlx.codeBasePath}/blocks/hero/hero.css`);
+    } else if (main) {
       decorateMain(main);
       if (!window.isErrorPage) wrapMainContent(main);
       // The homepage (root "/") centers its content and keeps its full-width
@@ -1153,6 +1161,11 @@ async function loadEager(doc) {
 }
 
 async function loadLazy(doc) {
+  if (isAnonymousHomePath(window.location.pathname)) {
+    loadCSS(`${window.hlx.codeBasePath}/styles/lazy-styles.css`);
+    loadFonts();
+    return;
+  }
   const main = doc.querySelector('main');
   await loadSections(main);
   const { hash } = window.location;
@@ -1176,6 +1189,7 @@ async function loadPage() {
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
+  if (isAnonymousHomePath(window.location.pathname)) return;
   initLightbox();
   initCommandPalette();
   recordRecentPage();

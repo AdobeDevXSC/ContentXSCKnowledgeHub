@@ -473,3 +473,48 @@ body.dark-mode .hero-home-dropdown::-webkit-scrollbar-thumb {
     display: none; /* room is tight on phones; the title alone is enough */
   }
 }
+
+/* ===== signed-out landing (/home) — the homepage hero as a sign-in page ===== */
+body.anonymous-home main {
+  display: flex;
+  min-height: 100vh;
+}
+
+body.anonymous-home .anonymous-home-container {
+  display: flex;
+  flex: 1;
+  margin: 0;
+  padding: 0;
+}
+
+.hero.homepage.anonymous-home {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  margin: 0;
+  overflow: hidden;
+}
+
+.hero.homepage.anonymous-home .hero-aurora {
+  opacity: 0.55;
+}
+
+.anonymous-home-actions {
+  margin: 2rem 0 0;
+}
+
+a.button.anonymous-home-signin:any-link {
+  padding: 0.85em 2.25em;
+  border-radius: 999px;
+  font-size: 1.05rem;
+  background: linear-gradient(135deg, var(--accent), #ff6a4d);
+  color: #fff;
+  box-shadow: 0 10px 28px rgb(237 34 36 / 28%);
+}
+
+a.button.anonymous-home-signin:hover,
+a.button.anonymous-home-signin:focus-visible {
+  background: linear-gradient(135deg, var(--accent), #ff6a4d);
+  box-shadow: 0 14px 34px rgb(237 34 36 / 36%);
+  transform: translateY(-1px);
+}
