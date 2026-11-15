@@ -9,6 +9,9 @@ export const ANONYMOUS_HOME_DEFAULTS = {
   subtitle: 'Sign in with your Adobe account to explore guides, sales plays, and resources curated for Experience Solutions Consultants.',
 };
 
+export const ACCESS_GROUP = 'GRP-XSCKNOWLEDGEHUB';
+export const ACCESS_GROUP_SUBSCRIBE_URL = `https://iam.corp.adobe.com/groups/subscribe?groups=${ACCESS_GROUP}`;
+
 export function isAnonymousHomePath(pathname) {
   return pathname === ANONYMOUS_HOME_PATH;
 }
@@ -28,6 +31,29 @@ export function getAnonymousHomeContent(lines = []) {
     title: authored[titleIdx].text.trim(),
     subtitle: authored[titleIdx + 1]?.text.trim() || ANONYMOUS_HOME_DEFAULTS.subtitle,
   };
+}
+
+function buildSignUpDialog(doc) {
+  const dialog = doc.createElement('dialog');
+  dialog.className = 'anonymous-home-dialog';
+  dialog.setAttribute('aria-labelledby', 'anonymous-home-dialog-title');
+  dialog.innerHTML = `
+    <form method="dialog" class="anonymous-home-dialog-close-form">
+      <button type="submit" class="anonymous-home-dialog-close" aria-label="Close">&times;</button>
+    </form>
+    <h2 id="anonymous-home-dialog-title">Request access</h2>
+    <p>Adobe employees can get access to the Knowledge Hub by subscribing to the
+      <strong>${ACCESS_GROUP}</strong> group in Adobe IAM.</p>
+    <p class="anonymous-home-dialog-note">Adobe IAM requires the GlobalProtect VPN or a
+      Cloud Secure Edge–registered device. Once your subscription is approved, return here and sign in.</p>
+    <p class="anonymous-home-dialog-actions">
+      <a class="button anonymous-home-dialog-subscribe" href="${ACCESS_GROUP_SUBSCRIBE_URL}"
+        target="_blank" rel="noopener noreferrer">Subscribe in Adobe IAM</a>
+    </p>`;
+  dialog.addEventListener('click', (event) => {
+    if (event.target === dialog) dialog.close();
+  });
+  return dialog;
 }
 
 /**
@@ -53,7 +79,10 @@ export function decorateAnonymousHome(main) {
       <p class="hero-home-eyebrow"><span class="hero-home-dot"></span></p>
       <h1 class="hero-home-title"></h1>
       <p class="hero-home-subtitle"></p>
-      <p class="anonymous-home-actions"><a class="button anonymous-home-signin"></a></p>
+      <p class="anonymous-home-actions">
+        <a class="button anonymous-home-signin"></a>
+        <button type="button" class="anonymous-home-signup" aria-haspopup="dialog">Sign up</button>
+      </p>
     </div>`;
   hero.querySelector('.hero-home-eyebrow').append(eyebrow);
   const words = title.split(/\s+/);
@@ -68,6 +97,8 @@ export function decorateAnonymousHome(main) {
   link.href = signIn.href;
   link.textContent = signIn.label;
 
-  section.append(hero);
+  section.append(hero, buildSignUpDialog(doc));
   main.replaceChildren(section);
+  const dialog = section.querySelector('.anonymous-home-dialog');
+  hero.querySelector('.anonymous-home-signup').addEventListener('click', () => dialog.showModal());
 }
