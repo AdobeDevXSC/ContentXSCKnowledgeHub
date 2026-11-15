@@ -33,23 +33,59 @@ export function getAnonymousHomeContent(lines = []) {
   };
 }
 
-function buildSignUpDialog(doc) {
+/**
+ * Returns the authored sign-up modal section: the second section of the
+ * document (after a section break), if it has any text.
+ * @param {{textContent: string}[]} sections top-level document sections
+ */
+export function getSignUpSection(sections = []) {
+  const section = sections[1];
+  return section && section.textContent.trim() ? section : null;
+}
+
+const DEFAULT_SIGN_UP_HTML = `
+  <h2>Request access</h2>
+  <p>Adobe employees can get access to the Knowledge Hub by subscribing to the
+    <strong>${ACCESS_GROUP}</strong> group in the Adobe IAM Portal.</p>
+  <p class="anonymous-home-dialog-note">The Adobe IAM Portal requires the GlobalProtect VPN or a
+    Cloud Secure Edge–registered device. Once your subscription is approved, return here and sign in.</p>
+  <p><a href="${ACCESS_GROUP_SUBSCRIBE_URL}">Subscribe in the Adobe IAM Portal</a></p>`;
+
+function buildSignUpDialog(doc, authoredSection) {
   const dialog = doc.createElement('dialog');
   dialog.className = 'anonymous-home-dialog';
-  dialog.setAttribute('aria-labelledby', 'anonymous-home-dialog-title');
   dialog.innerHTML = `
     <form method="dialog" class="anonymous-home-dialog-close-form">
       <button type="submit" class="anonymous-home-dialog-close" aria-label="Close">&times;</button>
     </form>
-    <h2 id="anonymous-home-dialog-title">Request access</h2>
-    <p>Adobe employees can get access to the Knowledge Hub by subscribing to the
-      <strong>${ACCESS_GROUP}</strong> group in the Adobe IAM Portal.</p>
-    <p class="anonymous-home-dialog-note">The Adobe IAM Portal requires the GlobalProtect VPN or a
-      Cloud Secure Edge–registered device. Once your subscription is approved, return here and sign in.</p>
-    <p class="anonymous-home-dialog-actions">
-      <a class="button anonymous-home-dialog-subscribe" href="${ACCESS_GROUP_SUBSCRIBE_URL}"
-        target="_blank" rel="noopener noreferrer">Subscribe in the Adobe IAM Portal</a>
-    </p>`;
+    <div class="anonymous-home-dialog-body"></div>`;
+  const body = dialog.querySelector('.anonymous-home-dialog-body');
+  if (authoredSection) {
+    authoredSection.querySelectorAll('.section-metadata').forEach((el) => el.remove());
+    body.append(...authoredSection.childNodes);
+  } else {
+    body.innerHTML = DEFAULT_SIGN_UP_HTML;
+  }
+
+  const heading = body.querySelector('h1, h2, h3, h4, h5, h6');
+  if (heading) {
+    heading.id = 'anonymous-home-dialog-title';
+    dialog.setAttribute('aria-labelledby', heading.id);
+  } else {
+    dialog.setAttribute('aria-label', 'Sign up');
+  }
+  body.querySelectorAll('a[href]').forEach((link) => {
+    if (link.origin !== doc.location?.origin) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
+    const p = link.parentElement;
+    if (p?.tagName === 'P' && p.childElementCount === 1 && p.textContent.trim() === link.textContent.trim()) {
+      link.classList.add('button', 'anonymous-home-dialog-subscribe');
+      p.classList.add('anonymous-home-dialog-actions');
+    }
+  });
+
   dialog.addEventListener('click', (event) => {
     if (event.target === dialog) dialog.close();
   });
@@ -62,7 +98,9 @@ function buildSignUpDialog(doc) {
  */
 export function decorateAnonymousHome(main) {
   const doc = main.ownerDocument;
-  const lines = [...main.querySelectorAll('h1, h2, h3, h4, h5, h6, p')]
+  const sections = [...main.querySelectorAll(':scope > div')];
+  const heroSource = sections[0] || main;
+  const lines = [...heroSource.querySelectorAll('h1, h2, h3, h4, h5, h6, p')]
     .map((el) => ({ tag: el.tagName, text: el.textContent }));
   const { eyebrow, title, subtitle } = getAnonymousHomeContent(lines);
   const signIn = getAuthControl(false, '/');
@@ -97,7 +135,7 @@ export function decorateAnonymousHome(main) {
   link.href = signIn.href;
   link.textContent = signIn.label;
 
-  section.append(hero, buildSignUpDialog(doc));
+  section.append(hero, buildSignUpDialog(doc, getSignUpSection(sections)));
   main.replaceChildren(section);
   const dialog = section.querySelector('.anonymous-home-dialog');
   hero.querySelector('.anonymous-home-signup').addEventListener('click', () => dialog.showModal());

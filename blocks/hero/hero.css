@@ -593,3 +593,7 @@ button.anonymous-home-dialog-close:focus-visible {
 .anonymous-home-dialog-actions a.button {
   margin: 0;
 }
+
+.anonymous-home-dialog-body > :first-child {
+  margin-top: 0;
+}
