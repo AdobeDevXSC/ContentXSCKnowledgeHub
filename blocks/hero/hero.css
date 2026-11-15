@@ -522,6 +522,10 @@ a.button.anonymous-home-signin:focus-visible {
 
 button.anonymous-home-signup {
   margin: 0;
+  font-family: var(--body-font-family);
+  font-weight: 600;
+  line-height: 1.25;
+  cursor: pointer;
   padding: 0.85em 2.25em;
   border: 1px solid var(--border-strong);
   border-radius: 999px;
@@ -571,6 +575,8 @@ button.anonymous-home-signup:focus-visible {
 
 button.anonymous-home-dialog-close {
   margin: 0;
+  border: 0;
+  cursor: pointer;
   padding: 0.1em 0.45em;
   font-size: 1.5rem;
   line-height: 1;
