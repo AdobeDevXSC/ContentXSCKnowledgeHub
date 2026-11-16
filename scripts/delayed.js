@@ -1,5 +1,5 @@
 import {
-  ORG_ID, TENANT_ID, getDatastreamId, getLinkType, isAnalyticsEnabled,
+  ORG_ID, TENANT_ID, getBlockAnalyticsVars, getDatastreamId, getLinkType, isAnalyticsEnabled,
 } from './martech-config.mjs'; // eslint-disable-line import/extensions
 
 const ALLOY_SRC = 'https://cdn1.adoberesources.net/alloy/2.37.1/alloy.min.js';
@@ -19,11 +19,24 @@ function withTenant(data) {
   return TENANT_ID ? { [TENANT_ID]: { knowledgeHub: data } } : {};
 }
 
+const SEQ_KEY = 'kh_block_seq';
+
+function nextSequence() {
+  try {
+    const n = (Number(sessionStorage.getItem(SEQ_KEY)) || 0) + 1;
+    sessionStorage.setItem(SEQ_KEY, n);
+    return n;
+  } catch {
+    return 0;
+  }
+}
+
 function blockInfo(block) {
   return {
     name: block.dataset.blockName || block.classList[0],
     position: Number(block.dataset.blockPos) || 0,
     variant: [...block.classList].filter((c) => !['block', block.dataset.blockName].includes(c)).join(' '),
+    sequence: nextSequence(),
   };
 }
 
@@ -32,23 +45,28 @@ function sendBlockEvent(e) {
   window.alloy('sendEvent', {
     xdm: {
       eventType: isClick ? 'web.webinteraction.linkClicks' : 'web.webinteraction.display',
-      ...(isClick && {
-        web: {
-          webInteraction: {
-            name: `${e.block.name}:${e.interaction?.label || ''}`,
-            URL: e.interaction?.href,
-            type: e.interaction?.linkType || 'other',
-            linkClicks: { value: 1 },
-          },
+      // A webInteraction makes Analytics record a link call, so impressions don't add page views.
+      web: {
+        webInteraction: isClick ? {
+          name: `${e.block.name}:${e.interaction?.label || ''}`,
+          URL: e.interaction?.href,
+          type: e.interaction?.linkType || 'other',
+          linkClicks: { value: 1 },
+        } : {
+          name: `${e.event}:${e.block.name}`,
+          type: 'other',
+          linkClicks: { value: 0 },
         },
-      }),
+      },
       ...withTenant({
         blockName: e.block.name,
         blockPosition: e.block.position,
         blockVariant: e.block.variant,
+        blockSequence: e.block.sequence,
         blockEvent: e.event,
       }),
     },
+    data: { __adobe: { analytics: getBlockAnalyticsVars(e) } },
   });
 }
 
@@ -67,11 +85,22 @@ function listenToDataLayer() {
 }
 
 function trackBlocks() {
+  // An impression needs the block at least 50% visible for 1 second.
+  const timers = new Map();
   const io = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      io.unobserve(entry.target);
-      window.adobeDataLayer.push({ event: 'block-impression', block: blockInfo(entry.target) });
+      const el = entry.target;
+      if (!entry.isIntersecting) {
+        clearTimeout(timers.get(el));
+        timers.delete(el);
+        return;
+      }
+      if (timers.has(el)) return;
+      timers.set(el, setTimeout(() => {
+        io.unobserve(el);
+        timers.delete(el);
+        window.adobeDataLayer.push({ event: 'block-impression', block: blockInfo(el) });
+      }, 1000));
     });
   }, { threshold: [0.5] });
   document.querySelectorAll('main .block').forEach((el, i) => {

@@ -45,3 +45,23 @@ export function getLinkType(href, host) {
   }
   return 'other';
 }
+
+/**
+ * Analytics variables for a block event, per the build guide's mapping table.
+ * The custom events, eVars and props must exist in the report suite admin.
+ * @param {{ event: string, block: object, interaction?: object }} e
+ */
+export function getBlockAnalyticsVars(e) {
+  const vars = {
+    eVar10: e.block?.name,
+    prop10: String(e.block?.position ?? ''),
+    eVar11: e.block?.variant,
+    prop11: String(e.block?.sequence ?? ''),
+  };
+  if (e.event === 'block-impression') vars.events = 'event10';
+  if (e.event === 'block-click') {
+    vars.events = 'event11';
+    vars.eVar12 = e.interaction?.label;
+  }
+  return Object.fromEntries(Object.entries(vars).filter(([, v]) => v));
+}
