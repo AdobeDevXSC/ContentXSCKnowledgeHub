@@ -5,14 +5,16 @@
 export const ORG_ID = '708E423B67F3C2050A495C27@AdobeOrg';
 export const TENANT_ID = '_aemshowcase2';
 
-// No stage datastream yet: stage and preview hosts send nothing.
+// No stage datastream yet: other preview hosts send nothing.
 const STAGE_DATASTREAM_ID = '';
 // Report suite: xscknowledgehubprod
 const PROD_DATASTREAM_ID = '9c15e2f4-56ab-4f26-8d3d-c34762e6d5d9';
 
 const DATASTREAMS = {
   'xscknowledgehub.adobe.com': PROD_DATASTREAM_ID,
-  'stage.xscknowledgehub.adobe.com': STAGE_DATASTREAM_ID,
+  // Temporary: stage sends to the prod datastream for testing until it has its own.
+  'stage.xscknowledgehub.adobe.com': PROD_DATASTREAM_ID,
+  'stage--contentxscknowledgehub--adobedevxsc.aem.live': PROD_DATASTREAM_ID,
 };
 
 /**

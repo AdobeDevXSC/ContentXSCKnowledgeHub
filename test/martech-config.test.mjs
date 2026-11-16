@@ -2,9 +2,10 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getLinkType, isAnalyticsEnabled } from '../scripts/martech-config.mjs'; // eslint-disable-line import/extensions
 
-test('sends analytics only from the production host', () => {
+test('sends analytics from production and stage hosts only', () => {
   assert.equal(isAnalyticsEnabled('xscknowledgehub.adobe.com'), true);
-  assert.equal(isAnalyticsEnabled('stage.xscknowledgehub.adobe.com'), false);
+  assert.equal(isAnalyticsEnabled('stage.xscknowledgehub.adobe.com'), true);
+  assert.equal(isAnalyticsEnabled('stage--contentxscknowledgehub--adobedevxsc.aem.live'), true);
   assert.equal(isAnalyticsEnabled('main--contentxscknowledgehub--adobedevxsc.aem.page'), false);
   assert.equal(isAnalyticsEnabled('xscknowledgehub.adobe.com', ''), false);
 });
