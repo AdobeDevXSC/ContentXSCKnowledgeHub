@@ -69,7 +69,7 @@ header nav a:any-link {
 }
 
 body.dark-mode header nav a:any-link {
-  color: rgba(255, 255, 255, 0.95);
+  color: rgb(255 255 255 / 95%);
 }
 
 /* UIKit subnav styling for nav links */
@@ -87,16 +87,16 @@ header nav .nav-sections .uk-subnav > li > a {
 }
 
 header nav .nav-sections .uk-subnav > li > a:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
   color: var(--text-primary);
 }
 
 body.dark-mode header nav .nav-sections .uk-subnav > li > a {
-  color: rgba(255, 255, 255, 0.9);
+  color: rgb(255 255 255 / 90%);
 }
 
 body.dark-mode header nav .nav-sections .uk-subnav > li > a:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgb(255 255 255 / 8%);
   color: #fff;
 }
 
@@ -324,14 +324,14 @@ header nav .nav-sections ul > li > ul > li {
     background-color: var(--light-color);
     white-space: initial;
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-    border: 1px solid rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+    border: 1px solid rgb(0 0 0 / 6%);
   }
 
   body.dark-mode header nav .nav-sections .default-content-wrapper > ul > li[aria-expanded="true"] > ul {
     background-color: #252525;
-    border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    border-color: rgb(255 255 255 / 8%);
+    box-shadow: 0 4px 16px rgb(0 0 0 / 40%);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul > li a {
@@ -341,11 +341,11 @@ header nav .nav-sections ul > li > ul > li {
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul > li a:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: rgb(0 0 0 / 5%);
   }
 
   body.dark-mode header nav .nav-sections .default-content-wrapper > ul > li > ul > li a:hover {
-    background-color: rgba(255, 255, 255, 0.08);
+    background-color: rgb(255 255 255 / 8%);
   }
 
   header nav .nav-sections .default-content-wrapper > ul > li > ul::before {
@@ -394,11 +394,11 @@ header nav .nav-tools .default-content-wrapper a {
 }
 
 header nav .nav-tools .default-content-wrapper a:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: rgb(0 0 0 / 6%);
 }
 
 body.dark-mode header nav .nav-tools .default-content-wrapper a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: rgb(255 255 255 / 10%);
 }
 
 header nav .nav-tools img {
@@ -416,6 +416,7 @@ header nav .nav-sections .mobile-nav-wrapper {
   display: none;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 header nav .nav-tools .default-content-wrapper a {
   padding: 0;
   background-color: transparent;
@@ -471,17 +472,16 @@ header nav .mobile-nav-wrapper {
   color: var(--text-color);
   padding: 2rem 1rem;
   height: auto;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   transition: none; /* prevent flicker when toggling theme */
   border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 6%);
+  border: 1px solid rgb(0 0 0 / 6%);
 }
 
 body.dark-mode header nav .mobile-nav-wrapper {
-  background-color: rgba(26, 26, 26, 0.95);
-  border-color: rgba(255, 255, 255, 0.08);
+  background-color: rgb(26 26 26 / 95%);
+  border-color: rgb(255 255 255 / 8%);
 }
 
 /* theme toggle (light/dark mode) - UIKit-style */
@@ -496,11 +496,11 @@ header nav .theme-toggle {
 }
 
 header nav .theme-toggle:hover {
-  background-color: rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 5%);
 }
 
 body.dark-mode header nav .theme-toggle:hover {
-  background-color: rgba(255, 255, 255, 0.08);
+  background-color: rgb(255 255 255 / 8%);
 }
 
 header nav .theme-toggle-input {
@@ -510,7 +510,7 @@ header nav .theme-toggle-input {
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -522,7 +522,7 @@ header nav .theme-toggle-slider {
   height: 24px;
   background-color: var(--dark-color);
   border-radius: 24px;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 10%);
 }
 
 header nav .theme-toggle-slider::before {
@@ -534,14 +534,14 @@ header nav .theme-toggle-slider::before {
   height: 20px;
   background-color: var(--background-color);
   border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 20%);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* checked = dark mode active */
 header nav .theme-toggle-input:checked + .theme-toggle-slider {
   background-color: var(--accent);
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2), 0 0 12px rgba(237, 34, 36, 0.45);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 20%), 0 0 12px rgb(237 34 36 / 45%);
 }
 
 header nav .theme-toggle-input:checked + .theme-toggle-slider::before {
@@ -690,7 +690,7 @@ header nav .nav-user-menu-items {
 
 header nav .nav-user-menu .nav-user-menu-items a:any-link {
   display: block;
-  padding: 0.5rem 0.5rem;
+  padding: 0.5rem;
   border-radius: var(--radius-sm);
   color: var(--text-primary);
   font-size: 0.95rem;

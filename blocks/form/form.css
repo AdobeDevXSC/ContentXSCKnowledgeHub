@@ -93,7 +93,7 @@ body.dark-mode {
     --form-card-hover-shadow: 0 2px 4px rgb(0 0 0 / 40%);
     --form-card-selected-background: #2a3a4a;
     --form-card-selected-shadow: 0 0 0 1px var(--button-primary-color);
-    --form-button-color: #ffffff;
+    --form-button-color: #fff;
 }
 
 * {
@@ -702,7 +702,7 @@ main .form .form-message.success-message {
 
 main .form .form-message.error-message {
     color: var(--adobe-red);
-    background-color: rgba(237, 34, 36, 0.1);
+    background-color: rgb(237 34 36 / 10%);
     border-color: var(--adobe-red);
     flex: 100%;
     grid-column: span 12;

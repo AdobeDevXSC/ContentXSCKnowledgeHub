@@ -1,6 +1,6 @@
 // eslint-disable-next-line import/no-unresolved
 export default function decorate(block) {
-  console.log("block: ", block);
+  console.log('block: ', block);
 
   // Determine type based on class or data-type
   let type = 'primary'; // default

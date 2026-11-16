@@ -47,11 +47,15 @@ export function initialState(dataset) {
   const m = METHODS[method];
   const mode = dataset.mode === 'water' ? 'water' : 'coffee';
   // The slider moves in steps, so the starting ratio snaps to one
-  const ratio = snap(clamp(Number.isFinite(num(dataset.ratio)) ? num(dataset.ratio) : m.ratio, m.min, m.max), m.step);
+  const authoredRatio = Number.isFinite(num(dataset.ratio)) ? num(dataset.ratio) : m.ratio;
+  const ratio = snap(clamp(authoredRatio, m.min, m.max), m.step);
   const fallback = mode === 'water' ? m.dose * m.ratio : m.dose;
   const given = num(mode === 'water' ? dataset.water : dataset.dose);
   return {
-    method, mode, ratio, amount: Number.isFinite(given) && given > 0 ? Math.min(given, MAX_AMOUNT[mode]) : fallback,
+    method,
+    mode,
+    ratio,
+    amount: Number.isFinite(given) && given > 0 ? Math.min(given, MAX_AMOUNT[mode]) : fallback,
   };
 }
 

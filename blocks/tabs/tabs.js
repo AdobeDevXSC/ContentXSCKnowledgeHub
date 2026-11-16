@@ -1,6 +1,3 @@
-// eslint-disable-next-line import/no-unresolved
-import { toClassName } from '../../scripts/aem.js';
-
 export default function decorate(block) {
   const tabNav = document.createElement('ul');
   tabNav.setAttribute('uk-tab', '');

@@ -101,6 +101,7 @@ async function loadLeftNav(main) {
   const contentContainer = main.querySelector(':scope > .main-content');
   main.insertBefore(wrapper, contentContainer || main.querySelector('.section'));
 
+  // eslint-disable-next-line import/no-cycle
   const { default: decorate } = await import('../blocks/leftnav/leftnav.js');
   // Await the CSS so the nav has its constrained (scrollable) layout before
   // decorate measures it to scroll the active page into view.
@@ -147,6 +148,7 @@ function buildAutoBlocks(main) {
   try {
     const fragments = main.querySelectorAll('a[href*="/fragments/"]');
     if (fragments.length > 0) {
+      // eslint-disable-next-line import/no-cycle
       import('../blocks/fragment/fragment.js').then(({ loadFragment }) => {
         fragments.forEach(async (fragment) => {
           try {
@@ -328,7 +330,8 @@ function createBreadcrumb(titleByPath) {
  * @param {Element} main
  */
 async function loadPageMetaBanner(main) {
-  if (window.isErrorPage || PAGE_META_BANNER_EXCLUDED_PATHS.includes(window.location.pathname)) return;
+  const { pathname } = window.location;
+  if (window.isErrorPage || PAGE_META_BANNER_EXCLUDED_PATHS.includes(pathname)) return;
 
   const firstSection = main.querySelector('.section');
   if (!firstSection) return;

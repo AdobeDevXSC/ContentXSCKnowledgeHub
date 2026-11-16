@@ -32,7 +32,8 @@ function sampleRUM(checkpoint, data) {
       }[rate];
       const weight = rateValue !== undefined ? rateValue : 100;
       const id = (window.hlx.rum && window.hlx.rum.id) || crypto.randomUUID().slice(-9);
-      const isSelected = (window.hlx.rum && window.hlx.rum.isSelected) || (weight > 0 && Math.random() * weight < 1);
+      const isSelected = (window.hlx.rum && window.hlx.rum.isSelected)
+        || (weight > 0 && Math.random() * weight < 1);
       // eslint-disable-next-line object-curly-newline, max-len
       window.hlx.rum = {
         weight,
@@ -611,7 +612,10 @@ async function loadBlock(block) {
   return block;
 }
 
-/** Block names that have corresponding /blocks/{name}/ modules. Prevents content divs from being treated as blocks. */
+/**
+ * Block names that have corresponding /blocks/{name}/ modules.
+ * Prevents content divs from being treated as blocks.
+ */
 const KNOWN_BLOCKS = new Set([
   'accordion', 'cards', 'columns', 'feedback-form', 'footer', 'form', 'fragment',
   'header', 'hero', 'home-hub', 'leftnav', 'notebox', 'page-info', 'table', 'tabs', 'video', 'widget',
