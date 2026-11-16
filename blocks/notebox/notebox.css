@@ -52,7 +52,7 @@
 /* type accents — tinted background + colored edge/icon/title, dark-mode safe */
 .notebox.uk-alert-primary {
   border-left-color: #3b82f6;
-  background: rgba(59, 130, 246, 0.08);
+  background: rgb(59 130 246 / 8%);
 }
 
 .notebox.uk-alert-primary .notebox-icon,
@@ -62,7 +62,7 @@
 
 .notebox.uk-alert-warning {
   border-left-color: #e0a13a;
-  background: rgba(224, 161, 58, 0.10);
+  background: rgb(224 161 58 / 10%);
 }
 
 .notebox.uk-alert-warning .notebox-icon,
@@ -82,7 +82,7 @@
 
 .notebox.uk-alert-success {
   border-left-color: #22a06b;
-  background: rgba(34, 160, 107, 0.10);
+  background: rgb(34 160 107 / 10%);
 }
 
 .notebox.uk-alert-success .notebox-icon,

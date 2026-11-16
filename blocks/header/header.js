@@ -186,8 +186,6 @@ export default async function decorate(block) {
   const navSectionsEl = nav.querySelector('.nav-sections');
 
   if (leftNavContainer && navSectionsEl) {
-    const navSectionsEl = nav.querySelector('.nav-sections');
-
     if (navSectionsEl) {
       const wrapper = document.createElement('div');
       wrapper.className = 'mobile-nav-wrapper leftnav';
@@ -195,7 +193,7 @@ export default async function decorate(block) {
       navSectionsEl.appendChild(wrapper);
 
       // Import and decorate directly into wrapper
-      import('../../blocks/leftnav/leftnav.js').then((module) => {
+      import('../leftnav/leftnav.js').then((module) => {
         module.default(wrapper);
       });
     }

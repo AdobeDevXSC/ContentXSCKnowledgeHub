@@ -1,8 +1,10 @@
 /* slide in/out - single width animation, overflow clips cleanly */
 .leftnav-wrapper {
   flex-shrink: 0;
+
   /* width: calc(20vw + 2rem); */
   min-width: calc(350px + 2rem);
+
   /* overflow: hidden; */
   margin: 0;
   transition: width 0.4s cubic-bezier(0.32, 0.72, 0, 1), min-width 0.4s cubic-bezier(0.32, 0.72, 0, 1);
@@ -39,7 +41,7 @@ body.leftnav-collapsed .leftnav-wrapper {
 }
 
 .leftnav-container:hover .leftnav {
-  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+  scrollbar-color: rgb(0 0 0 / 25%) transparent;
 }
 
 .leftnav::-webkit-scrollbar {
@@ -59,24 +61,24 @@ body.leftnav-collapsed .leftnav-wrapper {
 }
 
 .leftnav-container:hover .leftnav::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.25);
+  background-color: rgb(0 0 0 / 25%);
 }
 
 .leftnav-container:hover .leftnav::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgb(0 0 0 / 40%);
 }
 
 /* themed scrollbar (dark mode) */
 body.dark-mode .leftnav-container:hover .leftnav {
-  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+  scrollbar-color: rgb(255 255 255 / 25%) transparent;
 }
 
 body.dark-mode .leftnav-container:hover .leftnav::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgb(255 255 255 / 25%);
 }
 
 body.dark-mode .leftnav-container:hover .leftnav::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  background-color: rgb(255 255 255 / 40%);
 }
 
 body.leftnav-collapsed .leftnav-container {
@@ -115,13 +117,13 @@ body.home .leftnav-container {
   padding: 0;
   border: none;
   border-radius: 6px;
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: rgb(0 0 0 / 6%);
   color: var(--text-color);
   cursor: pointer;
 }
 
 body.dark-mode .leftnav-collapse-btn {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: rgb(255 255 255 / 10%) !important;
 }
 
 .leftnav-expand-btn {
@@ -138,7 +140,7 @@ body.dark-mode .leftnav-collapse-btn {
   background-color: var(--light-color);
   color: var(--text-color);
   cursor: pointer;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 2px 2px 8px rgb(0 0 0 / 15%);
   align-items: center;
   justify-content: center;
 }
@@ -149,7 +151,7 @@ body.leftnav-collapsed .leftnav-expand-btn {
 
 body.dark-mode .leftnav-expand-btn {
   background-color: #1a1a1a;
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
+  box-shadow: 2px 2px 8px rgb(0 0 0 / 40%);
 }
 
 /* the expand button lives inside the (pointer-events:none) homepage wrapper,
@@ -158,6 +160,7 @@ body.home .leftnav-expand-btn {
   pointer-events: auto;
 }
 
+/* stylelint-disable-next-line no-duplicate-selectors */
 .leftnav {
   display: flex;
   flex-direction: column;
@@ -165,14 +168,13 @@ body.home .leftnav-expand-btn {
   padding: 1rem;
   margin: 5px 0;
   max-height: calc(100vh - var(--nav-height) - 2rem);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden auto;
   box-sizing: border-box;
 }
 
 /* title */
 .leftnav .nav-title > h3 {
-  padding: 0.5rem 1rem 0.5rem 1rem;
+  padding: 0.5rem 1rem;
   text-align: center;
   margin-bottom: 0.5rem;
   font-weight: 600;
@@ -185,18 +187,18 @@ body.home .leftnav-expand-btn {
   width: 100px;
   height: 2px;
   margin: 0.5rem auto 0;
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgb(0 0 0 / 10%);
 }
 
 body.dark-mode .leftnav .nav-title > h3::after {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgb(255 255 255 / 20%);
 }
 
 .leftnav .aem-parent {
   padding: 1rem;
 }
 
-.leftnav .aem-parent > ul > li > .uk-accordion-title:before {
+.leftnav .aem-parent > ul > li > .uk-accordion-title::before {
   content: "";
   display: inline-block;
   position: relative;
@@ -233,11 +235,11 @@ body.dark-mode .leftnav .nav-title > h3::after {
 
 /* dark mode — muted tone, brighten a touch on hover */
 body.dark-mode .leftnav .uk-accordion-title [uk-accordion-icon] {
-  color: rgba(255, 255, 255, 0.35);
+  color: rgb(255 255 255 / 35%);
 }
 
 body.dark-mode .leftnav .uk-accordion-title:hover [uk-accordion-icon] {
-  color: rgba(255, 255, 255, 0.65);
+  color: rgb(255 255 255 / 65%);
 }
 
 body.dark-mode .leftnav .uk-accordion-title,
@@ -267,8 +269,8 @@ body.dark-mode .leftnav .uk-nav-default a:hover {
 }
 
 body.dark-mode .leftnav .uk-nav-default > li.uk-active > a {
-  background-color: rgba(237, 34, 36, 0.18);
-  color: #ffffff;
+  background-color: rgb(237 34 36 / 18%);
+  color: #fff;
   opacity: 1;
 }
 

@@ -1,4 +1,7 @@
+// eslint-disable-next-line import/no-cycle
 import { fetchPlaceholders } from '../../scripts/scripts.js';
+
+/* eslint-disable no-underscore-dangle -- nav tree uses __pages/__children keys */
 
 /* ----------------------------- */
 /* Utilities */
@@ -75,6 +78,7 @@ function renderNav(block, items) {
   wrapper.className = 'aem-parent';
 
   const structure = buildStructure(items);
+  // eslint-disable-next-line no-use-before-define
   const { el: rootAccordion } = createAccordion(structure.__children || {}, true);
   wrapper.appendChild(rootAccordion);
 
@@ -134,8 +138,7 @@ function createAccordion(tree, isRoot = false) {
 
           const link = document.createElement('a');
           link.href = item.path;
-          link.textContent =
-            item.title || toTitleCase(item.path.split('/').pop());
+          link.textContent = item.title || toTitleCase(item.path.split('/').pop());
 
           liItem.appendChild(link);
           navList.appendChild(liItem);
@@ -224,11 +227,11 @@ export default async function decorate(block) {
       const path = item.path || '';
 
       return (
-        !path.startsWith('/tools/') &&
-        !path.includes('/non-nav/') &&
-        path !== '/aem' &&
-        path !== '/aem/' &&
-        path !== '/nav'
+        !path.startsWith('/tools/')
+        && !path.includes('/non-nav/')
+        && path !== '/aem'
+        && path !== '/aem/'
+        && path !== '/nav'
       );
     });
 
