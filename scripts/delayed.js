@@ -2,7 +2,7 @@ import {
   ORG_ID, TENANT_ID, getDatastreamId, getLinkType, isAnalyticsEnabled,
 } from './martech-config.mjs'; // eslint-disable-line import/extensions
 
-const ALLOY_SRC = 'https://cdn1.adoberesources.net/alloy/2.x/alloy.min.js';
+const ALLOY_SRC = 'https://cdn1.adoberesources.net/alloy/2.37.1/alloy.min.js';
 
 function loadAlloy() {
   /* eslint-disable */
