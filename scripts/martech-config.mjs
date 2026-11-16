@@ -2,11 +2,13 @@
  * Adobe Analytics (Web SDK) settings. See docs/Adobe-Analytics-Build-Guide-XSC-Knowledge-Hub.docx.
  * Tracking stays off until ORG_ID and the datastream ID for the current host are filled in.
  */
-export const ORG_ID = ''; // e.g. 'XXXXXXXXXXXXXXXXXXXXXXXX@AdobeOrg'
-export const TENANT_ID = ''; // XDM tenant namespace, e.g. '_adobedevxsc'
+export const ORG_ID = '708E423B67F3C2050A495C27@AdobeOrg';
+export const TENANT_ID = '_aemshowcase2';
 
+// No stage datastream yet: stage and preview hosts send nothing.
 const STAGE_DATASTREAM_ID = '';
-const PROD_DATASTREAM_ID = '';
+// Report suite: xscknowledgehubprod
+const PROD_DATASTREAM_ID = '9c15e2f4-56ab-4f26-8d3d-c34762e6d5d9';
 
 const DATASTREAMS = {
   'xscknowledgehub.adobe.com': PROD_DATASTREAM_ID,

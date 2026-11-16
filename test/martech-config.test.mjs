@@ -2,9 +2,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { getLinkType, isAnalyticsEnabled } from '../scripts/martech-config.mjs'; // eslint-disable-line import/extensions
 
-test('keeps analytics off until the org and datastream IDs are set', () => {
+test('sends analytics only from the production host', () => {
+  assert.equal(isAnalyticsEnabled('xscknowledgehub.adobe.com'), true);
   assert.equal(isAnalyticsEnabled('stage.xscknowledgehub.adobe.com'), false);
-  assert.equal(isAnalyticsEnabled('stage.xscknowledgehub.adobe.com', 'ORG@AdobeOrg'), false);
+  assert.equal(isAnalyticsEnabled('main--contentxscknowledgehub--adobedevxsc.aem.page'), false);
+  assert.equal(isAnalyticsEnabled('xscknowledgehub.adobe.com', ''), false);
 });
 
 test('classifies clicked links as download, exit, or other', () => {
