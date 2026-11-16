@@ -16,6 +16,7 @@ import {
 
 // eslint-disable-next-line import/extensions
 import { decorateAnonymousHome, isAnonymousHomePath } from './anonymous-home.mjs';
+import { initFormModal } from './form-modal.mjs'; // eslint-disable-line import/extensions
 import './uikit.min.js';
 import './uikit-icons.min.js';
 
@@ -1191,6 +1192,8 @@ async function loadPage() {
   loadDelayed();
   if (isAnonymousHomePath(window.location.pathname)) return;
   initLightbox();
+  initFormModal(document);
+  loadCSS(`${window.hlx.codeBasePath}/styles/form-modal.css`);
   initCommandPalette();
   recordRecentPage();
 

@@ -1,0 +1,71 @@
+.form-modal {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  width: min(94vw, 760px);
+  height: min(90vh, 860px);
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.form-modal:not([open]) {
+  display: none;
+}
+
+.form-modal::backdrop {
+  background: rgb(15 15 25 / 45%);
+  backdrop-filter: blur(4px);
+}
+
+.form-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 0.75rem 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-modal-title {
+  flex: 1;
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.form-modal-newtab {
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.form-modal-header form {
+  margin: 0;
+}
+
+button.form-modal-close {
+  margin: 0;
+  padding: 0.1em 0.45em;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+button.form-modal-close:hover,
+button.form-modal-close:focus-visible {
+  background: transparent;
+  color: var(--text-primary);
+}
+
+.form-modal-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #fff;
+}
