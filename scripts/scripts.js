@@ -1125,6 +1125,7 @@ function hideLoader() {
 }
 
 async function loadEager(doc) {
+  window.adobeDataLayer = window.adobeDataLayer || [];
   const showPage = () => { try { hideLoader(); } catch (e) { document.body.classList.add('appear'); } };
   setTimeout(showPage, 8000);
   try {
