@@ -1,5 +1,6 @@
 import {
-  ORG_ID, TENANT_ID, getBlockAnalyticsVars, getDatastreamId, getLinkType, isAnalyticsEnabled,
+  ORG_ID, TENANT_ID, getBlockAnalyticsVars, getDatastreamId, getLinkType, getSection,
+  isAnalyticsEnabled,
 } from './martech-config.mjs'; // eslint-disable-line import/extensions
 
 const ALLOY_SRC = 'https://cdn1.adoberesources.net/alloy/2.37.1/alloy.min.js';
@@ -66,7 +67,9 @@ function sendBlockEvent(e) {
         blockEvent: e.event,
       }),
     },
-    data: { __adobe: { analytics: getBlockAnalyticsVars(e) } },
+    data: {
+      __adobe: { analytics: getBlockAnalyticsVars(e, getSection(window.location.pathname)) },
+    },
   });
 }
 
@@ -147,10 +150,11 @@ function initAnalytics() {
         },
       },
       ...withTenant({
-        section: window.location.pathname.split('/')[1] || 'home',
+        section: getSection(window.location.pathname),
         template: document.body.dataset.template || '',
       }),
     },
+    data: { __adobe: { analytics: { eVar13: getSection(window.location.pathname) } } },
   });
   listenToDataLayer();
   trackBlocks();

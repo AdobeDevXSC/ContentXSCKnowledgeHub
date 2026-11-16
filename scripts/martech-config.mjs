@@ -50,10 +50,13 @@ export function getLinkType(href, host) {
  * Analytics variables for a block event, per the build guide's mapping table.
  * The custom events, eVars and props must exist in the report suite admin.
  * @param {{ event: string, block: object, interaction?: object }} e
+ * @param {string} [section] site section (eVar13)
  */
-export function getBlockAnalyticsVars(e) {
+export function getBlockAnalyticsVars(e, section) {
   const vars = {
     eVar10: e.block?.name,
+    eVar13: section,
+    prop12: e.block?.name,
     prop10: String(e.block?.position ?? ''),
     eVar11: e.block?.variant,
     prop11: String(e.block?.sequence ?? ''),
@@ -64,4 +67,9 @@ export function getBlockAnalyticsVars(e) {
     vars.eVar12 = e.interaction?.label;
   }
   return Object.fromEntries(Object.entries(vars).filter(([, v]) => v));
+}
+
+/** Site section: the first path segment, or 'home' for the root. */
+export function getSection(pathname) {
+  return pathname.split('/')[1] || 'home';
 }

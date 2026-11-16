@@ -1,6 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getBlockAnalyticsVars, getLinkType, isAnalyticsEnabled } from '../scripts/martech-config.mjs'; // eslint-disable-line import/extensions
+import {
+  getBlockAnalyticsVars, getLinkType, getSection, isAnalyticsEnabled,
+} from '../scripts/martech-config.mjs'; // eslint-disable-line import/extensions
 
 test('sends analytics from production and stage hosts only', () => {
   assert.equal(isAnalyticsEnabled('xscknowledgehub.adobe.com'), true);
@@ -22,10 +24,15 @@ test('maps block events to the guide\'s Analytics events, eVars and props', () =
   const block = {
     name: 'cards', position: 2, variant: 'featured', sequence: 3,
   };
-  assert.deepEqual(getBlockAnalyticsVars({ event: 'block-impression', block }), {
-    eVar10: 'cards', prop10: '2', eVar11: 'featured', prop11: '3', events: 'event10',
+  assert.deepEqual(getBlockAnalyticsVars({ event: 'block-impression', block }, 'xsc-resources'), {
+    eVar10: 'cards', eVar13: 'xsc-resources', prop12: 'cards', prop10: '2', eVar11: 'featured', prop11: '3', events: 'event10',
   });
   assert.deepEqual(getBlockAnalyticsVars({ event: 'block-click', block: { name: 'hero', position: 1 }, interaction: { label: 'Read more' } }), {
-    eVar10: 'hero', prop10: '1', events: 'event11', eVar12: 'Read more',
+    eVar10: 'hero', prop12: 'hero', prop10: '1', events: 'event11', eVar12: 'Read more',
   });
+});
+
+test('derives the site section from the first path segment', () => {
+  assert.equal(getSection('/'), 'home');
+  assert.equal(getSection('/xsc-resources/ai-tools/x'), 'xsc-resources');
 });
