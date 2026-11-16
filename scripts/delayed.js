@@ -130,7 +130,12 @@ function initAnalytics() {
   if (!isAnalyticsEnabled(hostname)) return;
   window.adobeDataLayer = window.adobeDataLayer || [];
   loadAlloy();
-  window.alloy('configure', { datastreamId: getDatastreamId(hostname), orgId: ORG_ID });
+  // Internal, sign-in-only site: no consent banner, so tracking is always on.
+  window.alloy('configure', {
+    datastreamId: getDatastreamId(hostname),
+    orgId: ORG_ID,
+    defaultConsent: 'in',
+  });
   window.alloy('sendEvent', {
     xdm: {
       eventType: 'web.webpagedetails.pageViews',
