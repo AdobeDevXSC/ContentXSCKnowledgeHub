@@ -4,3 +4,5 @@ scripts/uikit*.min.js
 blocks/form/rules/model/*
 blocks/form/rules/formula/*
 blocks/form/rules/functions.js
+tools/content-authenticity/*
+skills/*/template/*

@@ -1,0 +1,16 @@
+{
+  "name": "portable-content-authenticity-demo",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "@contentauth/c2pa-web": "0.17.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.60.0"
+  }
+}
