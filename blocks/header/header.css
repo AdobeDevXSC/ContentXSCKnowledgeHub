@@ -640,7 +640,7 @@ header nav .nav-user-menu {
   z-index: 30;
   box-sizing: border-box;
   width: 280px;
-  padding: 0.75rem;
+  padding: 0.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   background: var(--surface-1);
@@ -656,7 +656,7 @@ header nav .nav-user-menu-profile {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.25rem 0.25rem 0.75rem;
+  padding: 0.25rem 0.25rem 0.5rem;
   border-bottom: 1px solid var(--border);
 }
 
@@ -683,18 +683,26 @@ header nav .nav-user-menu-email {
 }
 
 header nav .nav-user-menu-items {
-  margin: 0.5rem 0 0;
+  margin: 0.25rem 0 0;
   padding: 0;
   list-style: none;
 }
 
+header nav .nav-user-menu-items li {
+  margin: 0;
+}
+
 header nav .nav-user-menu .nav-user-menu-items a:any-link {
   display: block;
-  padding: 0.5rem;
+  overflow: hidden;
+  padding: 0.3rem 0.5rem;
   border-radius: var(--radius-sm);
   color: var(--text-primary);
-  font-size: 0.95rem;
+  font-size: 0.875rem;
+  line-height: 1.3;
   text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 header nav .nav-user-menu .nav-user-menu-items a:any-link:hover,
@@ -710,6 +718,145 @@ header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger {
 header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger:hover,
 header nav .nav-user-menu .nav-user-menu-items a:any-link.nav-user-menu-danger:focus-visible {
   color: var(--accent);
+}
+
+header nav .nav-user-menu-divider {
+  height: 0;
+  margin: 0.375rem 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+header nav .nav-user-menu .nav-user-menu-footer {
+  margin: 0;
+}
+
+header nav .nav-user-links-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+}
+
+header nav .nav-user-links-label {
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+header nav .nav-user-btn {
+  margin: 0;
+  padding: 0.15rem 0.4rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.3;
+  cursor: pointer;
+}
+
+header nav .nav-user-btn:hover,
+header nav .nav-user-btn:focus-visible {
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+
+header nav .nav-user-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+header nav .nav-user-btn[hidden] {
+  display: none;
+}
+
+header nav .nav-user-links-add {
+  color: var(--link-color);
+}
+
+header nav .nav-user-links-list {
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+header nav .nav-user-links-list .nav-user-link {
+  display: flex;
+  align-items: center;
+}
+
+header nav .nav-user-menu .nav-user-links-list .nav-user-link a:any-link {
+  flex: 1;
+  min-width: 0;
+}
+
+header nav .nav-user-link-remove {
+  flex: none;
+  visibility: hidden;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+header nav .nav-user-link:hover .nav-user-link-remove,
+header nav .nav-user-link-remove:focus-visible {
+  visibility: visible;
+}
+
+header nav .nav-user-links-form {
+  display: grid;
+  gap: 0.3rem;
+  margin: 0.3rem 0.5rem 0.2rem;
+}
+
+header nav .nav-user-links-form[hidden] {
+  display: none;
+}
+
+header nav .nav-user-links-form input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0.3rem 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-1);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+}
+
+header nav .nav-user-links-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+header nav .nav-user-links-save {
+  color: var(--link-color);
+}
+
+header nav .nav-user-links-error,
+header nav .nav-user-links-status {
+  margin: 0.2rem 0.5rem 0;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+}
+
+header nav .nav-user-links-error {
+  color: var(--accent);
+}
+
+header nav .nav-user-links-error[hidden],
+header nav .nav-user-links-status[hidden],
+header nav .nav-user-links-status:empty {
+  display: none;
+}
+
+@media (hover: none) {
+  header nav .nav-user-link-remove {
+    visibility: visible;
+  }
 }
 
 @media (width < 600px) {

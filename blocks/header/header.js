@@ -3,6 +3,9 @@ import { loadFragment } from '../fragment/fragment.js';
 import {
   getAuthControl, getUserInitials, getUserMenuItems, isStageAuthHost,
 } from './auth.mjs'; // eslint-disable-line import/extensions
+import {
+  deleteUserLink, loadUserLinks, MAX_TITLE_LENGTH, MAX_USER_LINKS, saveUserLink,
+} from './user-links.mjs'; // eslint-disable-line import/extensions
 
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 1214px)');
@@ -119,7 +122,7 @@ function buildUserMenu({ name = '', email = '' }) {
   const toggle = document.createElement('button');
   toggle.type = 'button';
   toggle.className = 'nav-user-toggle';
-  toggle.setAttribute('aria-haspopup', 'menu');
+  toggle.setAttribute('aria-haspopup', 'true');
   toggle.setAttribute('aria-expanded', 'false');
   toggle.innerHTML = '<span class="nav-user-avatar" aria-hidden="true"></span><span class="nav-user-name"></span>';
   toggle.querySelector('.nav-user-avatar').textContent = initials;
@@ -138,21 +141,38 @@ function buildUserMenu({ name = '', email = '' }) {
         <p class="nav-user-menu-email"></p>
       </div>
     </div>
-    <ul class="nav-user-menu-items" role="menu"></ul>`;
+    <ul class="nav-user-menu-items"></ul>
+    <hr class="nav-user-menu-divider">
+    <section class="nav-user-links" aria-label="My links">
+      <div class="nav-user-links-head">
+        <span class="nav-user-links-label">My links</span>
+        <button type="button" class="nav-user-btn nav-user-links-add" aria-expanded="false">+ Add</button>
+      </div>
+      <form class="nav-user-links-form" hidden>
+        <input type="text" name="title" placeholder="Title" autocomplete="off">
+        <input type="text" name="url" placeholder="https://…" autocomplete="off" required>
+        <p class="nav-user-links-error" role="alert" hidden></p>
+        <div class="nav-user-links-actions">
+          <button type="button" class="nav-user-btn nav-user-links-cancel">Cancel</button>
+          <button type="submit" class="nav-user-btn nav-user-links-save">Save</button>
+        </div>
+      </form>
+      <ul class="nav-user-menu-items nav-user-links-list"></ul>
+      <p class="nav-user-links-status"></p>
+    </section>
+    <hr class="nav-user-menu-divider">
+    <ul class="nav-user-menu-items nav-user-menu-footer"></ul>`;
   menu.querySelector('.nav-user-avatar').textContent = initials;
   menu.querySelector('.nav-user-menu-name').textContent = displayName;
   const emailEl = menu.querySelector('.nav-user-menu-email');
   if (email && email !== displayName) emailEl.textContent = email;
   else emailEl.remove();
 
-  const list = menu.querySelector('.nav-user-menu-items');
-  getUserMenuItems().forEach(({
+  const renderItem = (list, {
     label, href, variant, external,
   }) => {
     const li = document.createElement('li');
-    li.setAttribute('role', 'none');
     const link = document.createElement('a');
-    link.setAttribute('role', 'menuitem');
     link.href = href;
     link.textContent = label;
     if (variant) link.classList.add(`nav-user-menu-${variant}`);
@@ -162,6 +182,97 @@ function buildUserMenu({ name = '', email = '' }) {
     }
     li.append(link);
     list.append(li);
+    return li;
+  };
+  const items = getUserMenuItems();
+  const signOut = items.pop();
+  const [mainList] = menu.querySelectorAll('.nav-user-menu-items');
+  items.forEach((item) => renderItem(mainList, item));
+  renderItem(menu.querySelector('.nav-user-menu-footer'), signOut);
+
+  const linksList = menu.querySelector('.nav-user-links-list');
+  const status = menu.querySelector('.nav-user-links-status');
+  const addButton = menu.querySelector('.nav-user-links-add');
+  const form = menu.querySelector('.nav-user-links-form');
+  const formError = menu.querySelector('.nav-user-links-error');
+  const saveButton = menu.querySelector('.nav-user-links-save');
+  form.elements.title.maxLength = MAX_TITLE_LENGTH;
+  let userLinks = [];
+  let linksLoaded = false;
+
+  const setStatus = (text) => {
+    status.textContent = text;
+    status.hidden = !text;
+  };
+  const renderLinks = () => {
+    linksList.replaceChildren();
+    userLinks.forEach((link) => {
+      const li = renderItem(linksList, { label: link.title, href: link.url, external: true });
+      li.classList.add('nav-user-link');
+      li.querySelector('a').title = link.url;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'nav-user-btn nav-user-link-remove';
+      remove.setAttribute('aria-label', `Remove ${link.title}`);
+      remove.textContent = '×';
+      remove.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        remove.disabled = true;
+        try {
+          await deleteUserLink(link.id);
+          userLinks = userLinks.filter((item) => item.id !== link.id);
+          renderLinks();
+        } catch {
+          remove.disabled = false;
+          setStatus('Could not remove link. Try again.');
+        }
+      });
+      li.append(remove);
+    });
+    addButton.hidden = userLinks.length >= MAX_USER_LINKS;
+    if (linksLoaded) setStatus(userLinks.length ? '' : 'No links yet.');
+  };
+  const loadLinks = async () => {
+    if (linksLoaded) return;
+    linksLoaded = true;
+    setStatus('Loading…');
+    try {
+      userLinks = await loadUserLinks();
+      renderLinks();
+    } catch {
+      linksLoaded = false;
+      setStatus('Could not load your links.');
+    }
+  };
+  const showForm = (show) => {
+    form.hidden = !show;
+    addButton.setAttribute('aria-expanded', show ? 'true' : 'false');
+    formError.hidden = true;
+    if (show) form.elements.url.focus();
+    else form.reset();
+  };
+  addButton.addEventListener('click', () => showForm(form.hidden));
+  menu.querySelector('.nav-user-links-cancel').addEventListener('click', () => showForm(false));
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    saveButton.disabled = true;
+    formError.hidden = true;
+    try {
+      const link = await saveUserLink({
+        title: form.elements.title.value,
+        url: form.elements.url.value,
+      });
+      userLinks = [...userLinks, link];
+      showForm(false);
+      renderLinks();
+    } catch (error) {
+      formError.textContent = error.message.startsWith('Enter')
+        ? error.message
+        : 'Could not save link. Try again.';
+      formError.hidden = false;
+    } finally {
+      saveButton.disabled = false;
+    }
   });
 
   const setOpen = (open) => {
@@ -171,6 +282,7 @@ function buildUserMenu({ name = '', email = '' }) {
   toggle.addEventListener('click', (event) => {
     event.stopPropagation();
     setOpen(menu.hidden);
+    if (!menu.hidden) loadLinks();
   });
   document.addEventListener('click', (event) => {
     if (!wrapper.contains(event.target)) setOpen(false);
