@@ -146,7 +146,9 @@ function buildUserMenu({ name = '', email = '' }) {
   else emailEl.remove();
 
   const list = menu.querySelector('.nav-user-menu-items');
-  getUserMenuItems().forEach(({ label, href, variant }) => {
+  getUserMenuItems().forEach(({
+    label, href, variant, external,
+  }) => {
     const li = document.createElement('li');
     li.setAttribute('role', 'none');
     const link = document.createElement('a');
@@ -154,6 +156,10 @@ function buildUserMenu({ name = '', email = '' }) {
     link.href = href;
     link.textContent = label;
     if (variant) link.classList.add(`nav-user-menu-${variant}`);
+    if (external) {
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+    }
     li.append(link);
     list.append(li);
   });

@@ -35,6 +35,13 @@ test('derives user initials from the name, then the email', () => {
   assert.equal(getUserInitials(), '?');
 });
 
+test('lists SharePoint Home as an external user-menu link', () => {
+  const [first] = getUserMenuItems();
+  assert.equal(first.label, 'SharePoint Home');
+  assert.ok(first.href.startsWith('https://adobe.sharepoint.com/'));
+  assert.equal(first.external, true);
+});
+
 test('ends the user menu with Sign out', () => {
   const items = getUserMenuItems();
   assert.deepEqual(items.at(-1), { label: 'Sign out', href: '/auth/logout', variant: 'danger' });

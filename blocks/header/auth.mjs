@@ -25,7 +25,13 @@ export function getUserInitials(name = '', email = '') {
 }
 
 // Add future user-menu entries here; they render in order above Sign out.
-export const USER_MENU_ITEMS = [];
+export const USER_MENU_ITEMS = [
+  {
+    label: 'SharePoint Home',
+    href: 'https://adobe.sharepoint.com/:f:/r/sites/ContentXSCKnowledgeHub/Shared%20Documents/Knowledge%20Hub?d=wb15720705c804ea9843ba535c16c5968&csf=1&web=1&e=Dqd0RK',
+    external: true,
+  },
+];
 
 export function getUserMenuItems() {
   return [
