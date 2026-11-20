@@ -31,6 +31,11 @@ export const USER_MENU_ITEMS = [
     href: 'https://adobe.sharepoint.com/:f:/r/sites/ContentXSCKnowledgeHub/Shared%20Documents/Knowledge%20Hub?d=wb15720705c804ea9843ba535c16c5968&csf=1&web=1&e=Dqd0RK',
     external: true,
   },
+  {
+    label: 'View Analytics',
+    href: 'https://www5.an.adobe.com/spa/?linkId=a0e34657-0e80-4b8d-8cf8-b50a2227da4d&dpc=pnw',
+    external: true,
+  },
 ];
 
 export function getUserMenuItems() {
