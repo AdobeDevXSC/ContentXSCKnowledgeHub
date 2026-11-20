@@ -6,6 +6,9 @@ import {
 import {
   deleteUserLink, loadUserLinks, MAX_TITLE_LENGTH, MAX_USER_LINKS, saveUserLink,
 } from './user-links.mjs'; // eslint-disable-line import/extensions
+import {
+  createFavoritesStore, isFavoritablePage, MENU_FAVORITES_LIMIT,
+} from './favorites.mjs'; // eslint-disable-line import/extensions
 
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 1214px)');
@@ -113,7 +116,7 @@ function toggleMenu(nav, navSections, forceExpanded = null) {
  * Builds the signed-in user pill and its flyout menu.
  * @param {{name?: string, email?: string}} user
  */
-function buildUserMenu({ name = '', email = '' }) {
+function buildUserMenu({ name = '', email = '' }, favorites) {
   const displayName = name.trim() || email.trim() || 'Signed in';
   const initials = getUserInitials(name, email);
   const wrapper = document.createElement('div');
@@ -142,6 +145,15 @@ function buildUserMenu({ name = '', email = '' }) {
       </div>
     </div>
     <ul class="nav-user-menu-items"></ul>
+    <hr class="nav-user-menu-divider">
+    <section class="nav-user-favs" aria-label="Favorites">
+      <div class="nav-user-links-head">
+        <span class="nav-user-links-label">Favorites</span>
+        <button type="button" class="nav-user-btn nav-user-favs-more" aria-expanded="false" hidden></button>
+      </div>
+      <ul class="nav-user-menu-items nav-user-links-list nav-user-favs-list"></ul>
+      <p class="nav-user-links-status nav-user-favs-status"></p>
+    </section>
     <hr class="nav-user-menu-divider">
     <section class="nav-user-links" aria-label="My links">
       <div class="nav-user-links-head">
@@ -190,8 +202,9 @@ function buildUserMenu({ name = '', email = '' }) {
   items.forEach((item) => renderItem(mainList, item));
   renderItem(menu.querySelector('.nav-user-menu-footer'), signOut);
 
-  const linksList = menu.querySelector('.nav-user-links-list');
-  const status = menu.querySelector('.nav-user-links-status');
+  const linksSection = menu.querySelector('.nav-user-links');
+  const linksList = linksSection.querySelector('.nav-user-links-list');
+  const status = linksSection.querySelector('.nav-user-links-status');
   const addButton = menu.querySelector('.nav-user-links-add');
   const form = menu.querySelector('.nav-user-links-form');
   const formError = menu.querySelector('.nav-user-links-error');
@@ -275,6 +288,55 @@ function buildUserMenu({ name = '', email = '' }) {
     }
   });
 
+  const favsList = menu.querySelector('.nav-user-favs-list');
+  const favsStatus = menu.querySelector('.nav-user-favs-status');
+  const favsMore = menu.querySelector('.nav-user-favs-more');
+  let favsExpanded = false;
+  let favsLoaded = false;
+  const renderFavorites = (list) => {
+    favsList.replaceChildren();
+    const shown = favsExpanded ? list : list.slice(0, MENU_FAVORITES_LIMIT);
+    shown.forEach((fav) => {
+      const li = renderItem(favsList, { label: fav.title, href: fav.path });
+      li.classList.add('nav-user-link');
+      li.querySelector('a').title = fav.title;
+      const remove = document.createElement('button');
+      remove.type = 'button';
+      remove.className = 'nav-user-btn nav-user-link-remove';
+      remove.setAttribute('aria-label', `Remove ${fav.title} from favorites`);
+      remove.textContent = '×';
+      remove.addEventListener('click', async (event) => {
+        event.stopPropagation();
+        remove.disabled = true;
+        try {
+          await favorites.remove(fav.path);
+        } catch {
+          remove.disabled = false;
+          favsStatus.textContent = 'Could not remove favorite. Try again.';
+        }
+      });
+      li.append(remove);
+    });
+    favsMore.hidden = list.length <= MENU_FAVORITES_LIMIT;
+    favsMore.textContent = favsExpanded ? 'Show less' : `View all (${list.length})`;
+    favsMore.setAttribute('aria-expanded', favsExpanded ? 'true' : 'false');
+    if (favsLoaded) favsStatus.textContent = list.length ? '' : 'No favorites yet. Use ☆ on a page.';
+  };
+  favsMore.addEventListener('click', (event) => {
+    event.stopPropagation();
+    favsExpanded = !favsExpanded;
+    renderFavorites(favorites.list);
+  });
+  favorites.subscribe((list) => {
+    favsLoaded = true;
+    renderFavorites(list);
+  });
+  const loadFavorites = () => {
+    if (favsLoaded) return;
+    favsStatus.textContent = 'Loading…';
+    favorites.load().catch(() => { favsStatus.textContent = 'Could not load favorites.'; });
+  };
+
   const setOpen = (open) => {
     menu.hidden = !open;
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -282,7 +344,10 @@ function buildUserMenu({ name = '', email = '' }) {
   toggle.addEventListener('click', (event) => {
     event.stopPropagation();
     setOpen(menu.hidden);
-    if (!menu.hidden) loadLinks();
+    if (!menu.hidden) {
+      loadFavorites();
+      loadLinks();
+    }
   });
   document.addEventListener('click', (event) => {
     if (!wrapper.contains(event.target)) setOpen(false);
@@ -302,6 +367,49 @@ function buildUserMenu({ name = '', email = '' }) {
  * loads and decorates the header, mainly the nav
  * @param {Element} block The header block element
  */
+const STAR_OFF = '<svg viewBox="0 0 20 20" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M10 2.5l2.32 4.7 5.18.75-3.75 3.66.89 5.16L10 14.33l-4.64 2.44.89-5.16L2.5 7.95l5.18-.75z"/></svg>';
+const STAR_ON = STAR_OFF.replace('fill="none"', 'fill="currentColor"');
+
+function addFavoriteStar(favorites) {
+  const { pathname } = window.location;
+  if (!isFavoritablePage(pathname, {
+    metadata: getMetadata('favorite'),
+    isErrorPage: window.isErrorPage,
+  })) return;
+  const heading = document.querySelector('main h1');
+  if (!heading || heading.querySelector('.favorite-star')) return;
+
+  const star = document.createElement('button');
+  star.type = 'button';
+  star.className = 'favorite-star';
+  star.hidden = true;
+  const render = () => {
+    const on = favorites.has(pathname);
+    star.innerHTML = on ? STAR_ON : STAR_OFF;
+    star.classList.toggle('is-favorite', on);
+    star.setAttribute('aria-pressed', on ? 'true' : 'false');
+    star.setAttribute('aria-label', on ? 'Remove from favorites' : 'Add to favorites');
+    star.title = star.getAttribute('aria-label');
+  };
+  star.addEventListener('click', async () => {
+    star.disabled = true;
+    try {
+      if (favorites.has(pathname)) await favorites.remove(pathname);
+      else {
+        const title = getMetadata('og:title') || document.title || heading.textContent;
+        await favorites.add({ path: pathname, title: title.trim() });
+      }
+    } catch (error) {
+      star.title = error.message.startsWith('You can') ? error.message : 'Could not update favorites. Try again.';
+    } finally {
+      star.disabled = false;
+    }
+  });
+  favorites.subscribe(render);
+  heading.append(star);
+  favorites.load().then(() => { star.hidden = false; }).catch(() => star.remove());
+}
+
 export default async function decorate(block) {
   // load nav as fragment
   const navMeta = getMetadata('nav');
@@ -448,7 +556,10 @@ export default async function decorate(block) {
         if (typeof user?.authenticated !== 'boolean') {
           throw new Error('Authentication status response is invalid');
         }
-        if (user.authenticated) authLink.replaceWith(buildUserMenu(user));
+        if (!user.authenticated) return;
+        const favorites = createFavoritesStore();
+        authLink.replaceWith(buildUserMenu(user, favorites));
+        addFavoriteStar(favorites);
       })
       .catch((error) => {
         // Keep the sign-in link available if status lookup fails.

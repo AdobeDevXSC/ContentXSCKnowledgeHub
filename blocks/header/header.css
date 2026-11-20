@@ -886,3 +886,37 @@ header nav .nav-user-links-status:empty {
     display: none;
   }
 }
+
+/* Page favorite star, appended to the article's h1 for signed-in users */
+main h1 .favorite-star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0 0 0.5rem;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+main h1 .favorite-star[hidden] {
+  display: none;
+}
+
+main h1 .favorite-star:hover,
+main h1 .favorite-star:focus-visible {
+  background: var(--surface-0);
+  color: var(--text-primary);
+}
+
+main h1 .favorite-star.is-favorite {
+  color: #f5a623;
+}
+
+main h1 .favorite-star:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
