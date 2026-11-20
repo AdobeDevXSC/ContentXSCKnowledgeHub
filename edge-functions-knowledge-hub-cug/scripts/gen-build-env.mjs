@@ -8,6 +8,7 @@ const buildKeys = new Set([
   'XSC_OKTA_CLIENT_ID',
   'XSC_OKTA_SCOPES',
   'XSC_OKTA_GROUPS_CLAIM',
+  'XSC_KV_URL',
 ]);
 let contents = '';
 try {

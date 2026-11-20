@@ -14,3 +14,5 @@ data:
       value: ${{XSC_SESSION_SECRET}}
     - key: XSC_SITE_TOKEN
       value: ${{XSC_SITE_TOKEN}}
+    - key: XSC_KV_SECRET
+      value: ${{XSC_KV_SECRET}}

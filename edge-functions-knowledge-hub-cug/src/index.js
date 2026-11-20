@@ -10,6 +10,7 @@ import { SecretStoreManager } from './lib/config.js';
 import { withPublicOrigin } from './lib/public-origin.js';
 import { siteForRequest } from './sites.js';
 import { homeDocumentAction, isHtmlDocumentNavigation } from './home-routing.js';
+import { handleKv, isKvPath } from './kv.js';
 import BUILD_ENV from './generated/build-env.js';
 
 const CUG_REQUIRED_HEADER = 'x-aem-cug-required';
@@ -53,12 +54,14 @@ async function loadEnvironment() {
     oktaClientSecret,
     sessionSecret,
     siteToken,
+    kvSecret,
   ] = await Promise.all([
     secret('XSC_OKTA_ISSUER'),
     secret('XSC_OKTA_CLIENT_ID'),
     secret('XSC_OKTA_CLIENT_SECRET'),
     secret('XSC_SESSION_SECRET'),
     secret('XSC_SITE_TOKEN'),
+    secret('XSC_KV_SECRET'),
   ]);
   const env = {
     OKTA_ISSUER: oktaIssuerSecret || get('XSC_OKTA_ISSUER'),
@@ -69,6 +72,8 @@ async function loadEnvironment() {
     OKTA_LOCAL_LOGOUT: true,
     SESSION_SECRET: sessionSecret,
     SITE_TOKEN: siteToken,
+    KV_SECRET: kvSecret,
+    KV_URL: get('XSC_KV_URL'),
   };
   const missing = [
     ['XSC_OKTA_ISSUER', env.OKTA_ISSUER],
@@ -200,6 +205,12 @@ export async function handleRequest(request) {
     failurePhase = 'request handling';
     if (url.pathname.startsWith('/auth/')) {
       return handleAuthRoute(request, withPublicOrigin(env, site), url);
+    }
+    if (isKvPath(url.pathname)) {
+      const session = await getSession(request, env);
+      return await handleKv(request, withPublicOrigin(env, site), url, session, {
+        fetch: (input, init) => fetch(input, { ...init, cacheOverride: new CacheOverride('pass') }),
+      });
     }
     return await proxyWithCug(request, env, site, url);
   } catch (error) {

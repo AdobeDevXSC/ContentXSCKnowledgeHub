@@ -37,6 +37,7 @@ values or paste secrets into chat.
 - `XSC_OKTA_CLIENT_SECRET`
 - `XSC_SESSION_SECRET` (at least 32 characters)
 - `XSC_SITE_TOKEN` (the site-authentication token for the Stage EDS origin)
+- `XSC_KV_SECRET` (optional; enables `/api/kv/*`, see below)
 
 Optional `XSC_OKTA_SCOPES` and `XSC_OKTA_GROUPS_CLAIM` values can be added to
 `config_default`.
@@ -53,6 +54,24 @@ the non-secret issuer, client ID, scopes, and group-claim setting into an
 ignored generated file. Client secrets, session secrets, and the site token are
 never embedded and must be provided through Adobe's secure stores. Do not
 commit `.env` or generated build output.
+
+## Per-user metadata (`/api/kv/*`)
+
+Requests to `/api/kv/*` are handled by the function, not the EDS origin. It
+requires a signed-in Okta session and forwards the request to the App Builder
+`per-user-metadata/kv` action (repository `ynaka-adobe/per-user-metadata`) as app
+`knowledge-hub`. The caller is identified by the session email only, and each
+request is HMAC-signed with `XSC_KV_SECRET`. Supported methods are `GET`, `PUT`
+and `DELETE`. Cross-origin writes are rejected, as are bodies larger than 300 KB.
+
+- `XSC_KV_SECRET` (`secret_default`) must equal the action's
+  `KV_SECRET_KNOWLEDGE_HUB`. Without it, `/api/kv/*` returns 503 and the rest of
+  the site is unaffected.
+- `XSC_KV_URL` (optional, `config_default`) overrides the default Production
+  action URL.
+
+Examples: `GET /api/kv/favorites/user`, `PUT /api/kv/links/user/{key}` with a
+JSON body, `PUT /api/kv/avatar/user/image` with an image body.
 
 ## Build and tests
 
