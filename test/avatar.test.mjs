@@ -1,7 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import {
-  deleteAvatar, loadAvatar, squareCrop, uploadAvatar, validateAvatarFile,
+  authorAvatarKey, deleteAvatar, loadAuthorAvatar, loadAvatar, squareCrop, uploadAvatar,
+  validateAvatarFile,
 } from '../blocks/header/avatar.mjs'; // eslint-disable-line import/extensions
 
 test('validateAvatarFile allows jpg/png/webp/gif up to 10 MB', () => {
@@ -30,4 +32,19 @@ test('avatar API client maps 404 to no avatar and sends the image type', async (
   await deleteAvatar(fetchImpl);
   assert.deepEqual(calls, [['GET', undefined], ['PUT', 'image/webp'], ['DELETE', undefined]]);
   await assert.rejects(uploadAvatar({ type: 'image/webp' }, async () => ({ ok: false, status: 413 })), /413/);
+});
+
+test('authorAvatarKey matches the service name normalization', async () => {
+  // sha256('josé núñez') from per-user-metadata nameKey()
+  const expected = createHash('sha256').update('josé núñez').digest('hex').slice(0, 32);
+  assert.equal(await authorAvatarKey('  José   Núñez '), expected);
+});
+
+test('loadAuthorAvatar returns null unless an image comes back', async () => {
+  const fetchImpl = async (path) => {
+    assert.match(path, /^\/api\/kv\/avatar\/public\/[0-9a-f]{32}$/);
+    return { ok: true, headers: new Map([['content-type', 'text/html']]), blob: async () => 'x' };
+  };
+  assert.equal(await loadAuthorAvatar('Yuji Nakagawa', fetchImpl), null);
+  assert.equal(await loadAuthorAvatar('', fetchImpl), null);
 });

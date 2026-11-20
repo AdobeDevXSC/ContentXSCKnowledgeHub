@@ -21,12 +21,17 @@ export function isKvPath(pathname) {
   return pathname === KV_PREFIX || pathname.startsWith(`${KV_PREFIX}/`);
 }
 
-/** Must stay byte-compatible with `sign()` in per-user-metadata/actions/kv/handler.js. */
+/**
+ * Must stay byte-compatible with `sign()` in per-user-metadata/actions/kv/handler.js.
+ * `name` is the URI-encoded x-kv-name value and is appended only when present.
+ */
 export async function signKvRequest(secret, {
-  method, path, app, user, timestamp, body,
+  method, path, app, user, timestamp, body, name,
 }) {
   const bodyHash = hex(await crypto.subtle.digest('SHA-256', body));
-  const payload = [method.toUpperCase(), path, app, user.toLowerCase(), timestamp, bodyHash].join('\n');
+  const lines = [method.toUpperCase(), path, app, user.toLowerCase(), timestamp, bodyHash];
+  if (name) lines.push(name);
+  const payload = lines.join('\n');
   const key = await crypto.subtle.importKey(
     'raw',
     encoder.encode(secret),
@@ -46,7 +51,7 @@ const jsonError = (status, error, extra = {}) => new Response(JSON.stringify({ e
  * @param {Request} request
  * @param {{ KV_SECRET: string, KV_URL?: string, PUBLIC_ORIGIN: string }} env
  * @param {URL} url
- * @param {{ email?: string } | null} session
+ * @param {{ email?: string, name?: string } | null} session
  * @param {{ fetch: typeof fetch, now?: () => number }} deps
  */
 export async function handleKv(request, env, url, session, deps) {
@@ -72,14 +77,18 @@ export async function handleKv(request, env, url, session, deps) {
   }
 
   const timestamp = String(Math.floor((deps.now?.() ?? Date.now()) / 1000));
+  // The verified Okta display name lets the service publish the user's avatar by name.
+  const name = typeof session?.name === 'string' && session.name.trim()
+    ? encodeURIComponent(session.name.trim().slice(0, 200)) : '';
   const signature = await signKvRequest(env.KV_SECRET, {
-    method, path, app: KV_APP, user, timestamp, body,
+    method, path, app: KV_APP, user, timestamp, body, name,
   });
   const headers = {
     'x-kv-app': KV_APP,
     'x-kv-user': user,
     'x-kv-timestamp': timestamp,
     'x-kv-signature': signature,
+    ...(name ? { 'x-kv-name': name } : {}),
     accept: request.headers.get('accept') || '*/*',
   };
   const contentType = request.headers.get('content-type');

@@ -98,3 +98,23 @@ test('passes through 204 and binary content types', async () => {
   assert.equal(imgRes.headers.get('content-type'), 'image/png');
   assert.deepEqual([...new Uint8Array(await imgRes.arrayBuffer())], [1, 2, 3]);
 });
+
+test('signs and forwards the session display name when present', async () => {
+  const deps = recorder();
+  const [request, url] = kvRequest('/api/kv/avatar/user/image', { headers: { 'x-kv-name': 'Mallory' } });
+  await handleKv(request, env, url, { ...session, name: 'José Núñez' }, deps);
+  const [{ init }] = deps.calls;
+  assert.equal(init.headers['x-kv-name'], encodeURIComponent('José Núñez'));
+  assert.equal(init.headers['x-kv-signature'], await signKvRequest('test-secret', {
+    method: 'GET',
+    path: '/avatar/user/image',
+    app: KV_APP,
+    user: 'ynaka@adobe.com',
+    timestamp: '1700000000',
+    body: new Uint8Array(0),
+    name: encodeURIComponent('José Núñez'),
+  }));
+  const payload = ['GET', '/avatar/user/image', KV_APP, 'ynaka@adobe.com', '1700000000',
+    createHash('sha256').update('').digest('hex'), encodeURIComponent('José Núñez')].join('\n');
+  assert.equal(init.headers['x-kv-signature'], createHmac('sha256', 'test-secret').update(payload).digest('hex'));
+});

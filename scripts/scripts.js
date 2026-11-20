@@ -329,6 +329,26 @@ function createBreadcrumb(titleByPath) {
  * Skips rendering on any path listed in PAGE_META_BANNER_EXCLUDED_PATHS.
  * @param {Element} main
  */
+/**
+ * Sole-author pages show the author's uploaded avatar (published per display name
+ * by the per-user metadata service) in place of the generic author icon.
+ * Only the Stage host proxies /api/kv, and only signed-in readers can fetch it.
+ */
+async function showAuthorAvatar(authorRow, name) {
+  if (window.location.hostname !== 'stage.xscknowledgehub.adobe.com') return;
+  try {
+    const { loadAuthorAvatar } = await import('../blocks/header/avatar.mjs'); // eslint-disable-line import/extensions
+    const blob = await loadAuthorAvatar(name);
+    if (!blob) return;
+    const icon = authorRow.querySelector('.page-meta-icon');
+    const img = document.createElement('img');
+    img.src = URL.createObjectURL(blob);
+    img.alt = '';
+    icon.replaceChildren(img);
+    icon.classList.add('page-meta-avatar');
+  } catch (e) { /* keep the generic icon */ }
+}
+
 async function loadPageMetaBanner(main) {
   const { pathname } = window.location;
   if (window.isErrorPage || PAGE_META_BANNER_EXCLUDED_PATHS.includes(pathname)) return;
@@ -370,7 +390,9 @@ async function loadPageMetaBanner(main) {
     if (author) {
       const authors = author.split(',').map((a) => a.trim()).filter(Boolean);
       const label = authors.length > 1 ? 'Authors' : 'Author';
-      banner.appendChild(row('page-meta-author', AUTHOR_ICON, label, authors.join(', ')));
+      const authorRow = row('page-meta-author', AUTHOR_ICON, label, authors.join(', '));
+      banner.appendChild(authorRow);
+      if (authors.length === 1) showAuthorAvatar(authorRow, authors[0]);
     }
 
     if (lastModified) {
@@ -464,6 +486,20 @@ async function loadPageMetaBanner(main) {
         box-shadow:
           inset 0 1px 0 rgba(255, 255, 255, 0.55),
           inset 0 0 0 1px var(--accent-soft);
+      }
+      .page-meta-icon.page-meta-avatar {
+        width: 32px;
+        height: 32px;
+        margin-top: 0;
+        overflow: hidden;
+        background: var(--surface-0);
+        box-shadow: inset 0 0 0 1px var(--border);
+      }
+      .page-meta-avatar img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
       .page-meta-text {
         display: flex;

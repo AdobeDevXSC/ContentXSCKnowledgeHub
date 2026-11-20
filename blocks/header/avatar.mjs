@@ -3,6 +3,7 @@
 // up to 256 KB, so uploads are cropped and resized in the browser first.
 
 export const AVATAR_ENDPOINT = '/api/kv/avatar/user/image';
+export const PUBLIC_AVATAR_ENDPOINT = '/api/kv/avatar/public';
 export const AVATAR_ACCEPT = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 export const AVATAR_SIZE = 256;
 export const MAX_SOURCE_BYTES = 10 * 1024 * 1024;
@@ -73,4 +74,23 @@ export async function uploadAvatar(blob, fetchImpl = fetch) {
 export async function deleteAvatar(fetchImpl = fetch) {
   const response = await fetchImpl(AVATAR_ENDPOINT, { method: 'DELETE', credentials: 'same-origin' });
   if (!response.ok && response.status !== 404) throw new Error(`avatar delete failed (${response.status})`);
+}
+
+/** Must match `normalizeName`/`nameKey` in per-user-metadata/actions/kv/handler.js. */
+export function normalizeAuthorName(name) {
+  return String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+export async function authorAvatarKey(name, subtle = globalThis.crypto.subtle) {
+  const digest = await subtle.digest('SHA-256', new TextEncoder().encode(normalizeAuthorName(name)));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, '0')).join('').slice(0, 32);
+}
+
+/** Returns the published avatar Blob for an author's display name, or null. */
+export async function loadAuthorAvatar(name, fetchImpl = fetch) {
+  if (!normalizeAuthorName(name)) return null;
+  const key = await authorAvatarKey(name);
+  const response = await fetchImpl(`${PUBLIC_AVATAR_ENDPOINT}/${key}`, { credentials: 'same-origin' });
+  if (!response.ok || !(response.headers.get('content-type') || '').startsWith('image/')) return null;
+  return response.blob();
 }

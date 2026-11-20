@@ -60,8 +60,10 @@ commit `.env` or generated build output.
 Requests to `/api/kv/*` are handled by the function, not the EDS origin. It
 requires a signed-in Okta session and forwards the request to the App Builder
 `per-user-metadata/kv` action (repository `ynaka-adobe/per-user-metadata`) as app
-`knowledge-hub`. The caller is identified by the session email only, and each
-request is HMAC-signed with `XSC_KV_SECRET`. Supported methods are `GET`, `PUT`
+`knowledge-hub`. The caller is identified by the session email, and each
+request is HMAC-signed with `XSC_KV_SECRET`. The session's Okta display name is
+also signed and sent as `x-kv-name`, so the service can publish the user's avatar
+for `GET /api/kv/avatar/public/{nameKey}` (used for author avatars on pages). Supported methods are `GET`, `PUT`
 and `DELETE`. Cross-origin writes are rejected, as are bodies larger than 300 KB.
 
 - `XSC_KV_SECRET` (`secret_default`) must equal the action's
