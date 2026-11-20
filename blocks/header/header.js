@@ -9,6 +9,9 @@ import {
 import {
   createFavoritesStore, isFavoritablePage, MENU_FAVORITES_LIMIT,
 } from './favorites.mjs'; // eslint-disable-line import/extensions
+import {
+  AVATAR_ACCEPT, deleteAvatar, loadAvatar, prepareAvatar, uploadAvatar, validateAvatarFile,
+} from './avatar.mjs'; // eslint-disable-line import/extensions
 
 // media query match that indicates mobile/tablet width
 const isDesktop = window.matchMedia('(min-width: 1214px)');
@@ -140,7 +143,14 @@ function buildUserMenu({ name = '', email = '' }, favorites) {
     <div class="nav-user-menu-profile">
       <span class="nav-user-avatar nav-user-avatar-lg" aria-hidden="true"></span>
       <div class="nav-user-menu-identity">
-        <p class="nav-user-menu-name"></p>
+        <div class="nav-user-menu-name-row">
+          <p class="nav-user-menu-name"></p>
+          <span class="nav-user-avatar-actions" hidden>
+            <button type="button" class="nav-user-btn nav-user-avatar-add">+ Avatar</button>
+            <button type="button" class="nav-user-btn nav-user-avatar-change" hidden>Change</button>
+            <button type="button" class="nav-user-btn nav-user-avatar-delete" hidden>Delete</button>
+          </span>
+        </div>
         <p class="nav-user-menu-email"></p>
       </div>
     </div>
@@ -337,6 +347,136 @@ function buildUserMenu({ name = '', email = '' }, favorites) {
     favorites.load().catch(() => { favsStatus.textContent = 'Could not load favorites.'; });
   };
 
+  const avatarActions = menu.querySelector('.nav-user-avatar-actions');
+  const avatarAdd = menu.querySelector('.nav-user-avatar-add');
+  const avatarChange = menu.querySelector('.nav-user-avatar-change');
+  const avatarDelete = menu.querySelector('.nav-user-avatar-delete');
+  let avatarUrl = null;
+  const setAvatar = (blob) => {
+    if (avatarUrl) URL.revokeObjectURL(avatarUrl);
+    avatarUrl = blob ? URL.createObjectURL(blob) : null;
+    wrapper.querySelectorAll('.nav-user-avatar').forEach((el) => {
+      el.replaceChildren();
+      el.classList.toggle('has-image', Boolean(avatarUrl));
+      if (avatarUrl) {
+        const img = document.createElement('img');
+        img.src = avatarUrl;
+        img.alt = '';
+        el.append(img);
+      } else {
+        el.textContent = initials;
+      }
+    });
+    avatarActions.hidden = false;
+    avatarAdd.hidden = Boolean(avatarUrl);
+    avatarChange.hidden = !avatarUrl;
+    avatarDelete.hidden = !avatarUrl;
+  };
+
+  const dialog = document.createElement('dialog');
+  dialog.className = 'nav-avatar-dialog';
+  dialog.setAttribute('aria-labelledby', 'nav-avatar-dialog-title');
+  dialog.innerHTML = `
+    <form method="dialog" class="nav-avatar-form">
+      <h2 id="nav-avatar-dialog-title">Profile picture</h2>
+      <label class="nav-avatar-drop">
+        <span class="nav-avatar-preview" aria-hidden="true"></span>
+        <span class="nav-avatar-hint">Choose or drop a JPG, PNG, WebP or GIF image</span>
+        <input type="file" name="file" accept="${AVATAR_ACCEPT.join(',')}">
+      </label>
+      <p class="nav-avatar-note">Cropped to a square. Animated GIFs use the first frame.</p>
+      <p class="nav-avatar-error" role="alert" hidden></p>
+      <div class="nav-avatar-actions">
+        <button type="button" class="nav-user-btn nav-avatar-cancel">Cancel</button>
+        <button type="submit" class="nav-user-btn nav-avatar-save" disabled>Save</button>
+      </div>
+    </form>`;
+  const avatarForm = dialog.querySelector('form');
+  const fileInput = avatarForm.elements.file;
+  const preview = dialog.querySelector('.nav-avatar-preview');
+  const avatarError = dialog.querySelector('.nav-avatar-error');
+  const avatarSave = dialog.querySelector('.nav-avatar-save');
+  let pendingBlob = null;
+  let previewUrl = null;
+  const showAvatarError = (text) => {
+    avatarError.textContent = text;
+    avatarError.hidden = !text;
+  };
+  const setPreview = (blob) => {
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    previewUrl = blob ? URL.createObjectURL(blob) : null;
+    preview.style.backgroundImage = previewUrl ? `url("${previewUrl}")` : '';
+    preview.classList.toggle('has-image', Boolean(previewUrl));
+  };
+  const chooseFile = async (file) => {
+    pendingBlob = null;
+    avatarSave.disabled = true;
+    const problem = validateAvatarFile(file);
+    showAvatarError(problem);
+    if (problem) return;
+    try {
+      pendingBlob = await prepareAvatar(file);
+      setPreview(pendingBlob);
+      avatarSave.disabled = false;
+    } catch (error) {
+      setPreview(null);
+      showAvatarError(error.message.startsWith('Could not') ? error.message : 'Could not read that image.');
+    }
+  };
+  fileInput.addEventListener('change', () => chooseFile(fileInput.files[0]));
+  const drop = dialog.querySelector('.nav-avatar-drop');
+  drop.addEventListener('dragover', (event) => {
+    event.preventDefault();
+    drop.classList.add('is-dragging');
+  });
+  drop.addEventListener('dragleave', () => drop.classList.remove('is-dragging'));
+  drop.addEventListener('drop', (event) => {
+    event.preventDefault();
+    drop.classList.remove('is-dragging');
+    chooseFile(event.dataTransfer.files[0]);
+  });
+  dialog.querySelector('.nav-avatar-cancel').addEventListener('click', () => dialog.close());
+  dialog.addEventListener('close', () => {
+    avatarForm.reset();
+    pendingBlob = null;
+    avatarSave.disabled = true;
+    setPreview(null);
+    showAvatarError('');
+  });
+  avatarForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    if (!pendingBlob) return;
+    avatarSave.disabled = true;
+    try {
+      await uploadAvatar(pendingBlob);
+      setAvatar(pendingBlob);
+      dialog.close();
+    } catch {
+      showAvatarError('Could not save your picture. Try again.');
+      avatarSave.disabled = false;
+    }
+  });
+
+  const openAvatarDialog = () => {
+    // eslint-disable-next-line no-use-before-define
+    setOpen(false);
+    dialog.showModal();
+  };
+  avatarAdd.addEventListener('click', openAvatarDialog);
+  avatarChange.addEventListener('click', openAvatarDialog);
+  avatarDelete.addEventListener('click', async () => {
+    avatarDelete.disabled = true;
+    try {
+      await deleteAvatar();
+      setAvatar(null);
+    } catch {
+      // Keep the current picture when the delete fails.
+    } finally {
+      avatarDelete.disabled = false;
+    }
+  });
+  loadAvatar().then(setAvatar).catch(() => {});
+
   const setOpen = (open) => {
     menu.hidden = !open;
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
@@ -359,7 +499,7 @@ function buildUserMenu({ name = '', email = '' }, favorites) {
     }
   });
 
-  wrapper.append(toggle, menu);
+  wrapper.append(toggle, menu, dialog);
   return wrapper;
 }
 
