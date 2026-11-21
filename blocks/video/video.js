@@ -9,7 +9,7 @@ const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)
 /**
  * Determines the video source type from a link
  * @param {string} link - The video link URL
- * @returns {string} - 'youtube', 'vimeo', or 'video'
+ * @returns {string} - 'youtube', 'vimeo', 'sharepoint', or 'video'
  */
 function getVideoSource(link) {
   if (link.includes('youtube') || link.includes('youtu.be')) return 'youtube';
@@ -23,7 +23,7 @@ function getVideoSource(link) {
 
 /**
  * Gets a human-readable video type label
- * @param {string} source - The video source type ('youtube', 'vimeo', or 'video')
+ * @param {string} source - The video source type
  * @returns {string} - Human-readable label
  */
 function getVideoTypeLabel(source) {
@@ -87,7 +87,8 @@ function embedVimeo(url, autoplay, background) {
 /**
  * Embeds a SharePoint / OneDrive / Stream video (e.g. a Teams meeting recording).
  * An `_layouts/15/embed.aspx` embed URL is used as-is; a normal "Copy link" share
- * URL is best-effort converted to an embeddable view. NOTE: the viewer must be
+ * URL with a file ID is converted to the video player; other share links request
+ * an embeddable view. NOTE: the viewer must be
  * signed in to the tenant (SSO) and have access to the file — embedding does not
  * bypass SharePoint permissions.
  * @param {URL} url
@@ -97,18 +98,29 @@ function embedSharePoint(url) {
   let src = url.href;
   if (!/\/_layouts\/15\/embed\.aspx/i.test(url.pathname)) {
     const embed = new URL(url.href);
-    // Drop the share-resolver prefix (…/:v:/r/…, …/:v:/g/…) and request the embed view.
+    // Path-based "Copy link" URLs carry the file GUID as d=w<32 hex digits>.
     embed.pathname = embed.pathname.replace(/\/:[a-z]:\/[a-z]\//i, '/');
-    embed.searchParams.set('action', 'embedview');
+    const fileId = embed.searchParams.get('d')?.match(/^w([a-f0-9]{32})$/i);
+    if (fileId && /(^|\.)sharepoint\.com$/i.test(embed.hostname)) {
+      const sitePath = embed.pathname.match(/^\/(?:sites|teams|personal)\/[^/]+/i)?.[0] || '';
+      const uniqueId = fileId[1].replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/, '$1-$2-$3-$4-$5');
+      embed.pathname = `${sitePath}/_layouts/15/embed.aspx`;
+      embed.search = '';
+      embed.hash = '';
+      embed.searchParams.set('UniqueId', uniqueId);
+    } else {
+      embed.searchParams.set('action', 'embedview');
+    }
     src = embed.href;
   }
   const temp = document.createElement('div');
   temp.innerHTML = `<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
-      <iframe src="${src}"
+      <iframe
       style="border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;"
       frameborder="0" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen
       title="Video recording" loading="lazy" scrolling="no"></iframe>
     </div>`;
+  temp.querySelector('iframe').src = src;
   return temp.children.item(0);
 }
 
