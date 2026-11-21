@@ -25,6 +25,17 @@ npm i
 npm run lint
 ```
 
+## SharePoint videos
+
+In a Video block, paste a SharePoint MP4 **Copy link** URL as a hyperlink or
+plain text. Path-based links containing a `d=w...` file ID are converted to the
+SharePoint video embed player. SharePoint `_layouts/15/embed.aspx` URLs can also
+be used directly; for other sharing-link formats, use the embed URL from
+SharePoint's video player if the sharing link does not play inline.
+
+Viewers must be signed in to the Microsoft tenant and have permission to view
+the file. Embedding does not make the video public.
+
 ## Local development
 
 1. Create a new repository based on the `aem-boilerplate` template
