@@ -42,11 +42,8 @@ test('lists SharePoint Home as an external user-menu link', () => {
   assert.equal(first.external, true);
 });
 
-test('lists View Analytics after SharePoint Home', () => {
-  const [, second] = getUserMenuItems();
-  assert.equal(second.label, 'View Analytics');
-  assert.ok(second.href.startsWith('https://www5.an.adobe.com/'));
-  assert.equal(second.external, true);
+test('does not list View Analytics as a global quick link', () => {
+  assert.ok(!getUserMenuItems().some((item) => item.label === 'View Analytics'));
 });
 
 test('ends the user menu with Sign out', () => {

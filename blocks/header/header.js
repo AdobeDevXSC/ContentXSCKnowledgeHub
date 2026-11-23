@@ -4,7 +4,7 @@ import {
   getAuthControl, getUserInitials, getUserMenuItems, isStageAuthHost,
 } from './auth.mjs'; // eslint-disable-line import/extensions
 import {
-  deleteUserLink, loadUserLinks, MAX_TITLE_LENGTH, MAX_USER_LINKS, saveUserLink,
+  deleteUserLink, loadUserLinksWithSeeds, MAX_TITLE_LENGTH, MAX_USER_LINKS, saveUserLink,
 } from './user-links.mjs'; // eslint-disable-line import/extensions
 import {
   createFavoritesStore, isFavoritablePage, MENU_FAVORITES_LIMIT,
@@ -260,7 +260,7 @@ function buildUserMenu({ name = '', email = '' }, favorites) {
     linksLoaded = true;
     setStatus('Loading…');
     try {
-      userLinks = await loadUserLinks();
+      userLinks = await loadUserLinksWithSeeds(email);
       renderLinks();
     } catch {
       linksLoaded = false;

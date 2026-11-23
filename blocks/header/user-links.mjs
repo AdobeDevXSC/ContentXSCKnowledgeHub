@@ -62,6 +62,47 @@ export async function loadUserLinks(fetchImpl = fetch) {
   return toLinkList(await request(fetchImpl, LINKS_ENDPOINT));
 }
 
+// Links added once to specific users' My links (matched by Okta email). Users
+// can remove them; removal leaves a tombstone so they are not re-added.
+export const SEEDED_LINKS = [
+  {
+    id: 'seed-view-analytics',
+    title: 'View Analytics',
+    url: 'https://www5.an.adobe.com/spa/?linkId=a0e34657-0e80-4b8d-8cf8-b50a2227da4d&dpc=pnw',
+    emails: [
+      'bportela@adobe.com', // Bridget Portela
+      'estange@adobe.com', // Emily Jansen
+      'ynaka@adobe.com', // Yuji Nakagawa
+    ],
+  },
+];
+
+export const isSeededLinkId = (id) => SEEDED_LINKS.some((link) => link.id === id);
+
+/** Loads the user's links, first adding any seeded links they have never had. */
+export async function loadUserLinksWithSeeds(email, fetchImpl = fetch, now = Date.now()) {
+  const doc = await request(fetchImpl, LINKS_ENDPOINT);
+  const stored = doc && typeof doc === 'object' && !Array.isArray(doc) ? { ...doc } : {};
+  const user = typeof email === 'string' ? email.trim().toLowerCase() : '';
+  const pending = user
+    ? SEEDED_LINKS.filter((seed) => seed.emails.includes(user) && !(seed.id in stored))
+    : [];
+  await Promise.all(pending.map(async ({ id, title, url }) => {
+    const link = { title, url, created: now };
+    try {
+      await request(fetchImpl, `${LINKS_ENDPOINT}/${id}`, {
+        method: 'PUT',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(link),
+      });
+      stored[id] = link;
+    } catch {
+      // Try again on the next load.
+    }
+  }));
+  return toLinkList(stored);
+}
+
 export async function saveUserLink({ title, url }, fetchImpl = fetch, now = Date.now()) {
   const safeUrl = normalizeLinkUrl(url);
   if (!safeUrl) throw new Error('Enter a valid http(s) link.');
@@ -76,5 +117,14 @@ export async function saveUserLink({ title, url }, fetchImpl = fetch, now = Date
 }
 
 export async function deleteUserLink(id, fetchImpl = fetch) {
-  await request(fetchImpl, `${LINKS_ENDPOINT}/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  const path = `${LINKS_ENDPOINT}/${encodeURIComponent(id)}`;
+  if (isSeededLinkId(id)) {
+    await request(fetchImpl, path, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ removed: true }),
+    });
+    return;
+  }
+  await request(fetchImpl, path, { method: 'DELETE' });
 }

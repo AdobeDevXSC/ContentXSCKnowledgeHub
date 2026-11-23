@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   deleteUserLink, loadUserLinks, newLinkId, normalizeLinkTitle, normalizeLinkUrl, saveUserLink,
-  toLinkList,
+  loadUserLinksWithSeeds, toLinkList,
 } from '../blocks/header/user-links.mjs'; // eslint-disable-line import/extensions
 
 const SCRIPT_URL = ['javascript', 'alert(1)'].join(':');
@@ -51,4 +51,43 @@ test('API client uses the KV proxy endpoints', async () => {
   assert.equal(calls[2].method, 'DELETE');
   await assert.rejects(saveUserLink({ url: 'ftp://x' }, fetchImpl), /valid/);
   await assert.rejects(loadUserLinks(async () => ({ ok: false, status: 401 })), /401/);
+});
+
+const kvFetch = (doc) => {
+  const calls = [];
+  const fetchImpl = async (path, init) => {
+    calls.push({ path, method: init.method || 'GET', body: init.body });
+    if (init.method) return { ok: true, status: 204 };
+    return { ok: true, status: 200, json: async () => doc };
+  };
+  return { calls, fetchImpl };
+};
+
+test('seeds View Analytics once into allowlisted users\' links', async () => {
+  for (const email of ['bportela@adobe.com', 'EStange@adobe.com', 'ynaka@adobe.com']) {
+    const { calls, fetchImpl } = kvFetch({});
+    // eslint-disable-next-line no-await-in-loop
+    const links = await loadUserLinksWithSeeds(email, fetchImpl, 7);
+    assert.deepEqual(links.map((l) => [l.id, l.title]), [['seed-view-analytics', 'View Analytics']]);
+    assert.ok(links[0].url.startsWith('https://www5.an.adobe.com/'));
+    assert.equal(calls[1].method, 'PUT');
+    assert.equal(calls[1].path, '/api/kv/links/user/seed-view-analytics');
+  }
+});
+
+test('does not seed other users or re-add a removed seeded link', async () => {
+  let { calls, fetchImpl } = kvFetch({});
+  assert.deepEqual(await loadUserLinksWithSeeds('other@adobe.com', fetchImpl), []);
+  assert.equal(calls.length, 1);
+
+  ({ calls, fetchImpl } = kvFetch({ 'seed-view-analytics': { removed: true } }));
+  assert.deepEqual(await loadUserLinksWithSeeds('ynaka@adobe.com', fetchImpl), []);
+  assert.equal(calls.length, 1);
+});
+
+test('removing a seeded link stores a tombstone instead of deleting', async () => {
+  const { calls, fetchImpl } = kvFetch({});
+  await deleteUserLink('seed-view-analytics', fetchImpl);
+  assert.equal(calls[0].method, 'PUT');
+  assert.deepEqual(JSON.parse(calls[0].body), { removed: true });
 });

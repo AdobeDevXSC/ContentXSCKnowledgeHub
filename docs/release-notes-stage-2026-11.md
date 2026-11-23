@@ -39,7 +39,7 @@ Click your name in the header to open a compact menu:
 | Section | What it does |
 |---|---|
 | **Profile** | Shows your name and email. **+ Avatar** uploads a profile picture; once you have one, **Change** and **Delete** replace it. |
-| **Quick links** | **SharePoint Home** (the Knowledge Hub folder) and **View Analytics** (the Adobe Analytics workspace). Both open in a new tab. |
+| **Quick links** | **SharePoint Home** (the Knowledge Hub folder). Opens in a new tab. |
 | **Favorites** | The 5 pages you favorited most recently, with **View all** if there are more and **×** to remove one. |
 | **My links** | Your own bookmarks. **+ Add** saves a title and URL; **×** removes a link. |
 | **Sign out** | Ends your session. |
@@ -64,6 +64,7 @@ Click your name in the header to open a compact menu:
 
 - Save up to 50 personal links. A missing `https://` is added for you, and only web links are accepted.
 - If you leave the title blank, the site name is used.
+- **View Analytics** (the Adobe Analytics workspace) is added once to the My links of selected users on their next sign-in. They can remove it, and it will not come back.
 
 ## Analytics
 
